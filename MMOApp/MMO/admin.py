@@ -1,10 +1,7 @@
 from django.contrib import admin
 from .models import *
-from django.db.models import Count
 from django.template.response import TemplateResponse
 from django.urls import path
-from django.utils import timezone
-from datetime import timedelta, datetime
 from django.utils.html import mark_safe
 from oauth2_provider.models import AccessToken, Application, RefreshToken, Grant, IDToken
 
@@ -21,7 +18,7 @@ class MyAdminSite(admin.AdminSite):
         return TemplateResponse(request, 'admin/stats_view.html')
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'first_name', 'last_name', 'password','email', 'role', 'is_staff', 'is_active', 'date_joined', 'avatar']
+    list_display = ['user_code', 'username', 'first_name', 'last_name', 'password','email', 'role', 'is_staff', 'is_active', 'date_joined', 'avatar']
     list_filter = ['role', 'is_staff', 'is_active']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     ordering = ['-date_joined']

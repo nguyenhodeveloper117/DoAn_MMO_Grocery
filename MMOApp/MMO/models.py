@@ -12,16 +12,11 @@ class BaseModel(models.Model):
         abstract = True
         ordering = ['-id']
 
-# Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         role = extra_fields.get("role")
         if not role:
             raise ValueError("Người dùng phải có role")
-
-        # Tạo id tự động
-        user_id = self.generate_user_id(role)
-        extra_fields["id"] = user_id
 
         user = self.model(username=username, **extra_fields)
         user.set_password(password)
@@ -32,71 +27,61 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("role", "admin")
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_staff", True)
+
         return self.create_user(username, password, **extra_fields)
-
-    def generate_user_id(self, role):
-        prefix = {
-            'admin': 'AD',
-            'seller': 'SE',
-            'customer': 'CU'
-        }.get(role, 'US')
-
-        last_user = self.model.objects.filter(role=role).order_by('-id').first()
-        if last_user:
-            try:
-                last_id = int(last_user.id[-3:])
-            except:
-                last_id = 0
-        else:
-            last_id = 0
-
-        return f"{prefix}{last_id + 1:03d}"  # VD: AD001, CU007, ...
-
 
 # User model
 class User(AbstractUser):
-    id = models.CharField(primary_key=True, max_length=10, editable=False)
+    user_code = models.CharField(primary_key=True, max_length=10, editable=False)
 
     ROLE_CHOICES = (
         ('admin', 'Quản trị viên'),
         ('seller', 'Người bán'),
         ('customer', 'Người mua'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    avatar = CloudinaryField(null=True, blank=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False)
+    avatar = CloudinaryField(null=False, blank=False)
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return f"{self.id} - {self.username}"
+        return f"{self.user_code} - {self.username}"
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.user_code:
             prefix = {
                 'admin': 'AD',
                 'seller': 'SE',
                 'customer': 'CU'
-            }.get(self.role, 'US')
+            }.get(self.role, 'CU')
 
-            last_user = User.objects.filter(role=self.role).order_by('-id').first()
+            last_user = User.objects.filter(role=self.role).order_by('-user_code').first()
             if last_user:
                 try:
-                    last_id = int(last_user.id[-3:])
+                    last_id = int(last_user.user_code[-3:])
                 except:
                     last_id = 0
             else:
                 last_id = 0
 
-            self.id = f"{prefix}{last_id + 1:03d}"
+            self.user_code = f"{prefix}{last_id + 1:03d}"
 
-        # Nếu password chưa được mã hoá, thì mã hoá nó
+        if not self.avatar:
+            self.avatar = "https://res.cloudinary.com/dnwyvuqej/image/upload/v1733499646/default_avatar_uv0h7z.jpg"
+
+        # Mã hóa mật khẩu nếu chưa được mã hóa
         if self.pk is None or not User.objects.filter(pk=self.pk).exists():
+            # User mới → đảm bảo set_password()
             self.set_password(self.password)
         else:
+            # User cũ → kiểm tra nếu password chưa mã hóa
             old = User.objects.get(pk=self.pk)
-            if old.password != self.password:
+            if self.password != old.password:
                 self.set_password(self.password)
 
         super().save(*args, **kwargs)
+
+
+
 
 
