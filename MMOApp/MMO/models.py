@@ -1,8 +1,14 @@
+from decimal import Decimal
+
 from cloudinary.models import CloudinaryField
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
+from rest_framework.exceptions import ValidationError
+from ckeditor.fields import RichTextField
+
 from .utils import generate_code
 
 class BaseModel(models.Model):
@@ -92,6 +98,9 @@ class Store(BaseModel):
     description = models.TextField()
     verified = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.store_code} - {self.name}"
+
     def save(self, *args, **kwargs):
         if not self.store_code:
             self.store_code = generate_code(Store, 'store_code', 'ST')
@@ -105,12 +114,15 @@ class Product(BaseModel):
     name = models.CharField(max_length=100)
     image = CloudinaryField(null=False, blank=False)
     description = models.TextField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('1000000000'))])
     format = models.TextField(help_text="Định dạng gửi về, ví dụ: TK|MK|Email|OTP")
     type = models.CharField(max_length=20, choices=[('account', 'Tài khoản'), ('service', 'Dịch vụ'), ('software', 'Phần mềm'), ('course', 'Khoá học')])
     available_quantity = property(lambda self: self.stocks.filter(is_sold=False).count())
-    warranty_days = models.IntegerField(default=0) # số ngày bảo hành
+    warranty_days = models.IntegerField(default=3) # số ngày bảo hành
     is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.product_code} - {self.name}"
 
     def save(self, *args, **kwargs):
         if not self.product_code:
@@ -125,6 +137,9 @@ class AccountStock(BaseModel):
     is_sold = models.BooleanField(default=False)
     sold_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.stock_code}"
+
     def save(self, *args, **kwargs):
         if not self.stock_code:
             self.stock_code = generate_code(AccountStock, 'stock_code', 'AS')
@@ -134,10 +149,13 @@ class Voucher(BaseModel):
     voucher_code = models.CharField(primary_key=True, max_length=10, editable=False)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vouchers')
     code = models.CharField(max_length=20, unique=True)
-    discount_percent = models.FloatField()
-    max_discount = models.DecimalField(max_digits=10, decimal_places=2)
-    expired_at = models.DateTimeField()
-    quantity = models.IntegerField()
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('1')), MaxValueValidator(Decimal('100.00'))])
+    max_discount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('30000'))
+    expired_at = models.DateTimeField(null=False, blank=False)
+    quantity = models.IntegerField(null=False, blank=False, validators=[MinValueValidator(1), MaxValueValidator(1000)])
+
+    def __str__(self):
+        return f"{self.voucher_code}"
 
     def save(self, *args, **kwargs):
         if not self.voucher_code:
@@ -148,10 +166,8 @@ class Voucher(BaseModel):
 # Đơn hàng
 class Order(BaseModel):
     order_code = models.CharField(primary_key=True, max_length=10, editable=False)
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'buyer'}, related_name='orders')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'}, related_name='orders')
     voucher = models.ForeignKey(Voucher, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
-    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_paid = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=[
         ('processing', 'Đang xử lý'),
@@ -162,6 +178,9 @@ class Order(BaseModel):
     ])
     released_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.order_code}"
+
     def save(self, *args, **kwargs):
         if not self.order_code:
             self.order_code = generate_code(Order, 'order_code', 'OD')
@@ -171,23 +190,50 @@ class Order(BaseModel):
 # Chi tiết đơn hàng
 class AccOrderDetail(BaseModel):
     acc_order_detail_code = models.CharField(primary_key=True, max_length=10, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='acc_details')
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='acc_detail')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='acc_order_details')
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     content_delivered = models.TextField()
+
+    def __str__(self):
+        return f"{self.acc_order_detail_code}"
 
     def save(self, *args, **kwargs):
         if not self.acc_order_detail_code:
-            self.order_detail_code = generate_code(AccOrderDetail, 'order_detail_code', 'ADD')
+            self.acc_order_detail_code = generate_code(AccOrderDetail, 'acc_order_detail_code', 'ADD')
+        if self.order and hasattr(self.order, 'service_detail'):
+            raise ValidationError("Order này đã có service detail. Không thể thêm acc detail.")
+
+        if self.product and self.quantity:
+            self.unit_price = self.product.price
+            raw_total = self.unit_price * self.quantity
+
+            # Áp dụng giảm giá từ voucher (nếu có)
+            if self.order and self.order.voucher:
+                percent = self.order.voucher.discount_percent
+                max_discount = self.order.voucher.max_discount
+
+                discount = raw_total * (percent / 100)
+                discount = min(discount, max_discount)
+
+                self.total_amount = raw_total - discount
+            else:
+                self.total_amount = raw_total
+
         super().save(*args, **kwargs)
+
 
 class ServiceOrderDetail(BaseModel):
     service_order_detail_code = models.CharField(primary_key=True, max_length=10, editable=False)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='service_details')
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='service_detail')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='service_order_details')
     target_url = models.URLField(help_text="Link TikTok/YouTube/Instagram cần tăng tương tác")
-    quantity = models.IntegerField(help_text="Số lượng cần tăng, ví dụ: 1000 follow", validators=[MinValueValidator(1)])
     note = models.TextField(null=True, blank=True)  # Ghi chú thêm nếu có
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    quantity = models.IntegerField(help_text="Số lượng cần tăng, ví dụ: 1000 follow", validators=[MinValueValidator(1)])
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Chờ xác nhận'),
         ('in_progress', 'Đang thực hiện'),
@@ -196,11 +242,31 @@ class ServiceOrderDetail(BaseModel):
     ], default='pending')
     delivered_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.service_order_detail_code}"
+
     def save(self, *args, **kwargs):
         if not self.service_order_detail_code:
             self.service_order_detail_code = generate_code(ServiceOrderDetail, 'service_order_detail_code', 'SOD')
-        super().save(*args, **kwargs)
+        if self.order and hasattr(self.order, 'acc_detail'):
+            raise ValidationError("Order này đã có acc detail. Không thể thêm service detail.")
+        if self.product and self.quantity:
+            self.unit_price = self.product.price
+            raw_total = self.unit_price * self.quantity
 
+            # Áp dụng giảm giá từ voucher (nếu có)
+            if self.order and self.order.voucher:
+                percent = self.order.voucher.discount_percent
+                max_discount = self.order.voucher.max_discount
+
+                discount = raw_total * (percent / 100)
+                discount = min(discount, max_discount)
+
+                self.total_amount = raw_total - discount
+            else:
+                self.total_amount = raw_total
+
+        super().save(*args, **kwargs)
 
 
 class Complaint(BaseModel):
@@ -215,7 +281,10 @@ class Complaint(BaseModel):
         ('release', 'Trả tiền cho người bán'),
         ('negotiate', 'Yêu cầu thương lượng lại')
     ], null=True, blank=True)
-    admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_complaints')
+    admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_complaints', limit_choices_to={'role': 'admin'})
+
+    def __str__(self):
+        return f"{self.complaint_code}"
 
     def save(self, *args, **kwargs):
         if not self.complaint_code:
@@ -226,9 +295,12 @@ class Complaint(BaseModel):
 class Review(BaseModel):
     review_code = models.CharField(primary_key=True, max_length=10, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.IntegerField()
-    comment = models.TextField()
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'}, related_name='reviews')
+    rating = models.IntegerField(null=False, blank=False, validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.review_code}"
 
     def save(self, *args, **kwargs):
         if not self.review_code:
@@ -239,11 +311,13 @@ class Review(BaseModel):
 class Blog(BaseModel):
     blog_code = models.CharField(primary_key=True, max_length=10, editable=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blogs')
-    title = models.CharField(max_length=255)
-    content = models.TextField()
+    title = models.CharField(max_length=255, null=False, blank=False)
+    content = RichTextField(null=False, blank=False)  # Dùng richtext
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='blogs')
-    created_at = models.DateTimeField(auto_now_add=True)
     category = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.blog_code}"
 
     def save(self, *args, **kwargs):
         if not self.blog_code:
@@ -255,7 +329,10 @@ class BlogComment(BaseModel):
     blog_comment_code = models.CharField(primary_key=True, max_length=10, editable=False)
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_comments')
-    content = models.TextField()
+    content = models.TextField(null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.blog_comment_code}"
 
     def save(self, *args, **kwargs):
         if not self.blog_comment_code:
@@ -271,12 +348,14 @@ class TransactionHistory(BaseModel):
         ('purchase', 'Thanh toán đơn hàng'),
         ('receive', 'Nhận tiền bán')
     ]
-
     transaction_code = models.CharField(primary_key=True, max_length=20, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
-    type = models.CharField(max_length=20, choices=TRANSACTION_TYPE)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    type = models.CharField(max_length=20, choices=TRANSACTION_TYPE, null=False, blank=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, blank=False)
     note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.transaction_code}"
 
     def save(self, *args, **kwargs):
         if not self.transaction_code:
@@ -291,6 +370,9 @@ class FavoriteProduct(BaseModel):
 
     class Meta:
         unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"{self.favorite_code}"
 
     def save(self, *args, **kwargs):
         if not self.favorite_code:

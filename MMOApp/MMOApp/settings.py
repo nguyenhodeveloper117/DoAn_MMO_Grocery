@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MMO.apps.MmoConfig',
-    'django_ckeditor_5',
+    'ckeditor',
+    'ckeditor_uploader',
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
@@ -163,19 +164,6 @@ optimize_url, _ = cloudinary_url("shoes", fetch_format="auto", quality="auto")
 # Transform the image: auto-crop to square aspect_ratio
 auto_crop_url, _ = cloudinary_url("shoes", width=500, height=500, crop="auto", gravity="auto")
 # print(auto_crop_url)
-
-CKEDITOR_5_CONFIGS = {
-    'default': {
-        'toolbar': [
-            'heading', '|',
-            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-            'blockQuote', 'insertTable', 'mediaEmbed', '|',
-            'undo', 'redo'
-        ],
-        'language': 'en',
-    }
-}
-
 
 # import os
 # from dotenv import load_dotenv
