@@ -5,7 +5,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django_ckeditor_5.fields import CKEditor5Field
 from rest_framework.exceptions import ValidationError
 from ckeditor.fields import RichTextField
 
@@ -49,6 +48,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False)
     avatar = CloudinaryField(null=False, blank=False)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
+    phone = models.CharField(max_length=15, blank=True, null=False)
     # is_verified = models.BooleanField(default=False)  # Đã xác thực thông tin
 
     objects = CustomUserManager()
@@ -96,6 +96,7 @@ class Store(BaseModel):
     seller = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role': 'seller'}, related_name='store')
     name = models.CharField(max_length=100, null=False, blank=False)
     description = models.TextField()
+    cccd = models.CharField(max_length=12, blank=False, null=False, unique=True)
     verified = models.BooleanField(default=False)
 
     def __str__(self):
