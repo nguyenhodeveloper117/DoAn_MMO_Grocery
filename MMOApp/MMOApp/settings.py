@@ -177,8 +177,8 @@ auto_crop_url, _ = cloudinary_url("shoes", width=500, height=500, crop="auto", g
 # EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 # DEFAULT_FROM_EMAIL = os.getenv("EMAIL_SEND")
 
-# CLIENT_ID = 'dFBP2bJwjFlPvISeSfRNaBG8mFf7WD9XuHW2Bh5p'
-# CLIENT_SECRET = 'PRLGXfWEPENDcmaPIC7vtz0KMwRWIvT1wXDlTPFfpCGzZJge7Emjl2Uk4qdRMfMYZUP9ehUj4VkDB7WVNhotEwMSjLECEaG3PpaTqpwMTJncOQYWtg4MvRvinrN4OZya'
+# CLIENT_ID = '1qUb2KS5saMFLs5xjweLyOupFXuctyA5Smytxbvn'
+# CLIENT_SECRET = '8QCvtCAgnSbXSZYdUIVCCBF7OGhE7s7x2AOg4zici5iK5IGr2ZK4apkRyXxoD2B503gQu1skrjLOiwVRReIS55Ve3UExBdXGihxroEe678hoqLSzlQIeuE5lVH5ysWLX'
 
 # POSTMAN - cach lay token
 # http://127.0.0.1:8000/o/token/
