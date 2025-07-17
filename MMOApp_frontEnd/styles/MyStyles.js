@@ -6,7 +6,8 @@ const styles = StyleSheet.create({
   }, subject: {
     fontSize: 10,
     fontWeight: "bold",
-    color: "#333",
+    color: "#333"
+  }
 });
 
 export default styles;  
