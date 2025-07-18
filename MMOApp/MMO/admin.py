@@ -76,13 +76,31 @@ class UserAdmin(admin.ModelAdmin):
         if obj.avatar:
             return mark_safe(f"<img src='{obj.avatar.url}' width='80' />")
 
+# Verification
+class VerificationAdmin(admin.ModelAdmin):
+    list_display = ['verification_code', 'user', 'cccd', 'front_id_image', 'back_id_image', 'portrait_image', 'status',
+                    'created_date', 'updated_date']
+    search_fields = ['verification_code', 'user__username']
+    list_filter = ['status']
+    readonly_fields = ['front_id_image', 'back_id_image', 'portrait_image']
+
+    def front_id_image(self, obj):
+        if obj.front_id:
+            return mark_safe(f"<img src='{obj.front_id.url}' width='80' />")
+
+    def back_id_image(self, obj):
+        if obj.back_id:
+            return mark_safe(f"<img src='{obj.back_id.url}' width='80' />")
+
+    def portrait_image(self, obj):
+        if obj.portrait:
+            return mark_safe(f"<img src='{obj.portrait.url}' width='80' />")
 
 # Store
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ['store_code', 'name', 'seller', 'verified', 'created_date', 'updated_date']
+    list_display = ['store_code', 'name', 'seller', 'created_date', 'updated_date']
     search_fields = ['name', 'seller__username']
-    list_filter = ['verified']
-
+    list_filter = ['created_date']
 
 # Product
 class ProductAdmin(admin.ModelAdmin):
@@ -133,14 +151,26 @@ class ServiceOrderDetailAdmin(admin.ModelAdmin):
 
 # Complaint
 class ComplaintAdmin(admin.ModelAdmin):
-    list_display = ['complaint_code', 'order', 'buyer', 'resolved', 'decision', 'admin', 'created_date', 'updated_date']
+    list_display = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin', 'created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'video_display']
     search_fields = ['order__order_code', 'buyer__username']
     list_filter = ['resolved', 'decision']
-    readonly_fields = ['image_display']
+    readonly_fields = ['image_display1', 'image_display2', 'image_display3', 'video_display']
 
-    def image_display(self, obj):
-        if obj.evidence_image:
-            return mark_safe(f"<img src='{obj.evidence_image.url}' width='80' />")
+    def image_display1(self, obj):
+        if obj.evidence_image1:
+            return mark_safe(f"<img src='{obj.evidence_image1.url}' width='80' />")
+
+    def image_display2(self, obj):
+        if obj.evidence_image2:
+            return mark_safe(f"<img src='{obj.evidence_image2.url}' width='80' />")
+
+    def image_display3(self, obj):
+        if obj.evidence_image3:
+            return mark_safe(f"<img src='{obj.evidence_image3.url}' width='80' />")
+
+    def video_display(self, obj):
+        if obj.evidence_video:
+            return mark_safe(f"<img src='{obj.evidence_video.url}' width='80' />")
 
 
 # Review
@@ -179,6 +209,7 @@ admin_site = MyAdminSite(name='admin')
 
 # Đăng ký với custom Admin model
 admin_site.register(User, UserAdmin)
+admin_site.register(Verification, VerificationAdmin)
 admin_site.register(Store, StoreAdmin)
 admin_site.register(Product, ProductAdmin)
 admin_site.register(AccountStock, AccountStockAdmin)

@@ -49,7 +49,7 @@ class User(AbstractUser):
     avatar = CloudinaryField(null=False, blank=False)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
     phone = models.CharField(max_length=15, blank=True, null=False)
-    # is_verified = models.BooleanField(default=False)  # Đã xác thực thông tin
+    is_verified = models.BooleanField(default=False)  # Xác thực thông tin
 
     objects = CustomUserManager()
 
@@ -90,14 +90,35 @@ class User(AbstractUser):
 
         super().save(*args, **kwargs)
 
+# Thông tin xác thực
+class Verification(BaseModel):
+    verification_code = models.CharField(primary_key=True, max_length=10, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_request')
+    cccd = models.CharField(max_length=12, blank=False, null=False, unique=True)
+    front_id = CloudinaryField('Ảnh CCCD mặt trước', blank=False, null=False)
+    back_id = CloudinaryField('Ảnh CCCD mặt sau', blank=False, null=False)
+    portrait = CloudinaryField('Ảnh chân dung', blank=False, null=False)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Đang chờ duyệt'),
+            ('approved', 'Đã duyệt'),
+            ('rejected', 'Bị từ chối')
+        ],
+        default='pending'
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.verification_code:
+            self.verification_code = generate_code(Verification, 'verification_code', 'VE')
+        super().save(*args, **kwargs)
+
 # Gian hàng
 class Store(BaseModel):
     store_code = models.CharField(primary_key=True, max_length=10, editable=False)
     seller = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role': 'seller'}, related_name='store')
     name = models.CharField(max_length=100, null=False, blank=False)
     description = models.TextField()
-    cccd = models.CharField(max_length=12, blank=False, null=False, unique=True)
-    verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.store_code} - {self.name}"
@@ -167,7 +188,7 @@ class Voucher(BaseModel):
 # Đơn hàng
 class Order(BaseModel):
     order_code = models.CharField(primary_key=True, max_length=10, editable=False)
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'}, related_name='orders')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     voucher = models.ForeignKey(Voucher, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
     is_paid = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=[
@@ -269,13 +290,16 @@ class ServiceOrderDetail(BaseModel):
 
         super().save(*args, **kwargs)
 
-
+# Khiếu nại
 class Complaint(BaseModel):
     complaint_code = models.CharField(primary_key=True, max_length=10, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='complaints')
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints')
     message = models.TextField()
-    evidence_image = CloudinaryField(null=True, blank=True)
+    evidence_image1 = CloudinaryField(null=False, blank=False)
+    evidence_image2 = CloudinaryField(null=True, blank=True)
+    evidence_image3 = CloudinaryField(null=True, blank=True)
+    evidence_video = CloudinaryField(null=True, blank=True)
     resolved = models.BooleanField(default=False)
     decision = models.CharField(max_length=20, choices=[
         ('refund', 'Hoàn tiền người mua'),
@@ -296,7 +320,7 @@ class Complaint(BaseModel):
 class Review(BaseModel):
     review_code = models.CharField(primary_key=True, max_length=10, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'}, related_name='reviews')
+    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(null=False, blank=False, validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(null=True, blank=True)
 
@@ -366,7 +390,7 @@ class TransactionHistory(BaseModel):
 
 class FavoriteProduct(BaseModel):
     favorite_code = models.CharField(primary_key=True, max_length=20, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'}, related_name='favorites')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='favorited_by')
 
     class Meta:

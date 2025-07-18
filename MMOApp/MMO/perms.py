@@ -6,3 +6,10 @@ from .models import *
 class OwnerPerms(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         return super().has_object_permission(request, view, obj) and request.user == obj
+
+class IsSeller(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == 'seller'
+
+    def has_object_permission(self, request, view, obj):
+        return obj.seller == request.user
