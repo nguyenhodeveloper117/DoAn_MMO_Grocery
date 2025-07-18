@@ -63,7 +63,6 @@ class User(AbstractUser):
                 'seller': 'SE',
                 'customer': 'CU'
             }.get(self.role, 'CU')
-
             last_user = User.objects.filter(role=self.role).order_by('-user_code').first()
             if last_user:
                 try:
@@ -72,7 +71,6 @@ class User(AbstractUser):
                     last_id = 0
             else:
                 last_id = 0
-
             self.user_code = f"{prefix}{last_id + 1:03d}"
 
         if not self.avatar:

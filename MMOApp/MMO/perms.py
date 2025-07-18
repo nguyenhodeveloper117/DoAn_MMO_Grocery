@@ -9,7 +9,7 @@ class OwnerPerms(permissions.IsAuthenticated):
 
 class IsSeller(permissions.IsAuthenticated):
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role == 'seller'
+        return super().has_permission(request, view) and request.user.role == 'seller' and request.user.is_verified
 
     def has_object_permission(self, request, view, obj):
         return obj.seller == request.user

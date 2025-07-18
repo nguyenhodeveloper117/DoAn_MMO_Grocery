@@ -66,7 +66,7 @@ def export_to_csv_service(modeladmin, request, queryset):
 
 # User
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['user_code', 'username', 'first_name', 'last_name', 'balance', 'email', 'role', 'is_staff', 'is_active', 'date_joined', 'avatar_display']
+    list_display = ['user_code', 'username', 'first_name', 'last_name', 'balance', 'email', 'role', 'is_verified' ,'is_staff', 'is_active', 'date_joined', 'avatar_display']
     list_filter = ['role', 'is_staff', 'is_active']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     ordering = ['-date_joined']
