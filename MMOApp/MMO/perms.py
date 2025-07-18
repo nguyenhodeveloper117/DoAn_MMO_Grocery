@@ -13,3 +13,12 @@ class IsSeller(permissions.IsAuthenticated):
 
     def has_object_permission(self, request, view, obj):
         return obj.seller == request.user
+
+class IsVerificationOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # Cho phép truy cập nếu user đã đăng nhập
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        # Chỉ cho phép nếu verification.user là user hiện tại
+        return obj.user == request.user

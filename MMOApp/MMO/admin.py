@@ -79,7 +79,7 @@ class UserAdmin(admin.ModelAdmin):
 # Verification
 class VerificationAdmin(admin.ModelAdmin):
     list_display = ['verification_code', 'user', 'cccd', 'front_id_image', 'back_id_image', 'portrait_image', 'status',
-                    'created_date', 'updated_date']
+                    'active', 'created_date', 'updated_date']
     search_fields = ['verification_code', 'user__username']
     list_filter = ['status']
     readonly_fields = ['front_id_image', 'back_id_image', 'portrait_image']
@@ -98,13 +98,14 @@ class VerificationAdmin(admin.ModelAdmin):
 
 # Store
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ['store_code', 'name', 'seller', 'created_date', 'updated_date']
+    list_display = ['store_code', 'name', 'seller', 'active', 'created_date', 'updated_date']
     search_fields = ['name', 'seller__username']
     list_filter = ['created_date']
 
 # Product
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['product_code', 'name', 'store', 'type', 'price', 'available_quantity', 'is_approved','created_date', 'updated_date', 'image_display']
+    list_display = ['product_code', 'name', 'store', 'type', 'price', 'available_quantity', 'is_approved',
+                    'active', 'created_date', 'updated_date', 'image_display']
     search_fields = ['name', 'store__name']
     list_filter = ['type', 'is_approved']
 
@@ -115,7 +116,7 @@ class ProductAdmin(admin.ModelAdmin):
             return mark_safe(f"<img src='{obj.image.url}' width='80' />")
 
 class AccountStockAdmin(admin.ModelAdmin):
-    list_display = ['stock_code', 'product', 'is_sold', 'sold_at', 'created_date', 'updated_date']
+    list_display = ['stock_code', 'product', 'is_sold', 'sold_at', 'active', 'created_date', 'updated_date']
     list_filter = ['is_sold', 'product']
     search_fields = ['stock_code', 'product__name', 'content']
     readonly_fields = ['stock_code', 'sold_at', 'created_date', 'updated_date']
@@ -124,26 +125,29 @@ class AccountStockAdmin(admin.ModelAdmin):
 
 # Voucher
 class VoucherAdmin(admin.ModelAdmin):
-    list_display = ['voucher_code', 'code', 'store', 'discount_percent', 'max_discount', 'expired_at', 'quantity', 'created_date', 'updated_date']
+    list_display = ['voucher_code', 'code', 'store', 'discount_percent', 'max_discount', 'expired_at', 'quantity',
+                    'active', 'created_date', 'updated_date']
     search_fields = ['code', 'store__name']
     list_filter = ['expired_at']
 
 # Order
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_code', 'buyer', 'is_paid', "voucher", 'status', 'released_at', 'created_date', 'updated_date']
+    list_display = ['order_code', 'buyer', 'is_paid', "voucher", 'status', 'released_at', 'active', 'created_date', 'updated_date']
     search_fields = ['order_code', 'buyer__username']
     list_filter = ['status', 'is_paid']
 
 
 # AccOrderDetail
 class AccOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered', 'created_date', 'updated_date']
+    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered',
+                    'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name']
     readonly_fields = ['total_amount', 'unit_price']
     actions = [export_to_csv_acc]
 
 class ServiceOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status', 'total_amount', 'created_date', 'updated_date']
+    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status', 'total_amount',
+                    'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name', 'target_url']
     list_filter = ['status']
     readonly_fields = ['total_amount', 'unit_price']
@@ -151,7 +155,8 @@ class ServiceOrderDetailAdmin(admin.ModelAdmin):
 
 # Complaint
 class ComplaintAdmin(admin.ModelAdmin):
-    list_display = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin', 'created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'video_display']
+    list_display = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin',
+                    'active','created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'video_display']
     search_fields = ['order__order_code', 'buyer__username']
     list_filter = ['resolved', 'decision']
     readonly_fields = ['image_display1', 'image_display2', 'image_display3', 'video_display']
@@ -175,32 +180,32 @@ class ComplaintAdmin(admin.ModelAdmin):
 
 # Review
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['review_code', 'product', 'buyer', 'rating', 'created_date', 'updated_date']
+    list_display = ['review_code', 'product', 'buyer', 'rating', 'active', 'created_date', 'updated_date']
     search_fields = ['product__name', 'buyer__username']
 
 
 # Blog
 class BlogAdmin(admin.ModelAdmin):
-    list_display = ['blog_code', 'title', 'author', 'category', 'created_date', 'updated_date']
+    list_display = ['blog_code', 'title', 'author', 'category', 'active', 'created_date', 'updated_date']
     search_fields = ['title', 'author__username', 'category']
 
 
 # BlogComment
 class BlogCommentAdmin(admin.ModelAdmin):
-    list_display = ['blog_comment_code', 'blog', 'author', 'created_date', 'updated_date']
+    list_display = ['blog_comment_code', 'blog', 'author', 'active', 'created_date', 'updated_date']
     search_fields = ['blog__title', 'author__username']
 
 
 # TransactionHistory
 class TransactionHistoryAdmin(admin.ModelAdmin):
-    list_display = ['transaction_code', 'user', 'type', 'amount', 'created_date', 'updated_date']
+    list_display = ['transaction_code', 'user', 'type', 'amount', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username']
     list_filter = ['type']
 
 
 # FavoriteProduct
 class FavoriteProductAdmin(admin.ModelAdmin):
-    list_display = ['favorite_code', 'user', 'product', 'created_date', 'updated_date']
+    list_display = ['favorite_code', 'user', 'product', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username', 'product__name']
 
 
