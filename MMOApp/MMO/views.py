@@ -44,14 +44,13 @@ class StoreViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIVie
 class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = models.Verification.objects.filter(active=True)
     serializer_class = serializers.VerificationSerializer
+    parser_classes = [parsers.MultiPartParser]
 
     def get_permissions(self):
         if self.action == 'my_verification':
             return [IsAuthenticated()]
-
         if self.request.method == 'POST':
             return [IsAuthenticated()]
-
         if self.request.method in ['PUT', 'PATCH']:
             return [perms.IsVerificationOwner()]
 
@@ -67,4 +66,24 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
             return Response({'error': 'Verification not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
+    queryset = models.Product.objects.filter(active=True, is_approved=True)
+    serializer_class = serializers.ProductSerializer
+    parser_classes = [parsers.MultiPartParser]
 
+    def get_permissions(self):
+        if self.action == 'my_products':
+            return [perms.IsSeller()]
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return [perms.IsSeller()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-products')
+    def my_products(self, request):
+        try:
+            store = models.Store.objects.get(seller=request.user, active=True)
+            products = models.Product.objects.filter(store=store)
+            serializer = self.get_serializer(products, many=True)
+            return Response(serializer.data)
+        except models.Store.DoesNotExist:
+            return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)

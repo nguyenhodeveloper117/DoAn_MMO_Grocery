@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ValidationError
 from . import models
 
 
@@ -7,6 +7,7 @@ class UserSerializer(ModelSerializer):
         model = models.User
         # fields = '__all__'
         fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email']
+        read_only_fields = ['user_code']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -31,7 +32,7 @@ class StoreSerializer(ModelSerializer):
     class Meta:
         model = models.Store
         fields = ['store_code', 'seller', 'name', 'description']
-        read_only_fields = ['seller']
+        read_only_fields = ['store_code', 'seller']
 
     def create(self, validated_data):
         validated_data['seller'] = self.context['request'].user  # Gán seller là user hiện tại
@@ -42,7 +43,7 @@ class VerificationSerializer(ModelSerializer):
     class Meta:
         model = models.Verification
         fields = 'verification_code', 'user', 'cccd', 'front_id', 'back_id', 'portrait', 'status'
-        read_only_fields = ['user']
+        read_only_fields = ['verification_code' ,'user']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
@@ -61,3 +62,25 @@ class VerificationSerializer(ModelSerializer):
 
         return data
 
+class ProductSerializer(ModelSerializer):
+    store = StoreSerializer(read_only=True)
+    class Meta:
+        model = models.Product
+        fields = 'product_code', 'store', 'name', 'image', 'description', 'price', 'format', 'type', 'available_quantity', 'warranty_days', 'is_approved'
+        read_only_fields = ['product_code', 'store', 'available_quantity', 'is_approved']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.image:
+            data['image'] = instance.image.url
+        return data
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        try:
+            store = user.store  # Do OneToOne: user.store sẽ trả về Store
+        except models.Store.DoesNotExist:
+            raise ValidationError("Người dùng chưa tạo gian hàng.")
+
+        validated_data['store'] = store
+        return super().create(validated_data)
