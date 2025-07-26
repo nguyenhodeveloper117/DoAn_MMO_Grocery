@@ -48,7 +48,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False)
     avatar = CloudinaryField(null=False, blank=False)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
-    phone = models.CharField(max_length=15, blank=True, null=False)
+    phone = models.CharField(max_length=15, blank=False, null=False, unique=True)
     is_verified = models.BooleanField(default=False)  # Xác thực thông tin
 
     objects = CustomUserManager()
