@@ -62,7 +62,7 @@ const LoginNavigator = () => (
 const ProfileStack = createNativeStackNavigator();
 const ProfileNavigator = () => (
   <ProfileStack.Navigator>
-    <ProfileStack.Screen name="profile" component={Profile} options={{
+    <ProfileStack.Screen name="profileDetails" component={Profile} options={{
       title: 'Tài khoản',
       headerTitleStyle: {
         ...MyStyles.header,
