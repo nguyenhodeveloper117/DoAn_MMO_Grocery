@@ -27,11 +27,21 @@ const Register = () => {
         field: 'password',
         icon: 'eye',
         secureTextEntry: true
-    },  {
+    }, {
         label: 'Xác nhận mật khẩu',
         field: 'confirm',
         icon: 'eye',
         secureTextEntry: true
+    }, {
+        label: 'Email',
+        field: 'email',
+        icon: 'email',
+        secureTextEntry: false
+    }, {
+        label: 'Số điện thoại',
+        field: 'phone',
+        icon: 'phone',
+        secureTextEntry: false
     }];
 
     const [user, setUser] = useState({});
@@ -40,29 +50,36 @@ const Register = () => {
     const nav = useNavigation();
 
     const setState = (value, field) => {
-        setUser({...user, [field]: value})
-    }
+        setUser({ ...user, [field]: value });
+    };
 
     const picker = async () => {
-        let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            alert("Permissions denied!");
-        } else {
-            const result = await ImagePicker.launchImageLibraryAsync();
-            
-            if (!result.canceled)
-                setState(result.assets[0], 'avatar');
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                aspect: [1, 1], // Ensure a square aspect ratio for round profile images
+                quality: 1,
+                mediaTypes: ImagePicker.MediaType
+            });
+
+            if (!result.canceled) {
+                const selectedAvatar = result.assets[0];
+                setState(selectedAvatar, "avatar"); // ✅ Cập nhật avatar vào object `user`
+            }
+        } catch (error) {
+            console.error("Lỗi khi chọn ảnh:", error);
         }
-    }
+    };
+
 
     const validate = () => {
-        if (Object.values(user).length == 0) {
+        if (Object.values(user).length === 0) {
             setMsg("Vui lòng nhập thông tin!");
             return false;
         }
 
         for (let i of info)
-            if (user[i.field] === '') {
+            if (!user[i.field]) {
                 setMsg(`Vui lòng nhập ${i.label}!`);
                 return false;
             }
@@ -74,26 +91,31 @@ const Register = () => {
 
         setMsg('');
         return true;
-    }
+    };
 
     const register = async () => {
-        if (validate() === true) {
+        if (validate()) {
             try {
                 setLoading(true);
-                
                 let form = new FormData();
-                for (let key in user)
+
+                for (let key in user) {
                     if (key !== 'confirm') {
-                        if (key === 'avatar') {
-                            console.info(Math.random());
+                        if (key === 'avatar' && user.avatar?.uri) {
+                            const uri = user.avatar.uri;
+                            const fileName = uri.split('/').pop();
+                            const fileType = user.avatar.type ?? 'image/jpeg';
+
                             form.append('avatar', {
-                                uri: user.avatar?.uri,
-                                name: user.avatar?.fileName,
-                                type: user.avatar?.type
-                            })
-                        } else
+                                uri: uri,
+                                name: fileName,
+                                type: fileType
+                            });
+                        } else {
                             form.append(key, user[key]);
+                        }
                     }
+                }
 
                 let res = await Apis.post(endpoints['register'], form, {
                     headers: {
@@ -101,38 +123,46 @@ const Register = () => {
                     }
                 });
 
-                if (res.status === 201)
-                    nav.navigate('login');
-
+                if (res.status === 201) nav.navigate('login');
             } catch (ex) {
-                console.error(ex);
+                console.error("Đăng ký lỗi:", ex);
+                setMsg("Đăng ký thất bại!");
             } finally {
                 setLoading(false);
             }
         }
-    }
+    };
+
 
     return (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ ...MyStyles.container }}>
             <HelperText type="error" visible={msg}>
                 {msg}
             </HelperText>
-            
-            {info.map(i =>  <TextInput key={i.field} style={MyStyles.m}
-                                label={i.label}
-                                secureTextEntry={i.secureTextEntry}
-                                right={<TextInput.Icon icon={i.icon} />}
-                                value={user[i.field]} onChangeText={t => setState(t, i.field)} />)}
 
-            <TouchableOpacity style={MyStyles.m} onPress={picker}>
+            {info.map(i => (
+                <TextInput
+                    key={i.field}
+                    style={{ marginBottom: 16 }}
+                    label={i.label}
+                    secureTextEntry={i.secureTextEntry}
+                    right={<TextInput.Icon icon={i.icon} />}
+                    value={user[i.field]}
+                    onChangeText={t => setState(t, i.field)}
+                />
+            ))}
+
+            <TouchableOpacity style={MyStyles.buttonText} onPress={picker}>
                 <Text>Chọn ảnh đại diện...</Text>
             </TouchableOpacity>
 
-            {user?.avatar && <Image source={{uri: user.avatar.uri}} style={[MyStyles.avatar, MyStyles.m]} />}
+            {user?.avatar && <Image source={{ uri: user.avatar.uri }} style={[MyStyles.avatar]} />}
 
-            <Button onPress={register} disabled={loading} loading={loading} style={MyStyles.m} mode="contained">Đăng ký</Button>
+            <Button onPress={register} disabled={loading} loading={loading} style={MyStyles.button} mode="contained">
+                Đăng ký
+            </Button>
         </ScrollView>
-    )
-}
+    );
+};
 
 export default Register;

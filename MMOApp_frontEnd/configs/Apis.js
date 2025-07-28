@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://127.0.0.1:8000";
-const BASE_URL = "http://192.168.1.17:8000";
+const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://192.168.1.17:8000";
 
 export const endpoints = {
     'login': '/o/token/',

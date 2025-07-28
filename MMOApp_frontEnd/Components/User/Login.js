@@ -55,8 +55,8 @@ const Login = ({ navigation }) => {
 
                 let res = await Apis.post(endpoints['login'], {
                     ...user,
-                    client_id: '1qUb2KS5saMFLs5xjweLyOupFXuctyA5Smytxbvn',
-                    client_secret: '8QCvtCAgnSbXSZYdUIVCCBF7OGhE7s7x2AOg4zici5iK5IGr2ZK4apkRyXxoD2B503gQu1skrjLOiwVRReIS55Ve3UExBdXGihxroEe678hoqLSzlQIeuE5lVH5ysWLX',
+                    client_id: 'zJwncIqfkRcuCjrv6HauiqrOGjCkVL1IHbcsRycG',
+                    client_secret: 'B5DZbb5lTkvnF5xvCbjIHvCix8DbAy75103VeLZH0DZIVbSaTcvh1ujSf0SXDsMcVyMQXiteaGmR9CUph7q8CexMJEGGMJwFNjc7Opxl3d0vOwkjcjTwKKvSZ58dgewt',
                     grant_type: 'password'
                 });
                 await AsyncStorage.setItem('token', res.data.access_token);

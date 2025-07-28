@@ -19,6 +19,12 @@ const styles = StyleSheet.create({
     color: "#ffffff", // Màu trắng cho chữ trên nút
     textAlign: "center",
   },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
+  },
 });
 
 export default styles;

@@ -1,9 +1,11 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "./components/Home/Home";
+import Home from "./components/Home/Home"
 import Login from "./components/User/Login";
 import Register from "./components/User/Register";
 import Profile from "./components/User/Profile";
+import MMOForum from "./components/Forum/MMOForum";
+import ChatBox from "./components/Chat/ChatBox";
 import ForgotPassword from "./components/User/ForgotPassword";
 import MyStyles from "./styles/MyStyles";
 import { TouchableOpacity } from "react-native";
@@ -19,21 +21,34 @@ const HomeStack = createNativeStackNavigator();
 const HomeNavigator = () => {
   return (
     <HomeStack.Navigator>
-      <HomeStack.Screen name="home" component={Home} options={{
-        title: 'Tạp hoá MMO',
-        headerTitleStyle: {
-          ...MyStyles.header,
-        },
-        headerRight: () => (
-            <TouchableOpacity onPress={() => console.log('Nhắn tin')}>
+      <HomeStack.Screen
+        name="home"
+        component={Home}
+        options={({ navigation }) => ({ // Truyền navigation vào options
+          title: 'Tạp hoá MMO',
+          headerTitleStyle: {
+            ...MyStyles.header,
+          },
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate("chat")}>
               <IconButton icon="message" size={24} />
             </TouchableOpacity>
           ),
-        }} 
+        })}
+      />
+      <HomeStack.Screen
+        name="chat"
+        component={ChatBox}
+        options={{
+          title: 'ChatBox',
+          headerTitleStyle: {
+            ...MyStyles.header,
+          }
+        }}
       />
     </HomeStack.Navigator>
   );
-}
+};
 
 const LoginStack = createNativeStackNavigator();
 const LoginNavigator = () => (
@@ -71,6 +86,18 @@ const ProfileNavigator = () => (
   </ProfileStack.Navigator>
 );
 
+const ForumStack = createNativeStackNavigator();
+const MMOForumNavigator = () => (
+  <ForumStack.Navigator>
+    <ForumStack.Screen name="forumDetails" component={MMOForum} options={{
+      title: 'Diễn đàn',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+  </ForumStack.Navigator>
+);
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
@@ -78,7 +105,7 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator >
       <Tab.Screen name="index" component={HomeNavigator} options={{ headerShown: false, title: "Sản phẩm", tabBarIcon: () => <Icon size={30} source="home" /> }} />
-
+      <Tab.Screen name="forum" component={MMOForumNavigator} options={{ headerShown: false, title: "Diễn đàn", tabBarIcon: () => <Icon size={30} source="forum" /> }} />
       {user === null ? <>
         <Tab.Screen name="login" component={LoginNavigator} options={{ headerShown: false, title: "Đăng nhập", tabBarIcon: () => <Icon size={30} source="account" /> }} />
       </> : <>

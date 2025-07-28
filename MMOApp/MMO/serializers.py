@@ -14,18 +14,22 @@ class UserSerializer(ModelSerializer):
             }
         }
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.avatar:
-            data['avatar'] = instance.avatar.url
-        return data
-
     def create(self, validated_data):
         data = validated_data.copy()
         u = models.User(**data)
         u.set_password(u.password)
         u.save()
         return u
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        try:
+            # Nếu avatar là Cloudinary object (có .url)
+            data['avatar'] = instance.avatar.url
+        except AttributeError:
+            # Nếu avatar chỉ là chuỗi (string URL)
+            data['avatar'] = instance.avatar
+        return data
 
 class StoreSerializer(ModelSerializer):
     seller = UserSerializer(read_only=True)

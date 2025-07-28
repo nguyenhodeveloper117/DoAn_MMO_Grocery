@@ -14,9 +14,7 @@ SECRET_KEY = 'django-insecure-124kj+n*jh#y=5y2zc5h@e&h0&yd#um(t-1+8bu&3hwoh08(=1
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "192.168.1.17",
+    "*"
 ]
 
 
@@ -144,6 +142,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Tăng giới hạn lên 10MB hoặc cao hơn nếu cần
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
 import cloudinary
 import cloudinary.uploader
 from cloudinary.utils import cloudinary_url
@@ -180,9 +182,6 @@ auto_crop_url, _ = cloudinary_url("shoes", width=500, height=500, crop="auto", g
 # EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 # EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 # DEFAULT_FROM_EMAIL = os.getenv("EMAIL_SEND")
-
-# CLIENT_ID = '1qUb2KS5saMFLs5xjweLyOupFXuctyA5Smytxbvn'
-# CLIENT_SECRET = '8QCvtCAgnSbXSZYdUIVCCBF7OGhE7s7x2AOg4zici5iK5IGr2ZK4apkRyXxoD2B503gQu1skrjLOiwVRReIS55Ve3UExBdXGihxroEe678hoqLSzlQIeuE5lVH5ysWLX'
 
 # POSTMAN - cach lay token
 # http://127.0.0.1:8000/o/token/

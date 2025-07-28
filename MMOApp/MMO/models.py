@@ -7,7 +7,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from rest_framework.exceptions import ValidationError
 from ckeditor.fields import RichTextField
-
 from .utils import generate_code
 
 class BaseModel(models.Model):
@@ -18,24 +17,6 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-class CustomUserManager(BaseUserManager):
-    def create_user(self, username, password=None, **extra_fields):
-        role = extra_fields.get("role")
-        if not role:
-            raise ValueError("Người dùng phải có role")
-
-        user = self.model(username=username, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, password=None, **extra_fields):
-        extra_fields.setdefault("role", "admin")
-        extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_staff", True)
-
-        return self.create_user(username, password, **extra_fields)
-
 # User model
 class User(AbstractUser):
     user_code = models.CharField(primary_key=True, max_length=10, editable=False)
@@ -45,47 +26,18 @@ class User(AbstractUser):
         ('seller', 'Người bán'),
         ('customer', 'Người mua'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False)
-    avatar = CloudinaryField(null=False, blank=False)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False, default='customer')
+    avatar = CloudinaryField(null=True, default="https://res.cloudinary.com/dnwyvuqej/image/upload/v1733499646/default_avatar_uv0h7z.jpg")
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
     phone = models.CharField(max_length=15, blank=False, null=False, unique=True)
     is_verified = models.BooleanField(default=False)  # Xác thực thông tin
-
-    objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.user_code} - {self.username}"
 
     def save(self, *args, **kwargs):
         if not self.user_code:
-            prefix = {
-                'admin': 'AD',
-                'seller': 'SE',
-                'customer': 'CU'
-            }.get(self.role, 'CU')
-            last_user = User.objects.filter(role=self.role).order_by('-user_code').first()
-            if last_user:
-                try:
-                    last_id = int(last_user.user_code[-3:])
-                except:
-                    last_id = 0
-            else:
-                last_id = 0
-            self.user_code = f"{prefix}{last_id + 1:03d}"
-
-        if not self.avatar:
-            self.avatar = "https://res.cloudinary.com/dnwyvuqej/image/upload/v1733499646/default_avatar_uv0h7z.jpg"
-
-        # Mã hóa mật khẩu nếu chưa được mã hóa
-        if self.pk is None or not User.objects.filter(pk=self.pk).exists():
-            # User mới → đảm bảo set_password()
-            self.set_password(self.password)
-        else:
-            # User cũ → kiểm tra nếu password chưa mã hóa
-            old = User.objects.get(pk=self.pk)
-            if self.password != old.password:
-                self.set_password(self.password)
-
+            self.user_code = generate_code(User, 'user_code', 'US')
         super().save(*args, **kwargs)
 
 # Thông tin xác thực

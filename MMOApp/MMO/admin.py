@@ -66,7 +66,7 @@ def export_to_csv_service(modeladmin, request, queryset):
 
 # User
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['user_code', 'username', 'first_name', 'last_name', 'balance', 'email', 'role', 'is_verified' ,'is_staff', 'is_active', 'date_joined', 'avatar_display']
+    list_display = ['user_code', 'username', 'first_name', 'last_name', 'balance', 'email', 'role', 'is_verified', 'is_superuser' ,'is_staff', 'is_active', 'date_joined', 'avatar_display']
     list_filter = ['role', 'is_staff', 'is_active']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     ordering = ['-date_joined']
@@ -75,6 +75,11 @@ class UserAdmin(admin.ModelAdmin):
     def avatar_display(self, obj):
         if obj.avatar:
             return mark_safe(f"<img src='{obj.avatar.url}' width='80' />")
+
+    def save_model(self, request, obj, form, change):
+        if not change or 'password' in form.changed_data:
+            obj.set_password(obj.password)
+        super().save_model(request, obj, form, change)
 
 # Verification
 class VerificationAdmin(admin.ModelAdmin):
