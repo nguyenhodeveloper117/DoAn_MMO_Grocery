@@ -98,6 +98,18 @@ const MMOForumNavigator = () => (
   </ForumStack.Navigator>
 );
 
+// const OrderStack = createNativeStackNavigator();
+// const OrderNavigator = () => (
+//   <OrderStack.Navigator>
+//     <OrderStack.Screen name="orderDetails" component={OrderDetails} options={{
+//       title: 'Đơn hàng đã mua',
+//       headerTitleStyle: {
+//         ...MyStyles.header,
+//       }
+//     }} />
+//   </OrderStack.Navigator>
+// );
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
@@ -109,6 +121,7 @@ const TabNavigator = () => {
       {user === null ? <>
         <Tab.Screen name="login" component={LoginNavigator} options={{ headerShown: false, title: "Đăng nhập", tabBarIcon: () => <Icon size={30} source="account" /> }} />
       </> : <>
+        {/* <Tab.Screen name="order" component={OrderNavigator} options={{ headerShown: false, title: "Đơn hàng", tabBarIcon: () => <Icon size={30} source="cart" /> }} /> */}
         <Tab.Screen name="profile" component={ProfileNavigator} options={{ headerShown: false, title: "Tài khoản", tabBarIcon: () => <Icon size={30} source="account" /> }} />
       </>}
     </Tab.Navigator>

@@ -46,6 +46,8 @@ const Register = () => {
 
     const [user, setUser] = useState({});
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [msg, setMsg] = useState();
     const nav = useNavigation();
 
@@ -123,7 +125,7 @@ const Register = () => {
                     }
                 });
 
-                if (res.status === 201) nav.navigate('login');
+                if (res.status === 201) nav.navigate('loginScreen');
             } catch (ex) {
                 console.error("Đăng ký lỗi:", ex);
                 setMsg("Đăng ký thất bại!");
@@ -145,15 +147,30 @@ const Register = () => {
                     key={i.field}
                     style={{ marginBottom: 16 }}
                     label={i.label}
-                    secureTextEntry={i.secureTextEntry}
-                    right={<TextInput.Icon icon={i.icon} />}
+                    secureTextEntry={
+                        i.field === 'password' ? !showPassword :
+                            i.field === 'confirm' ? !showConfirm :
+                                i.secureTextEntry
+                    }
+                    right={
+                        (i.field === 'password' || i.field === 'confirm') && (
+                            <TextInput.Icon
+                                icon={i.field === 'password' ? (showPassword ? 'eye-off' : 'eye') : (showConfirm ? 'eye-off' : 'eye')}
+                                onPress={() => {
+                                    if (i.field === 'password') setShowPassword(!showPassword);
+                                    if (i.field === 'confirm') setShowConfirm(!showConfirm);
+                                }}
+                            />
+                        )
+                    }
                     value={user[i.field]}
                     onChangeText={t => setState(t, i.field)}
+                    mode="outlined"
                 />
             ))}
 
-            <TouchableOpacity style={MyStyles.buttonText} onPress={picker}>
-                <Text>Chọn ảnh đại diện...</Text>
+            <TouchableOpacity onPress={picker}>
+                <Text style={{fontWeight: 'bold', marginBottom: 16 }}>Chọn ảnh đại diện</Text>
             </TouchableOpacity>
 
             {user?.avatar && <Image source={{ uri: user.avatar.uri }} style={[MyStyles.avatar]} />}

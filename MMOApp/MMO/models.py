@@ -29,7 +29,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False, default='customer')
     avatar = CloudinaryField(null=True, default="https://res.cloudinary.com/dnwyvuqej/image/upload/v1733499646/default_avatar_uv0h7z.jpg")
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
-    phone = models.CharField(max_length=15, blank=False, null=False, unique=True)
+    phone = models.CharField(max_length=10, blank=False, null=False, unique=True)
     is_verified = models.BooleanField(default=False)  # Xác thực thông tin
 
     def __str__(self):
