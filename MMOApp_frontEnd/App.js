@@ -6,6 +6,8 @@ import Register from "./components/User/Register";
 import Profile from "./components/User/Profile";
 import MMOForum from "./components/Forum/MMOForum";
 import ChatBox from "./components/Chat/ChatBox";
+import UpdateUser from "./components/User/UpdateUser";
+import Verification from "./components/User/Verification";
 import ForgotPassword from "./components/User/ForgotPassword";
 import MyStyles from "./styles/MyStyles";
 import { TouchableOpacity } from "react-native";
@@ -14,7 +16,6 @@ import { Icon, IconButton } from "react-native-paper";
 import { MyDispatchContext, MyUserContext } from "./configs/Contexts";
 import { useContext, useReducer } from "react";
 import MyUserReducer from "./reducers/MyUserReducer";
-
 
 
 const HomeStack = createNativeStackNavigator();
@@ -83,6 +84,18 @@ const ProfileNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <ProfileStack.Screen name="updateUser" component={UpdateUser} options={{
+      title: 'Cập nhật User',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ProfileStack.Screen name="kyc" component={Verification} options={{
+      title: 'Xác minh KYC',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </ProfileStack.Navigator>
 );
 
@@ -116,7 +129,7 @@ const TabNavigator = () => {
   const user = useContext(MyUserContext);
   return (
     <Tab.Navigator >
-      <Tab.Screen name="index" component={HomeNavigator} options={{ headerShown: false, title: "Sản phẩm", tabBarIcon: () => <Icon size={30} source="home" /> }} />
+      <Tab.Screen name="index" component={HomeNavigator} options={{ headerShown: false, title: "Home", tabBarIcon: () => <Icon size={30} source="home" /> }} />
       <Tab.Screen name="forum" component={MMOForumNavigator} options={{ headerShown: false, title: "Diễn đàn", tabBarIcon: () => <Icon size={30} source="forum" /> }} />
       {user === null ? <>
         <Tab.Screen name="login" component={LoginNavigator} options={{ headerShown: false, title: "Đăng nhập", tabBarIcon: () => <Icon size={30} source="account" /> }} />

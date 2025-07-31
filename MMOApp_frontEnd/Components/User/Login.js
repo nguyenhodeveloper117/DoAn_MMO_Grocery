@@ -1,5 +1,6 @@
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native"
 import MyStyles from "../../styles/MyStyles"
+import styles from "./UserStyle";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import { useContext, useState } from "react";
 import Apis, { authApis, endpoints } from "../../configs/Apis";
@@ -119,7 +120,7 @@ const Login = ({ navigation }) => {
                 disabled={loading}
                 loading={loading}
                 mode="contained"
-                style={{ ...MyStyles.button, marginBottom: 16 }}
+                style={{ ...styles.button, marginBottom: 16 }}
             >
                 Đăng nhập
             </Button>

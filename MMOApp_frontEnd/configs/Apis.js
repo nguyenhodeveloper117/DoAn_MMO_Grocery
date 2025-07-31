@@ -7,6 +7,7 @@ export const endpoints = {
     'login': '/o/token/',
     'register': '/users/',
     'current-user': '/users/current-user/',
+    'update-user': (userId) => `/users/${userId}/`
 };
 
 export const authApis = (token) => {

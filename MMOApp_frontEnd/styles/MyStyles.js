@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#e8f5e9", // Màu xanh lá cây nhạt làm nền
-    padding: 20,
+    padding: 24,
   },
   header: {
     fontSize: 20,

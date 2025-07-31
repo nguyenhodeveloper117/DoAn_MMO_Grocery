@@ -7,6 +7,8 @@ export default (current, action) => {
         case 'logout':
             AsyncStorage.removeItem('token');
             return null;
+        case 'updateUser':
+            return { ...current, ...action.payload }; // Cập nhật thông tin người dùng
     }
     return current;
 }

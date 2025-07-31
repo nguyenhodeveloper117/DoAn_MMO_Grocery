@@ -1,5 +1,6 @@
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native"
 import MyStyles from "../../styles/MyStyles"
+import styles from "./UserStyle";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from "react";
@@ -145,7 +146,7 @@ const Register = () => {
             {info.map(i => (
                 <TextInput
                     key={i.field}
-                    style={{ marginBottom: 16 }}
+                    style= {styles.input}
                     label={i.label}
                     secureTextEntry={
                         i.field === 'password' ? !showPassword :
@@ -170,12 +171,12 @@ const Register = () => {
             ))}
 
             <TouchableOpacity onPress={picker}>
-                <Text style={{fontWeight: 'bold', marginBottom: 16 }}>Chọn ảnh đại diện</Text>
+                <Text style={styles.avatarPicker}>Chọn ảnh đại diện</Text>
             </TouchableOpacity>
 
-            {user?.avatar && <Image source={{ uri: user.avatar.uri }} style={[MyStyles.avatar]} />}
+            {user?.avatar && <Image source={{ uri: user.avatar.uri }} style={[styles.avatar]} />}
 
-            <Button onPress={register} disabled={loading} loading={loading} style={MyStyles.button} mode="contained">
+            <Button onPress={register} disabled={loading} loading={loading} style={styles.button} mode="contained">
                 Đăng ký
             </Button>
         </ScrollView>
