@@ -15,6 +15,12 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         fontWeight: "bold"
     },
+    imageVerification: {
+        width: "100%",
+        height: 200,
+        resizeMode: "contain",
+        marginVertical: 15,
+    },
     name: {
         fontSize: 22,
         fontWeight: 'bold',
@@ -34,8 +40,34 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         color: '#333',
     },
+    label: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginTop: 8,
+    },
     input: {
         marginBottom: 16,
+    },
+    header: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 12,
+        marginBottom: 4,
+    },
+    subTitle: {
+        fontWeight: '600',
+        marginTop: 4,
+    },
+    text: {
+        fontSize: 15,
+        lineHeight: 22,
+        marginBottom: 8,
     },
     buttonContainer: {
         width: '100%',
@@ -53,6 +85,16 @@ const styles = StyleSheet.create({
     },
     kycButton: {
         backgroundColor: '#ff9800',
+        width: '80%',
+        borderRadius: 20,
+    },
+    becomeSellerButton: {
+        backgroundColor: '#78cb1fff',
+        width: '80%',
+        borderRadius: 20,
+    },
+    termsButton: {
+        color: '#d28924ff',
         width: '80%',
         borderRadius: 20,
     },

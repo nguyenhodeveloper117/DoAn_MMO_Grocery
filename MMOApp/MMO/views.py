@@ -12,6 +12,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
     parser_classes = [parsers.MultiPartParser]
 
     def get_permissions(self):
+        if self.action == 'upgrade_to_seller':
+            return [perms.IsVerified()]
         if self.request.method in ['PUT', 'PATCH']:
             return [perms.OwnerPerms()]
         return [AllowAny()]
@@ -19,6 +21,13 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
     @action(methods=['get'], url_path='current-user', detail=False, permission_classes=[IsAuthenticated])
     def get_current_user(self, request):
         return Response(serializers.UserSerializer(request.user).data)
+
+    @action(methods=['patch'], detail=False, url_path='upgrade-to-seller')
+    def upgrade_to_seller(self, request):
+        user = request.user
+        user.role = 'seller'
+        user.save()
+        return Response({'message': 'Đã cập nhật role thành seller'}, status=status.HTTP_200_OK)
 
 class StoreViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = models.Store.objects.filter(active=True)

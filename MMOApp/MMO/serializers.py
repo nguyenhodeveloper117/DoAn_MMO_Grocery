@@ -6,7 +6,7 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = models.User
         # fields = '__all__'
-        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email']
+        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email', 'is_verified']
         read_only_fields = ['user_code']
         extra_kwargs = {
             'password': {

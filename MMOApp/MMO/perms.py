@@ -22,3 +22,8 @@ class IsVerificationOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Chỉ cho phép nếu verification.user là user hiện tại
         return obj.user == request.user
+
+class IsVerified(permissions.IsAuthenticated):
+    # Chỉ cho phép người dùng đã xác thực (is_verified == True)
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == 'customer' and request.user.is_verified

@@ -16,6 +16,8 @@ import { Icon, IconButton } from "react-native-paper";
 import { MyDispatchContext, MyUserContext } from "./configs/Contexts";
 import { useContext, useReducer } from "react";
 import MyUserReducer from "./reducers/MyUserReducer";
+import Terms from "./components/User/Terms";
+import UpdateVerification from "./components/User/UpdateVerification";
 
 
 const HomeStack = createNativeStackNavigator();
@@ -96,8 +98,22 @@ const ProfileNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <ProfileStack.Screen name="terms" component={Terms} options={{
+      title: 'Điều khoản và Chính sách',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ProfileStack.Screen name="updateVerification" component={UpdateVerification} options={{
+      title: 'Cập nhật xác minh',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </ProfileStack.Navigator>
 );
+
+
 
 const ForumStack = createNativeStackNavigator();
 const MMOForumNavigator = () => (

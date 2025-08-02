@@ -7,7 +7,12 @@ export const endpoints = {
     'login': '/o/token/',
     'register': '/users/',
     'current-user': '/users/current-user/',
-    'update-user': (userId) => `/users/${userId}/`
+    'update-user': (userId) => `/users/${userId}/`,
+    'get-verification': 'verifications/my-verification/',
+    'update-verification': (verificationCode) => `/verifications/${verificationCode}/`,
+    'create-verification': 'verifications/',
+    'become-seller': 'users/upgrade-to-seller/',
+
 };
 
 export const authApis = (token) => {
