@@ -162,7 +162,7 @@ const Verification = () => {
             <Text style={styles.label}>Ảnh chân dung:</Text>
             <Image source={{ uri: verificationData.portrait }} style={styles.imageVerification} />
 
-            <Button style={styles.button} onPress={navigateToUpdateVerification}>
+            <Button mode="contained" style={styles.button} onPress={navigateToUpdateVerification}>
                 Cập nhật xác minh
             </Button>
         </ScrollView>

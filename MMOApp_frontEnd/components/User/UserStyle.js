@@ -1,6 +1,11 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+    registerView: {
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        marginTop: 20
+    },
     avatar: {
         width: 120,
         height: 120,
@@ -20,6 +25,12 @@ const styles = StyleSheet.create({
         height: 200,
         resizeMode: "contain",
         marginVertical: 15,
+    },
+    registerText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1976d2',
+        textTransform: 'uppercase'
     },
     name: {
         fontSize: 22,
@@ -77,6 +88,11 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#4caf50',
         borderRadius: 20,
+    },
+    googleButton: {
+        borderColor: "#1976d2", 
+        borderWidth: 1,
+        marginTop: 16,
     },
     editButton: {
         backgroundColor: '#2196f3',

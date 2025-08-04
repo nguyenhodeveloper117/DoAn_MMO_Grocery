@@ -2,13 +2,13 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#e8f5e9", // Màu xanh lá cây nhạt làm nền
+    backgroundColor: "#ffffff", // Màu trắng làm nền
     padding: 24,
   },
   header: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#4caf50', // Màu xanh lá cây
+    color: '#4cadafff', // Màu xanh lá cây
   },
   button: {
     backgroundColor: "#4caf50", // Màu xanh lá cây cho nút

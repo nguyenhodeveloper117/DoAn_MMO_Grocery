@@ -79,16 +79,14 @@ const Login = ({ navigation }) => {
 
     return (
         <ScrollView contentContainerStyle={{ ...MyStyles.container}}>
-            {/* Thông báo lỗi */}
-            <HelperText type="error" visible={msg} style={{ marginBottom: 10 }}>
+            <HelperText type="error" visible={msg}>
                 {msg}
             </HelperText>
 
-            {/* Form nhập liệu */}
             {info.map(i => (
                 <TextInput
                     key={i.field}
-                    style={{ marginBottom: 16 }}
+                    style={styles.input}
                     label={i.label}
                     secureTextEntry={i.field === 'password' ? !showPassword : i.secureTextEntry} // Ẩn/hiện mật khẩu
                     value={user[i.field]}
@@ -107,47 +105,37 @@ const Login = ({ navigation }) => {
                 />
             ))}
 
-            {/* Quên mật khẩu */}
             <TouchableOpacity onPress={() => navigation.navigate("forgotPassword")}>
                 <Text style={{ color: "#1976d2", textAlign: "right", marginBottom: 20 }}>
                     Quên mật khẩu?
                 </Text>
             </TouchableOpacity>
 
-            {/* Nút đăng nhập */}
             <Button
                 onPress={login}
                 disabled={loading}
                 loading={loading}
                 mode="contained"
-                style={{ ...styles.button, marginBottom: 16 }}
+                style={styles.button}
             >
                 Đăng nhập
             </Button>
 
-            {/* Nút đăng nhập bằng Google */}
             <Button
                 icon="google"
                 mode="outlined"
                 // onPress={loginWithGoogle}
-                style={{ borderColor: "#1976d2", borderWidth: 1 }}
-                textColor="#1976d2"
+                style={styles.googleButton}
             >
                 Đăng nhập bằng Google
             </Button>
 
-            {/* Nút đăng ký */}
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
+            <View style={styles.registerView}>
                 <Text style={{ fontSize: 16, color: '#000' }}>
                     Chưa có tài khoản?{' '}
                 </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("register")}>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        color: '#1976d2',
-                        textTransform: 'uppercase'
-                    }}>
+                    <Text style={styles.registerText}>
                         Đăng ký ngay!
                     </Text>
                 </TouchableOpacity>

@@ -18,6 +18,8 @@ import { useContext, useReducer } from "react";
 import MyUserReducer from "./reducers/MyUserReducer";
 import Terms from "./components/User/Terms";
 import UpdateVerification from "./components/User/UpdateVerification";
+import StoreSeller from "./components/Store/StoreSeller";
+import UpdateStore from "./components/Store/UpdateStore";
 
 
 const HomeStack = createNativeStackNavigator();
@@ -113,8 +115,6 @@ const ProfileNavigator = () => (
   </ProfileStack.Navigator>
 );
 
-
-
 const ForumStack = createNativeStackNavigator();
 const MMOForumNavigator = () => (
   <ForumStack.Navigator>
@@ -127,17 +127,23 @@ const MMOForumNavigator = () => (
   </ForumStack.Navigator>
 );
 
-// const OrderStack = createNativeStackNavigator();
-// const OrderNavigator = () => (
-//   <OrderStack.Navigator>
-//     <OrderStack.Screen name="orderDetails" component={OrderDetails} options={{
-//       title: 'Đơn hàng đã mua',
-//       headerTitleStyle: {
-//         ...MyStyles.header,
-//       }
-//     }} />
-//   </OrderStack.Navigator>
-// );
+const StoreStack = createNativeStackNavigator();
+const StoreNavigator = () => (
+  <StoreStack.Navigator>
+    <StoreStack.Screen name="storeSeller" component={StoreSeller} options={{
+      title: 'Cửa hàng',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="updateStore" component={UpdateStore} options={{
+      title: 'Chỉnh sửa gian hàng',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+  </StoreStack.Navigator>
+);
 
 const Tab = createBottomTabNavigator();
 
@@ -149,13 +155,17 @@ const TabNavigator = () => {
       <Tab.Screen name="forum" component={MMOForumNavigator} options={{ headerShown: false, title: "Diễn đàn", tabBarIcon: () => <Icon size={30} source="forum" /> }} />
       {user === null ? <>
         <Tab.Screen name="login" component={LoginNavigator} options={{ headerShown: false, title: "Đăng nhập", tabBarIcon: () => <Icon size={30} source="account" /> }} />
-      </> : <>
-        {/* <Tab.Screen name="order" component={OrderNavigator} options={{ headerShown: false, title: "Đơn hàng", tabBarIcon: () => <Icon size={30} source="cart" /> }} /> */}
-        <Tab.Screen name="profile" component={ProfileNavigator} options={{ headerShown: false, title: "Tài khoản", tabBarIcon: () => <Icon size={30} source="account" /> }} />
-      </>}
+      </> : (
+        <>
+          {user?.role === "seller" && (
+            <Tab.Screen name="store" component={StoreNavigator} options={{ headerShown: false, title: "Cửa hàng", tabBarIcon: () => <Icon size={30} source="store" /> }} />
+          )}
+          <Tab.Screen name="profile" component={ProfileNavigator} options={{ headerShown: false, title: "Tài khoản", tabBarIcon: () => <Icon size={30} source="account" /> }} />
+        </>
+      )}
     </Tab.Navigator>
   );
-}
+};
 
 const App = () => {
   const [user, dispatch] = useReducer(MyUserReducer, null);
