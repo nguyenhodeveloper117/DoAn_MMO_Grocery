@@ -2,9 +2,20 @@ import { StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 
 const styles = StyleSheet.create({
+    ImagePicker: {
+        marginBottom: 16,
+        fontWeight: "bold",
+        marginVertical: 12,
+    },
+    image: {
+        width: "100%",
+        height: 200,
+        resizeMode: "contain",
+        marginVertical: 15,
+    },
     centered: {
         alignItems: "center",
-        marginTop: 40
+        marginTop: 20
     },
     noStoreText: {
         fontSize: 16,
@@ -20,8 +31,20 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 4
     },
+    viewInputType: {
+        borderWidth: 1, 
+        borderColor: "#000000ff",
+        borderRadius: 4, 
+        marginTop: 8,
+    },
     title: {
         fontSize: 22,
+        fontWeight: "bold"
+    },
+    productTitle: {
+        marginTop: 30,
+        marginVertical: 12,
+        fontSize: 18,
         fontWeight: "bold"
     },
     code: {
@@ -45,13 +68,22 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: '#4caf50',
     },
+    addButton: {
+        marginVertical: 16,
+        borderRadius: 20,
+    },
     viewInput: {
         marginBottom: 20,
     },
     TextInput: {
         backgroundColor: "white",
         marginTop: 4,
-    }
+    },
+    cardProduct: {
+        marginVertical: 6,
+        borderRadius: 10,
+    },
+    
 });
 
 export default styles;

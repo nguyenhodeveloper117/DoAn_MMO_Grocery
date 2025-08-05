@@ -14,6 +14,13 @@ class IsSeller(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         return obj.seller == request.user
 
+class IsSellerProduct(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == 'seller' and request.user.is_verified
+
+    def has_object_permission(self, request, view, obj):
+        return obj.store.seller == request.user
+
 class IsVerificationOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         # Cho phép truy cập nếu user đã đăng nhập

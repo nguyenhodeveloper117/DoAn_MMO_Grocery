@@ -11,7 +11,7 @@ const UpdateStore = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { store } = route.params;
-
+    const nav = useNavigation();
     const [name, setName] = useState(store.name);
     const [description, setDescription] = useState(store.description || "");
     const [loading, setLoading] = useState(false);
@@ -30,9 +30,10 @@ const UpdateStore = () => {
                 description: description.trim()
             });
 
-            Alert.alert("Thành công", "Cập nhật cửa hàng thành công!", [
-                { text: "OK", onPress: () => navigation.goBack() }
-            ]);
+            if (res.status === 200) {
+                Alert.alert("Thành công", "Cửa hàng đã được cập nhật.");
+                nav.navigate("storeSeller", { reload: true });
+            }
         } catch (err) {
             console.error(err);
             Alert.alert("Lỗi", "Không thể cập nhật thông tin cửa hàng.");

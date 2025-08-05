@@ -75,16 +75,17 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
             return Response({'error': 'Verification not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
+class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = models.Product.objects.filter(active=True, is_approved=True)
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
+    pagination_class = paginators.ProductPaginator
 
     def get_permissions(self):
         if self.action == 'my_products':
-            return [perms.IsSeller()]
-        if self.request.method in ['POST', 'PUT', 'PATCH']:
-            return [perms.IsSeller()]
+            return [perms.IsSellerProduct()]
+        if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            return [perms.IsSellerProduct()]
         return [AllowAny()]
 
     @action(detail=False, methods=['get'], url_path='my-products')

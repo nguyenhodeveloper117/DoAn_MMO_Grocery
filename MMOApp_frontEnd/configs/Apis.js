@@ -14,7 +14,11 @@ export const endpoints = {
     'become-seller': 'users/upgrade-to-seller/',
     'my-store': '/stores/my-store/',
     'create-stores': '/stores/',
-    'update-store': (storeId) => `/stores/${storeId}/`
+    'update-store': (storeId) => `/stores/${storeId}/`,
+    "my-products": "/products/my-products/",
+    "create-product": "/products/",
+    "update-product": (productId) => `/products/${productId}/`,
+    "delete-product": (productId) => `/products/${productId}/`,
 
 };
 

@@ -20,6 +20,10 @@ import Terms from "./components/User/Terms";
 import UpdateVerification from "./components/User/UpdateVerification";
 import StoreSeller from "./components/Store/StoreSeller";
 import UpdateStore from "./components/Store/UpdateStore";
+import AddProduct from "./components/Store/AddProduct";
+import ProductDetail from "./components/Store/ProductDetail";
+import UpdateProduct from "./components/Store/UpdateProduct";
+
 
 
 const HomeStack = createNativeStackNavigator();
@@ -138,6 +142,24 @@ const StoreNavigator = () => (
     }} />
     <StoreStack.Screen name="updateStore" component={UpdateStore} options={{
       title: 'Chỉnh sửa gian hàng',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="addProduct" component={AddProduct} options={{
+      title: 'Tạo sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="productDetail" component={ProductDetail} options={{
+      title: 'Chi tiết sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="updateProduct" component={UpdateProduct} options={{
+      title: 'Cập nhật sản phẩm',
       headerTitleStyle: {
         ...MyStyles.header,
       }
