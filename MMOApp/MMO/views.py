@@ -77,7 +77,7 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
 
 
 class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = models.Product.objects.filter(active=True, is_approved=True)
+    queryset = models.Product.objects.filter(active=True)
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
     pagination_class = paginators.ProductPaginator

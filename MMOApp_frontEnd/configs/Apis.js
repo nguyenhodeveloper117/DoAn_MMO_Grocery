@@ -19,7 +19,6 @@ export const endpoints = {
     "create-product": "/products/",
     "update-product": (productId) => `/products/${productId}/`,
     "delete-product": (productId) => `/products/${productId}/`,
-
 };
 
 export const authApis = (token) => {

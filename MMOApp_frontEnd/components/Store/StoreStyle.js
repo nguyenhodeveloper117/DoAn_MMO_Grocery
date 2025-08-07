@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     },
     centered: {
         alignItems: "center",
-        marginTop: 20
+        marginTop: 10
     },
     noStoreText: {
         fontSize: 16,
@@ -36,6 +36,11 @@ const styles = StyleSheet.create({
         borderColor: "#000000ff",
         borderRadius: 4, 
         marginTop: 8,
+    },
+    viewFilter: {
+        flexDirection: "row",
+        marginBottom: 16,
+        alignItems: "center",
     },
     title: {
         fontSize: 22,
@@ -63,6 +68,11 @@ const styles = StyleSheet.create({
         marginTop: 6,
         backgroundColor: "#fff"
     },
+    info: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 10
+    },
     Button: {
         marginTop: 16,
         borderRadius: 20,
@@ -72,6 +82,11 @@ const styles = StyleSheet.create({
         marginVertical: 16,
         borderRadius: 20,
     },
+    buttonUpdateProduct: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        marginTop: 20
+    },
     viewInput: {
         marginBottom: 20,
     },
@@ -79,11 +94,21 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         marginTop: 4,
     },
+    searchInput: {
+        flex: 1,
+    },
     cardProduct: {
         marginVertical: 6,
         borderRadius: 10,
     },
-    
+    label: {
+        fontWeight: "normal",
+        fontSize: 16,
+    },
+    menuItem: {
+        paddingHorizontal: 30,
+    },
+
 });
 
 export default styles;

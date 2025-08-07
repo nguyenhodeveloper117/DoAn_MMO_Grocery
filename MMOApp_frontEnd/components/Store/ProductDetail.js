@@ -5,6 +5,7 @@ import { Button } from "react-native-paper";
 import MyStyles from "../../styles/MyStyles";
 import Apis, { authApis, endpoints } from "../../configs/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import styles from "./StoreStyle";
 
 const ProductDetail = () => {
   const { product } = useRoute().params;
@@ -41,44 +42,19 @@ const ProductDetail = () => {
 
   return (
     <ScrollView contentContainerStyle={MyStyles.container}>
-      <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 10 }}>
-        {product.name}
-      </Text>
+      <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
+      <Text style={styles.info}>Tên sản phẩm: <Text style={styles.label}>{product.name}</Text></Text>
+      <Text style={styles.info}>Định dạng: <Text style={styles.label}>{product.format}</Text></Text>
+      <Text style={styles.info}>Giá: <Text style={styles.label}>{product.price} VNĐ</Text></Text>
+      <Text style={styles.info}>Loại sản phẩm: <Text style={styles.label}>{product.type}</Text></Text>
+      <Text style={styles.info}>Số lượng còn: <Text style={styles.label}>{product.available_quantity}</Text></Text>
+      <Text style={styles.info}>Số ngày bảo hành: <Text style={styles.label}>{product.warranty_days} ngày</Text></Text>
+      <Text style={styles.info}>Mô tả: <Text style={styles.label}>{product.description}</Text></Text>
+      <Text style={styles.info}>Phê duyệt: <Text style={styles.label}>{product.is_approved ? "Đã duyệt" : "Chưa duyệt"}</Text></Text>
 
-      <Image
-        source={{ uri: product.image }}
-        style={{ height: 200, borderRadius: 8, marginBottom: 10 }}
-        resizeMode="cover"
-      />
-
-      <Text style={{ fontWeight: "bold" }}>Giá:</Text>
-      <Text>{product.price} VNĐ</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Định dạng:</Text>
-      <Text>{product.format}</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Loại sản phẩm:</Text>
-      <Text>{product.type}</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Số lượng còn:</Text>
-      <Text>{product.available_quantity}</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Số ngày bảo hành:</Text>
-      <Text>{product.warranty_days} ngày</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Mô tả:</Text>
-      <Text>{product.description}</Text>
-
-      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Phê duyệt: </Text>
-      <Text>{product.is_approved ? "Đã duyệt" : "Chưa duyệt"}</Text>
-
-      <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 20 }}>
-        <Button mode="outlined" onPress={handleEdit}>
-          Chỉnh sửa
-        </Button>
-        <Button mode="contained" buttonColor="red" textColor="white" onPress={handleDelete}>
-          Xoá
-        </Button>
+      <View style={styles.buttonUpdateProduct}>
+        <Button mode="outlined" onPress={handleEdit}>Chỉnh sửa</Button>
+        <Button mode="contained" buttonColor="red" textColor="white" onPress={handleDelete}>Xoá</Button>
       </View>
     </ScrollView>
   );

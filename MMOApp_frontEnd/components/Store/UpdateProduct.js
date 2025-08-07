@@ -21,7 +21,7 @@ const UpdateProduct = () => {
         format: product.format,
         type: product.type,
         warranty_days: product.warranty_days.toString(),
-        image: { uri: product.image }, // Ban đầu lấy ảnh cũ
+        image: { uri: product.image },
     });
 
     const [msg, setMsg] = useState("");
@@ -87,13 +87,9 @@ const UpdateProduct = () => {
                 });
             }
 
-            const res = await authApis(token).patch(
-                endpoints["update-product"](product.product_code),
-                form,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
-            );
+            const res = await authApis(token).patch(endpoints["update-product"](product.product_code), form, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
 
             if (res.status === 200) {
                 Alert.alert("Thành công", "Sản phẩm đã được cập nhật.");
