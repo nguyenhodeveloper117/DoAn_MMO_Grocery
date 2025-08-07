@@ -12,7 +12,7 @@ import ForgotPassword from "./components/User/ForgotPassword";
 import MyStyles from "./styles/MyStyles";
 import { TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Icon, IconButton } from "react-native-paper";
+import { Icon, IconButton, PaperProvider } from "react-native-paper";
 import { MyDispatchContext, MyUserContext } from "./configs/Contexts";
 import { useContext, useReducer } from "react";
 import MyUserReducer from "./reducers/MyUserReducer";
@@ -195,9 +195,11 @@ const App = () => {
   return (
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>
-        <NavigationContainer>
-          <TabNavigator />
-        </NavigationContainer>
+        <PaperProvider>
+          <NavigationContainer>
+            <TabNavigator />
+          </NavigationContainer>
+        </PaperProvider>
       </MyDispatchContext.Provider>
     </MyUserContext.Provider>
   );

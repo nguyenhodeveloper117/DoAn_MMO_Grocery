@@ -13,7 +13,7 @@ export const endpoints = {
     'create-verification': 'verifications/',
     'become-seller': 'users/upgrade-to-seller/',
     'my-store': '/stores/my-store/',
-    'create-stores': '/stores/',
+    'create-store': '/stores/',
     'update-store': (storeId) => `/stores/${storeId}/`,
     "my-products": "/products/my-products/",
     "create-product": "/products/",

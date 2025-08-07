@@ -1,4 +1,5 @@
-from rest_framework import viewsets, generics, parsers, status
+from rest_framework import viewsets, generics, parsers, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -81,6 +82,14 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
     parser_classes = [parsers.MultiPartParser]
     pagination_class = paginators.ProductPaginator
 
+    # Thêm filter và search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = {
+        'type': ['exact'],
+        'price': ['gte', 'lte'],
+    }
+    search_fields = ['name']
+
     def get_permissions(self):
         if self.action == 'my_products':
             return [perms.IsSellerProduct()]
@@ -92,8 +101,22 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
     def my_products(self, request):
         try:
             store = models.Store.objects.get(seller=request.user, active=True)
-            products = models.Product.objects.filter(store=store)
-            serializer = self.get_serializer(products, many=True)
+            queryset = models.Product.objects.filter(store=store)
+
+            # Áp dụng filter + search thủ công
+            filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+            for backend in filter_backends:
+                queryset = backend().filter_queryset(request, queryset, self)
+
+            # Áp dụng phân trang thủ công
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            # Không có phân trang
+            serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
+
         except models.Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)

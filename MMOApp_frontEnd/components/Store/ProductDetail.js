@@ -69,6 +69,9 @@ const ProductDetail = () => {
       <Text style={{ fontWeight: "bold", marginTop: 10 }}>Mô tả:</Text>
       <Text>{product.description}</Text>
 
+      <Text style={{ fontWeight: "bold", marginTop: 10 }}>Phê duyệt: </Text>
+      <Text>{product.is_approved ? "Đã duyệt" : "Chưa duyệt"}</Text>
+
       <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 20 }}>
         <Button mode="outlined" onPress={handleEdit}>
           Chỉnh sửa
