@@ -200,6 +200,10 @@ class BlogCommentAdmin(admin.ModelAdmin):
     list_display = ['blog_comment_code', 'blog', 'author', 'active', 'created_date', 'updated_date']
     search_fields = ['blog__title', 'author__username']
 
+# Blog Like
+class BlogLikeAdmin(admin.ModelAdmin):
+    list_display = ['blog_like_code', 'blog', 'user', 'active', 'created_date', 'updated_date']
+    search_fields = ['blog__title', 'user__username']
 
 # TransactionHistory
 class TransactionHistoryAdmin(admin.ModelAdmin):
@@ -230,6 +234,7 @@ admin_site.register(ServiceOrderDetail, ServiceOrderDetailAdmin)
 admin_site.register(Complaint, ComplaintAdmin)
 admin_site.register(Review, ReviewAdmin)
 admin_site.register(Blog, BlogAdmin)
+admin_site.register(BlogLike, BlogLikeAdmin)
 admin_site.register(BlogComment, BlogCommentAdmin)
 admin_site.register(TransactionHistory, TransactionHistoryAdmin)
 admin_site.register(FavoriteProduct, FavoriteProductAdmin)

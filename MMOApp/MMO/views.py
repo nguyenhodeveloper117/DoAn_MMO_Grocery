@@ -120,3 +120,43 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
 
         except models.Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = models.Blog.objects.filter(active=True)
+    serializer_class = serializers.BlogSerializer
+    pagination_class = paginators.BlogPaginator
+
+    # Thêm filter và search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = {
+        'category': ['exact'],
+    }
+    search_fields = ['title']
+
+    def get_permissions(self):
+        if self.action == 'my_blogs':
+            return [IsAuthenticated()]
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [perms.BlogOwnerPerms()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-blogs')
+    def my_blogs(self, request):
+        # Lấy blog do chính user viết
+        queryset = models.Blog.objects.filter(author=request.user)
+
+        # Áp dụng filter + search
+        for backend in self.filter_backends:
+            queryset = backend().filter_queryset(request, queryset, self)
+
+        # Phân trang
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # Không phân trang
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

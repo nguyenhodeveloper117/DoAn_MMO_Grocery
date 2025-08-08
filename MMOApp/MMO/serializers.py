@@ -100,3 +100,16 @@ class ProductSerializer(ModelSerializer):
 
         validated_data['store'] = store
         return super().create(validated_data)
+
+class BlogSerializer(ModelSerializer):
+    author = UserSerializer(read_only=True)
+    class Meta:
+        model = models.Blog
+        fields = 'blog_code', 'author', 'title', 'content', 'product', 'category'
+        read_only_fields = ['blog_code', 'author']
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user  # Gán seller là user hiện tại
+        return super().create(validated_data)
+    
+

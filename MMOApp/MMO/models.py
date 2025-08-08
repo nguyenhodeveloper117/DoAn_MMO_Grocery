@@ -288,8 +288,17 @@ class Blog(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blogs')
     title = models.CharField(max_length=255, null=False, blank=False)
     content = RichTextField(null=False, blank=False)  # Dùng richtext
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='blogs')
-    category = models.CharField(max_length=100)
+    product = models.CharField(max_length=100, null=True, blank=True)
+    CATEGORY_CHOICES = [
+        ('tiktok', 'TikTok'),
+        ('facebook', 'Facebook'),
+        ('youtube', 'YouTube'),
+        ('instagram', 'Instagram'),
+        ('blockchain', 'Blockchain'),
+        ('other', 'Nội dung khác'),
+    ]
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+
 
     def __str__(self):
         return f"{self.blog_code}"
@@ -297,6 +306,22 @@ class Blog(BaseModel):
     def save(self, *args, **kwargs):
         if not self.blog_code:
             self.blog_code = generate_code(Blog, 'blog_code', 'BL')
+        super().save(*args, **kwargs)
+
+class BlogLike(BaseModel):
+    blog_like_code = models.CharField(primary_key=True, max_length=10, editable=False)
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='liked_blogs')
+
+    class Meta:
+        unique_together = ('blog', 'user')  # 1 user chỉ like 1 blog 1 lần
+
+    def __str__(self):
+        return f"{self.user} liked {self.blog}"
+
+    def save(self, *args, **kwargs):
+        if not self.blog_like_code:
+            self.blog_like_code = generate_code(BlogLike, 'blog_like_code', 'LI')
         super().save(*args, **kwargs)
 
 
