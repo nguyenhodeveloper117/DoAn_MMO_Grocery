@@ -23,6 +23,9 @@ import UpdateStore from "./components/Store/UpdateStore";
 import AddProduct from "./components/Store/AddProduct";
 import ProductDetail from "./components/Store/ProductDetail";
 import UpdateProduct from "./components/Store/UpdateProduct";
+import AddForum from "./components/Forum/AddForum";
+import UpdateForum from "./components/Forum/UpdateForum";
+import MyForums from "./components/Forum/MyForums";
 
 
 
@@ -122,8 +125,26 @@ const ProfileNavigator = () => (
 const ForumStack = createNativeStackNavigator();
 const MMOForumNavigator = () => (
   <ForumStack.Navigator>
-    <ForumStack.Screen name="forumDetails" component={MMOForum} options={{
+    <ForumStack.Screen name="forumPost" component={MMOForum} options={{
       title: 'Diễn đàn',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ForumStack.Screen name="forumDetail" component={MyForums} options={{
+      title: 'Bài viết của bạn',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ForumStack.Screen name="forumCreate" component={AddForum} options={{
+      title: 'Tạo bài viết',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ForumStack.Screen name="forumUpdate" component={UpdateForum} options={{
+      title: 'Cập nhật bài viết',
       headerTitleStyle: {
         ...MyStyles.header,
       }

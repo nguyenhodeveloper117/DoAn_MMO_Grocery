@@ -19,6 +19,11 @@ export const endpoints = {
     "create-product": "/products/",
     "update-product": (productId) => `/products/${productId}/`,
     "delete-product": (productId) => `/products/${productId}/`,
+    "get-blogs": "/blogs/",
+    "create-blog": "/blogs/",
+    "update-blog": (blogId) => `/blogs/${blogId}/`,
+    "delete-blog": (blogId) => `/blogs/${blogId}/`,
+    "my-blogs": (blogId) => `/blogs/${blogId}/posts/`,
 };
 
 export const authApis = (token) => {
