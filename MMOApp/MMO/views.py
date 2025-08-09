@@ -204,7 +204,7 @@ class BlogCommentViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Dest
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-class BlogLikeViewSet(generics.CreateAPIView, generics.DestroyAPIView):
+class BlogLikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
     queryset = models.Blog.objects.filter(active=True)
     serializer_class = serializers.BlogLikeSerializer
 
