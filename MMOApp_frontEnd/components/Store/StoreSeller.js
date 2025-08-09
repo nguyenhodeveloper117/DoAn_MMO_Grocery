@@ -24,8 +24,6 @@ const StoreSeller = () => {
   const debounceTimeout = useRef(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const typeOptions = ["account", "service", "software", "course"];
-
-
   const [refreshing, setRefreshing] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");

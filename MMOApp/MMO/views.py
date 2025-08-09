@@ -2,10 +2,10 @@ from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, parser_classes
+import cloudinary.uploader
 from . import perms, paginators, serializers
 from . import models
-
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = models.User.objects.filter(is_active=True)
@@ -160,3 +160,15 @@ class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
         # Không phân trang
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+@api_view(['POST'])
+@parser_classes([parsers.MultiPartParser, parsers.FormParser])
+def upload_image_cloudinary(request):
+    image = request.FILES.get('image')
+    if not image:
+        return Response({"error": "No image uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        result = cloudinary.uploader.upload(image)
+        return Response({"url": result["secure_url"]}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

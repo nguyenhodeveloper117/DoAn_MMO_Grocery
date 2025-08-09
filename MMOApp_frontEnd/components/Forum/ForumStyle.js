@@ -5,6 +5,9 @@ const styles = StyleSheet.create({
     marginBottom: {
         marginBottom: 10
     },
+    marginTop: {
+        marginTop: 20
+    },
     marginRight: {
         marginRight: 5
     },
@@ -25,6 +28,16 @@ const styles = StyleSheet.create({
     },
     blogContent: {
         color: "#555"
+    },
+    richTextInput: {
+        minHeight: 200, 
+        borderWidth: 1, 
+        borderColor: "#ccc", 
+        marginTop: 8
+    },
+    containerCategory: {
+        marginBottom: 16, 
+        minHeight: 48
     },
     noBlog: {
         textAlign: "center",

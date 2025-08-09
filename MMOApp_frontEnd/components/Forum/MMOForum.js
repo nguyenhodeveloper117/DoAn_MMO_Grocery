@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,6 +7,8 @@ import Apis, { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import { MyUserContext } from "../../configs/Contexts";
 import styles from "./ForumStyle"
+import RenderHTML from 'react-native-render-html';
+import { useWindowDimensions } from 'react-native';
 
 const categories = [
     { value: "", label: "Tất cả" },
@@ -26,6 +28,9 @@ const MMOForum = () => {
     const [category, setCategory] = useState("");
     const user = useContext(MyUserContext);
     const debounceTimeout = useRef(null);
+    const { width } = useWindowDimensions();
+    const [refreshing, setRefreshing] = useState(false);
+
 
     const loadBlogs = useCallback(async () => {
         if (searchText && typeof searchText !== "string") return;
@@ -49,8 +54,6 @@ const MMOForum = () => {
     }, [searchText, category]);
 
     useEffect(() => {
-        if (!user) return;
-
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
         }
@@ -60,6 +63,12 @@ const MMOForum = () => {
 
         return () => clearTimeout(debounceTimeout.current);
     }, [searchText, category, loadBlogs]);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await loadBlogs();
+        setRefreshing(false);
+    };
 
     const navigateMyBlogs = () => {
         nav.navigate("myBlogs");
@@ -78,7 +87,11 @@ const MMOForum = () => {
     };
 
     return (
-        <ScrollView contentContainerStyle={MyStyles.container}>
+        <ScrollView contentContainerStyle={MyStyles.container}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+        >
             {/* Ô tìm kiếm */}
             <TextInput
                 placeholder="Tìm kiếm bài viết..."
@@ -124,16 +137,24 @@ const MMOForum = () => {
                 blogs.map((b) => (
                     <TouchableOpacity key={b.blog_code} style={styles.blogs} onPress={() => navigateToBlogDetail(b)}>
                         <Text style={styles.blogTitle}>{b.title}</Text>
-                        <Text numberOfLines={2} style={styles.blogContent}>
-                            {b.content}
-                        </Text>
                         <Text style={styles.blogCategory}>
                             Danh mục: {b.category} | Tác giả: {b.author?.username}
                         </Text>
+                        <RenderHTML
+                            contentWidth={width}
+                            source={{ html: b.content }}
+                            tagsStyles={{
+                                img: {
+                                    maxWidth: '100%',
+                                    height: 'auto',
+                                    maxHeight: 250,
+                                    objectFit: 'contain',
+                                },
+                            }}
+                        />
                     </TouchableOpacity>
                 ))
             )}
-
         </ScrollView>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState, useRef} from "react";
+import React, { useCallback, useContext, useEffect, useState, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
@@ -7,6 +7,8 @@ import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import { MyUserContext } from "../../configs/Contexts";
 import styles from "./ForumStyle"
+import RenderHTML from 'react-native-render-html';
+import { useWindowDimensions } from 'react-native';
 
 const categories = [
   { value: "", label: "Tất cả" },
@@ -26,6 +28,7 @@ const MyForums = () => {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState("");
   const debounceTimeout = useRef(null);
+  const { width } = useWindowDimensions();
 
   const loadMyBlogs = useCallback(async () => {
     if (!user) return;
@@ -50,7 +53,7 @@ const MyForums = () => {
     }
   }, [user, searchText, category]);
 
-useEffect(() => {
+  useEffect(() => {
     if (!user) return;
 
     if (debounceTimeout.current) {
@@ -110,12 +113,22 @@ useEffect(() => {
             onPress={() => navigateToDetail(b)}
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
-            <Text numberOfLines={2} style={styles.blogContent}>
-              {b.content}
-            </Text>
             <Text style={styles.blogCategory}>
               Danh mục: {b.category} | Cập nhật: {new Date(b.updated_date).toLocaleDateString()}
             </Text>
+            <RenderHTML
+              contentWidth={width}
+              source={{ html: b.content }}
+              tagsStyles={{
+                img: {
+                  maxWidth: '100%',
+                  height: 'auto',
+                  maxHeight: 250,
+                  objectFit: 'contain',
+                },
+              }}
+            />
+
           </TouchableOpacity>
         ))
       )}

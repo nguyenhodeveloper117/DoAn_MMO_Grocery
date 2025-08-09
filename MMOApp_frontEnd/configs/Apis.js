@@ -23,7 +23,9 @@ export const endpoints = {
     "create-blog": '/blogs/',
     "update-blog": (blogId) => `/blogs/${blogId}/`,
     "delete-blog": (blogId) => `/blogs/${blogId}/`,
-    "my-blogs": 'blogs/my-blogs/'
+    "my-blogs": 'blogs/my-blogs/',
+    "upload-image": '/upload-image/'
+
 };
 
 export const authApis = (token) => {
