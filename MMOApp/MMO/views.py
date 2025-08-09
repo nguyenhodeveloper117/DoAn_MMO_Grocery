@@ -172,3 +172,57 @@ def upload_image_cloudinary(request):
         return Response({"url": result["secure_url"]}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BlogCommentViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = models.Blog.objects.filter(active=True)
+    serializer_class = serializers.BlogCommentSerializer
+    pagination_class = paginators.BlogPaginator
+
+    def get_permissions(self):
+        if self.action == 'get_blog_comments':
+            return [AllowAny()]
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [perms.BlogOwnerPerms()]
+        return [AllowAny()]
+
+    @action(detail=True, methods=['get'], url_path='comments')
+    def get_comments_by_blog(self, request, pk=None):
+        try:
+            blog = models.Blog.objects.get(pk=pk)
+        except models.Blog.DoesNotExist:
+            return Response({"detail": "Blog không tồn tại"}, status=404)
+
+        queryset = models.BlogComment.objects.filter(blog=blog)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+class BlogLikeViewSet(generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = models.Blog.objects.filter(active=True)
+    serializer_class = serializers.BlogLikeSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.request.method in ['DELETE']:
+            return [perms.BlogLikeOwnerPerms()]
+        return [AllowAny()]
+
+    @action(detail=True, methods=['get'], url_path='like-count')
+    def like_count(self, request, pk=None):
+        # pk ở đây là blog_code
+        try:
+            blog = models.Blog.objects.get(pk=pk)
+        except models.Blog.DoesNotExist:
+            return Response({"detail": "Blog không tồn tại"}, status=404)
+
+        count = blog.likes.count()  # 'likes' là related_name trong model BlogLike
+
+        return Response({"blog_code": blog.blog_code, "like_count": count})

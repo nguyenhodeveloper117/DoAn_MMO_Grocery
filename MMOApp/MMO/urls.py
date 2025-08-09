@@ -10,6 +10,8 @@ router.register('stores', views.StoreViewSet, basename='store')
 router.register('verifications', views.VerificationViewSet, basename='verification')
 router.register('products', views.ProductViewSet, basename='product')
 router.register('blogs', views.BlogViewSet, basename='blog')
+router.register('blog-comments', views.BlogCommentViewSet, basename='blog-comment')
+router.register('blog-likes', views.BlogLikeViewSet, basename='blog-like')
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),

@@ -105,11 +105,35 @@ class BlogSerializer(ModelSerializer):
     author = UserSerializer(read_only=True)
     class Meta:
         model = models.Blog
-        fields = 'blog_code', 'author', 'title', 'content', 'product', 'category'
-        read_only_fields = ['blog_code', 'author']
+        fields = 'blog_code', 'author', 'title', 'content', 'product', 'category', 'created_date', 'updated_date'
+        read_only_fields = ['blog_code', 'author', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user  # Gán seller là user hiện tại
+        return super().create(validated_data)
+
+class BlogCommentSerializer(ModelSerializer):
+    author = UserSerializer(read_only=True)
+    blog = BlogSerializer(read_only=True)
+    class Meta:
+        model = models.BlogComment
+        fields = 'blog_comment_code', 'author', 'blog', 'content', 'created_date', 'updated_date'
+        read_only_fields = ['blog_code', 'author', 'blog', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user  # Gán seller là user hiện tại
+        return super().create(validated_data)
+
+class BlogLikeSerializer(ModelSerializer):
+    user = UserSerializer(read_only=True)
+    blog = BlogSerializer(read_only=True)
+    class Meta:
+        model = models.BlogLike
+        fields = 'blog_like_code', 'user', 'blog'
+        read_only_fields = ['blog_code', 'user', 'blog']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
     
 
