@@ -25,6 +25,7 @@ const MMOForum = () => {
     const [searchText, setSearchText] = useState("");
     const [category, setCategory] = useState("");
     const user = useContext(MyUserContext);
+    const debounceTimeout = useRef(null);
 
     const loadBlogs = useCallback(async () => {
         if (searchText && typeof searchText !== "string") return;
@@ -48,8 +49,17 @@ const MMOForum = () => {
     }, [searchText, category]);
 
     useEffect(() => {
-        loadBlogs();
-    }, [loadBlogs]);
+        if (!user) return;
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+        debounceTimeout.current = setTimeout(() => {
+            loadBlogs();
+        }, 500); // đợi 0.5s sau khi gõ
+
+        return () => clearTimeout(debounceTimeout.current);
+    }, [searchText, category, loadBlogs]);
 
     const navigateMyBlogs = () => {
         nav.navigate("myBlogs");
@@ -108,6 +118,8 @@ const MMOForum = () => {
             {/* Danh sách blog */}
             {loading ? (
                 <ActivityIndicator size="large" color="blue" />
+            ) : blogs.length === 0 ? (
+                <Text style={styles.noBlog}>Chưa có bài viết nào!</Text>
             ) : (
                 blogs.map((b) => (
                     <TouchableOpacity key={b.blog_code} style={styles.blogs} onPress={() => navigateToBlogDetail(b)}>
@@ -121,6 +133,7 @@ const MMOForum = () => {
                     </TouchableOpacity>
                 ))
             )}
+
         </ScrollView>
     );
 };

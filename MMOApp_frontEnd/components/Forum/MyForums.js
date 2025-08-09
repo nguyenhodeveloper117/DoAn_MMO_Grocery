@@ -108,7 +108,6 @@ useEffect(() => {
             key={b.blog_code}
             style={styles.blogs}
             onPress={() => navigateToDetail(b)}
-            onLongPress={() => navigateToUpdate(b)}
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
             <Text numberOfLines={2} style={styles.blogContent}>
