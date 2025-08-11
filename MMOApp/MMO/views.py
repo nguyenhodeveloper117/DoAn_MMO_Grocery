@@ -77,7 +77,7 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
 
 
 class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = models.Product.objects.filter(active=True)
+    queryset = models.Product.objects.filter(active=True).order_by('-created_date')
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
     pagination_class = paginators.ProductPaginator
@@ -101,7 +101,7 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
     def my_products(self, request):
         try:
             store = models.Store.objects.get(seller=request.user, active=True)
-            queryset = models.Product.objects.filter(store=store)
+            queryset = models.Product.objects.filter(store=store).order_by('created_date')
 
             # Áp dụng filter + search thủ công
             filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -122,7 +122,7 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = models.Blog.objects.filter(active=True)
+    queryset = models.Blog.objects.filter(active=True).order_by('-created_date')
     serializer_class = serializers.BlogSerializer
     pagination_class = paginators.BlogPaginator
 
@@ -145,7 +145,7 @@ class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
     @action(detail=False, methods=['get'], url_path='my-blogs')
     def my_blogs(self, request):
         # Lấy blog do chính user viết
-        queryset = models.Blog.objects.filter(author=request.user)
+        queryset = models.Blog.objects.filter(author=request.user).order_by('-created_date')
 
         # Áp dụng filter + search
         for backend in self.filter_backends:
@@ -173,28 +173,28 @@ def upload_image_cloudinary(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class BlogCommentViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
-    queryset = models.Blog.objects.filter(active=True)
+class BlogCommentViewSet(viewsets.ViewSet, generics.DestroyAPIView):
+    queryset = models.BlogComment.objects.filter(active=True).order_by('-created_date')
     serializer_class = serializers.BlogCommentSerializer
-    pagination_class = paginators.BlogPaginator
+    pagination_class = paginators.BlogCommentPaginator
 
     def get_permissions(self):
         if self.action == 'get_blog_comments':
             return [AllowAny()]
-        if self.request.method in ['POST']:
+        if self.action == ['create_comment_for_blog']:
             return [IsAuthenticated()]
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [perms.BlogOwnerPerms()]
         return [AllowAny()]
 
-    @action(detail=True, methods=['get'], url_path='comments')
+    @action(detail=True, methods=['get'], url_path='get-blog-comments')
     def get_comments_by_blog(self, request, pk=None):
         try:
             blog = models.Blog.objects.get(pk=pk)
         except models.Blog.DoesNotExist:
             return Response({"detail": "Blog không tồn tại"}, status=404)
 
-        queryset = models.BlogComment.objects.filter(blog=blog)
+        queryset = models.BlogComment.objects.filter(blog=blog).order_by('-created_date')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -203,6 +203,18 @@ class BlogCommentViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Dest
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='post-comments')
+    def create_comment_for_blog(self, request, pk=None):
+        try:
+            blog = models.Blog.objects.get(pk=pk, active=True)
+        except models.Blog.DoesNotExist:
+            return Response({"detail": "Blog không tồn tại hoặc không hoạt động"}, status=404)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(blog=blog, author=request.user)
+        return Response(serializer.data, status=201)
 
 class BlogLikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
     queryset = models.Blog.objects.filter(active=True)

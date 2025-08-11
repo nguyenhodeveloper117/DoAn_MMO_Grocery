@@ -5,3 +5,6 @@ class ProductPaginator(pagination.PageNumberPagination):
 
 class BlogPaginator(pagination.PageNumberPagination):
     page_size = 5
+
+class BlogCommentPaginator(pagination.PageNumberPagination):
+    page_size = 5
