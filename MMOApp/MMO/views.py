@@ -250,11 +250,7 @@ class BlogLikeViewSet(viewsets.ViewSet):
         # Trả về số like hiện tại
         like_count = blog.likes.filter(active=True).count()
 
-        return Response({
-            "blog_code": blog.blog_code,
-            "like_count": like_count,
-            "message": message
-        }, status=status.HTTP_200_OK)
+        return Response({"blog_code": blog.blog_code, "like_count": like_count, "message": message}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path='like-count')
     def like_count(self, request, pk=None):
@@ -263,7 +259,11 @@ class BlogLikeViewSet(viewsets.ViewSet):
         except models.Blog.DoesNotExist:
             return Response({"detail": "Blog không tồn tại"}, status=404)
 
-        count = blog.likes.count()
-        return Response({"blog_code": blog.blog_code, "like_count": count})
+        count = blog.likes.filter(active=True).count()
+        liked = False
+        if request.user.is_authenticated:
+            liked = blog.likes.filter(user=request.user, active=True).exists()
+
+        return Response({"blog_code": blog.blog_code, "like_count": count, "liked": liked})
 
 

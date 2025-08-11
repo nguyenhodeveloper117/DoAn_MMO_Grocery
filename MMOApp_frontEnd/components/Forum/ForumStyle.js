@@ -92,6 +92,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         marginVertical: 10
+    },
+    like: {
+        flexDirection: "row", 
+        alignItems: "center", 
+        marginVertical: 15
     }
 });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Alert, Linking } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Alert, Linking, TouchableOpacity } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import RenderHTML from "react-native-render-html";
 import { useWindowDimensions } from "react-native";
@@ -8,6 +8,7 @@ import Apis, { authApis, endpoints } from "../../configs/Apis";
 import styles from "./ForumStyle";
 import MyStyles from "../../styles/MyStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AntDesign } from "@expo/vector-icons";
 
 const BlogDetail = ({ route }) => {
     const { blog } = route.params;
@@ -20,10 +21,10 @@ const BlogDetail = ({ route }) => {
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [newComment, setNewComment] = useState("");
+    const [likeCount, setLikeCount] = useState(0);
+    const [liked, setLiked] = useState(false);
 
-    // Chỉ tạo object này một lần, hoặc khi blog.content đổi
     const renderSource = useMemo(() => ({ html: blog.content }), [blog.content]);
-
     const renderTagsStyles = useMemo(() => ({
         img: {
             maxWidth: '100%',
@@ -51,8 +52,36 @@ const BlogDetail = ({ route }) => {
         }
     };
 
+    const loadLikeCount = async () => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            let api = token ? authApis(token) : Apis;
+            const res = await api.get(endpoints["get-like"](blog.blog_code));
+            setLikeCount(res.data.like_count);
+            setLiked(res.data.liked); // <= set luôn trạng thái
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleLike = async () => {
+        if (!user) {
+            Alert.alert("Thông báo", "Bạn cần đăng nhập mới có thể thích bài viết");
+            return;
+        }
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await authApis(token).post(endpoints["add-like"](blog.blog_code));
+            setLikeCount(res.data.like_count || 0);
+            setLiked(res.data.message === "Đã thích");
+        } catch (err) {
+            console.error("Lỗi like blog:", err.response?.data || err);
+        }
+    };
+
     useEffect(() => {
         loadComments(1);
+        loadLikeCount();
     }, []);
 
     const loadMore = () => {
@@ -67,14 +96,13 @@ const BlogDetail = ({ route }) => {
         if (!newComment.trim()) return;
         try {
             const token = await AsyncStorage.getItem("token");
-            const res = await authApis(token).post(endpoints["add-comment"](blog.blog_code),
+            await authApis(token).post(endpoints["add-comment"](blog.blog_code),
                 { content: newComment }
             );
             Alert.alert("Thành công", "Bình luận đã được tạo!");
             setNewComment("");
             setPage(1);
-            loadComments(1); // reload trang 1 để comment mới lên đầu
-
+            loadComments(1);
         } catch (err) {
             console.error("Lỗi thêm comment:", err.response?.data || err);
         }
@@ -89,12 +117,12 @@ const BlogDetail = ({ route }) => {
             <Text style={styles.blogCategory}>
                 Tác giả: {blog.author?.username} | Danh mục: {blog.category}
             </Text>
+
             <RenderHTML
                 contentWidth={width}
                 source={renderSource}
                 tagsStyles={renderTagsStyles}
             />
-
 
             <Text style={styles.productBLogTitle}>Sản phẩm liên quan: </Text>
             <Text
@@ -109,6 +137,15 @@ const BlogDetail = ({ route }) => {
             >
                 {blog.product}
             </Text>
+
+            {/* Nút Like */}
+            <TouchableOpacity
+                onPress={handleLike}
+                style={styles.like}
+            >
+                <AntDesign name={liked ? "heart" : "hearto"} size={24} color={liked ? "red" : "black"} />
+                <Text style={{ marginLeft: 5 }}>{likeCount} lượt thích</Text>
+            </TouchableOpacity>
 
             {/* Form comment */}
             {user && (
@@ -144,8 +181,13 @@ const BlogDetail = ({ route }) => {
                 )}
 
                 {hasMore && !loading && (
-                    <Button title={loadingMore ? "Đang tải..." : "Xem thêm bình luận"} onPress={loadMore} disabled={loadingMore}>
-                        Xem thêm
+                    <Button
+                        onPress={loadMore}
+                        disabled={loadingMore}
+                        mode="outlined"
+                        style={{ marginTop: 10 }}
+                    >
+                        {loadingMore ? "Đang tải..." : "Xem thêm bình luận"}
                     </Button>
                 )}
             </View>

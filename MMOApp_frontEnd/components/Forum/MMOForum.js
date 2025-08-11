@@ -33,8 +33,21 @@ const MMOForum = () => {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [likeCounts, setLikeCounts] = useState({});
 
   const debounceTimeout = useRef(null);
+
+  const loadLikeCount = async (blogId) => {
+    try {
+      const res = await Apis.get(endpoints["get-like"](blogId));
+      setLikeCounts((prev) => ({
+        ...prev,
+        [blogId]: res.data.like_count || 0,
+      }));
+    } catch (err) {
+      console.error(`Lỗi load like count cho blog ${blogId}:`, err?.response?.data || err);
+    }
+  };
 
   const loadBlogs = useCallback(
     async (pageNumber = 1) => {
@@ -51,13 +64,17 @@ const MMOForum = () => {
           },
         });
 
-        setBlogs(res.data.results || res.data);
+        const blogsData = res.data.results || res.data;
+        setBlogs(blogsData);
         setPage(pageNumber);
 
         // Lấy count từ backend, pageSize cố định 5 theo backend
         const count = res.data.count || 0;
-        const pageSize = 5;  // tương ứng với page_size backend
+        const pageSize = 5;
         setTotalPages(Math.ceil(count / pageSize) || 1);
+
+        // Load like count cho từng blog
+        blogsData.forEach((b) => loadLikeCount(b.blog_code));
       } catch (err) {
         console.error("Lỗi load blogs:", err?.response?.data || err);
       } finally {
@@ -222,9 +239,14 @@ const MMOForum = () => {
             onPress={() => navigateToBlogDetail(b)}
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
-            <Text style={styles.blogCategory}>
-              Danh mục: {b.category} | Tác giả: {b.author?.username}| Ngày tạo: {new Date(b.created_date).toLocaleDateString()}
+            <Text>
+              ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
             </Text>
+            <Text style={styles.blogCategory}>
+              Danh mục: {b.category} | Tác giả: {b.author?.username} | Ngày tạo: {new Date(b.created_date).toLocaleDateString()}
+            </Text>
+            
+
             <RenderHTML
               contentWidth={width}
               source={{ html: limitHTML(b.content, 100) }}

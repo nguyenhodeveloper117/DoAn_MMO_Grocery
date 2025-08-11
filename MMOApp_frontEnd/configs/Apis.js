@@ -28,6 +28,8 @@ export const endpoints = {
     "get-blog-comments": (blogId) => `blog-comments/${blogId}/get-blog-comments/`,
     "add-comment": (blogId) => `blog-comments/${blogId}/post-comments/`,
     "delete-comment": (blogId) => `blog-comments/${blogId}/`,
+    "get-like": (blogId) => `blog-likes/${blogId}/like-count/`,
+    "add-like": (blogId) => `blog-likes/${blogId}/like/`,
     
 };
 
