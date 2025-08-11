@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useCallback, useRef } from "react";
 import { View, Text, Alert, RefreshControl } from "react-native";
-import { TextInput, Button, Card, IconButton, Dialog, Portal, Menu } from "react-native-paper";
+import { TextInput, Button, Card, IconButton, Dialog, Portal } from "react-native-paper";
 import { FlatList } from "react-native";
 import { MyUserContext } from "../../configs/Contexts";
 import { endpoints, authApis } from "../../configs/Apis";
@@ -8,30 +8,48 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./StoreStyle";
 import { useNavigation } from "@react-navigation/native";
-import { Avatar } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
+import { Avatar } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
+
+const typeOptions = [
+  { label: "-- Tất cả loại --", value: "" },
+  { label: "Tài khoản", value: "account" },
+  { label: "Dịch vụ", value: "service" },
+  { label: "Phần mềm", value: "software" },
+  { label: "Khoá học", value: "course" }
+];
 
 const StoreSeller = () => {
   const user = useContext(MyUserContext);
+  const nav = useNavigation();
+
+  // Store
   const [store, setStore] = useState(null);
   const [loadingStore, setLoadingStore] = useState(true);
+
+  // Products
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+
+  // Filter
   const [searchText, setSearchText] = useState("");
   const [type, setType] = useState("");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
-  const debounceTimeout = useRef(null);
-  const [menuVisible, setMenuVisible] = useState(false);
-  const typeOptions = ["account", "service", "software", "course"];
+
+  // Refresh
   const [refreshing, setRefreshing] = useState(false);
+  const debounceTimeout = useRef(null);
+
+  // Create store
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
 
-
-  const nav = useNavigation();
-
+  // Load store
   const loadStore = useCallback(async () => {
+    setLoadingStore(true);
     try {
       const token = await AsyncStorage.getItem("token");
       const res = await authApis(token).get(endpoints["my-store"]);
@@ -46,32 +64,37 @@ const StoreSeller = () => {
     }
   }, []);
 
-  const loadProducts = useCallback(async () => {
-    if (!store) return;
+  // Load products (with pagination)
+  const loadProducts = useCallback(
+    async (nextPage = 1, append = false) => {
+      if (!store) return;
 
-    // Validate filter trước khi gửi request
-    if (priceMin && isNaN(priceMin)) return;
-    if (priceMax && isNaN(priceMax)) return;
-    if (type && !["account", "service", "software", "course"].includes(type)) return;
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const res = await authApis(token).get(endpoints["my-products"], {
+          params: {
+            search: searchText || undefined,
+            type: type || undefined,
+            price__gte: priceMin || undefined,
+            price__lte: priceMax || undefined,
+            page: nextPage
+          }
+        });
 
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const res = await authApis(token).get(endpoints["my-products"], {
-        params: {
-          search: searchText,
-          type: type || undefined,
-          price__gte: priceMin || undefined,
-          price__lte: priceMax || undefined,
-        },
-      });
-      setProducts(res.data.results || res.data);
-    } catch (err) {
-      console.error("Lỗi filter:", err?.response?.data || err);
-      // Không cần alert mỗi lần fail do input chưa xong
-    }
-  }, [store, searchText, type, priceMin, priceMax]);
+        const results = res.data.results || res.data;
+        setProducts(prev =>
+          append ? [...prev, ...results] : results
+        );
+        setHasNext(!!res.data.next);
+        setPage(nextPage);
+      } catch (err) {
+        console.error("Lỗi load sản phẩm:", err?.response?.data || err);
+      }
+    },
+    [store, searchText, type, priceMin, priceMax]
+  );
 
-
+  // Create store
   const createStore = async () => {
     if (!newName.trim()) {
       Alert.alert("Lỗi", "Tên cửa hàng không được để trống.");
@@ -90,38 +113,33 @@ const StoreSeller = () => {
     }
   };
 
+  // Effect load store lần đầu
   useEffect(() => {
     loadStore();
   }, [loadStore]);
 
+  // Effect tìm kiếm debounce
   useEffect(() => {
     if (!store) return;
-
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
     debounceTimeout.current = setTimeout(() => {
-      loadProducts();
-    }, 500); // 500ms chờ sau khi người dùng ngừng gõ
+      loadProducts(1);
+    }, 500);
   }, [searchText, store]);
 
+  // Refresh
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadStore(), loadProducts()]);
+    await loadStore();
     setRefreshing(false);
   };
 
-  const navigateUpdateStore = () => {
-    nav.navigate("updateStore", { store });
-  };
-
-  const navigateCreateProduct = () => {
-    nav.navigate("addProduct", { store });
-  };
-
-  const navigateViewProduct = (product) => {
-    nav.navigate("productDetail", { product });
-  };
+  // Navigation
+  const navigateUpdateStore = () => nav.navigate("updateStore", { store });
+  const navigateCreateProduct = () => nav.navigate("addProduct", { store });
+  const navigateViewProduct = product => nav.navigate("productDetail", { product });
 
   return (
     <>
@@ -164,7 +182,7 @@ const StoreSeller = () => {
                       mode="outlined"
                       style={styles.searchInput}
                     />
-                    <IconButton icon="tune" size={28} onPress={() => setFilterVisible(true)}/>
+                    <IconButton icon="tune" size={28} onPress={() => setFilterVisible(true)} />
                   </View>
                 </>
               )}
@@ -179,7 +197,7 @@ const StoreSeller = () => {
               <Card.Title
                 title={item.name}
                 subtitle={`Giá: ${item.price || "-"} đ`}
-                left={(props) =>
+                left={props =>
                   item.image ? (
                     <Avatar.Image {...props} source={{ uri: item.image }} size={50} />
                   ) : (
@@ -189,7 +207,9 @@ const StoreSeller = () => {
               />
               <Card.Content>
                 <Text style={styles.label}>Mã sản phẩm: {item.type || "Không có"}</Text>
-                <Text style={styles.label} numberOfLines={2}>Mô tả: {item.description}</Text>
+                <Text style={styles.label} numberOfLines={2}>
+                  Mô tả: {item.description}
+                </Text>
               </Card.Content>
               <Card.Actions>
                 <Button onPress={() => navigateViewProduct(item)}>Xem chi tiết</Button>
@@ -197,14 +217,14 @@ const StoreSeller = () => {
             </Card>
           )}
           ListEmptyComponent={
-            store ? (
-              <Text style={styles.centered}>Không có sản phẩm nào.</Text>
-            ) : null
+            store ? <Text style={styles.centered}>Không có sản phẩm nào.</Text> : null
           }
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={MyStyles.container}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (hasNext) loadProducts(page + 1, true);
+          }}
         />
       )}
 
@@ -213,19 +233,11 @@ const StoreSeller = () => {
           <Dialog.Title>Bộ lọc nâng cao</Dialog.Title>
           <Dialog.Content>
             <View style={styles.viewInput}>
-              <View style={styles.viewInputType}>
-                <Picker
-                  selectedValue={type}
-                  onValueChange={(itemValue) => setType(itemValue)}
-                  mode="dropdown"
-                >
-                  <Picker.Item label="-- Tất cả loại --" value="" />
-                  <Picker.Item label="Tài khoản" value="account" />
-                  <Picker.Item label="Dịch vụ" value="service" />
-                  <Picker.Item label="Phần mềm" value="software" />
-                  <Picker.Item label="Khoá học" value="course" />
-                </Picker>
-              </View>
+              <Picker selectedValue={type} onValueChange={value => setType(value)} mode="dropdown">
+                {typeOptions.map(opt => (
+                  <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                ))}
+              </Picker>
             </View>
             <TextInput placeholder="Giá tối thiểu" value={priceMin} onChangeText={setPriceMin} keyboardType="numeric" mode="outlined" style={styles.viewInput} />
             <TextInput placeholder="Giá tối đa" value={priceMax} onChangeText={setPriceMax} keyboardType="numeric" mode="outlined" style={styles.viewInput} />
@@ -234,7 +246,7 @@ const StoreSeller = () => {
             <Button onPress={() => setFilterVisible(false)}>Hủy</Button>
             <Button
               onPress={() => {
-                loadProducts();
+                loadProducts(1);
                 setFilterVisible(false);
               }}
             >
