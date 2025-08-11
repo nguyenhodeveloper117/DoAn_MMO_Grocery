@@ -11,10 +11,6 @@ class BlogOwnerPerms(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         return obj.author == request.user
 
-class BlogLikeOwnerPerms(permissions.IsAuthenticated):
-    def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
-
 class IsSeller(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         return super().has_permission(request, view) and request.user.role == 'seller' and request.user.is_verified

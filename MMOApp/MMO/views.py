@@ -216,25 +216,54 @@ class BlogCommentViewSet(viewsets.ViewSet, generics.DestroyAPIView):
         serializer.save(blog=blog, author=request.user)
         return Response(serializer.data, status=201)
 
-class BlogLikeViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
-    queryset = models.Blog.objects.filter(active=True)
+class BlogLikeViewSet(viewsets.ViewSet):
+    queryset = models.BlogLike.objects.filter(active=True)
     serializer_class = serializers.BlogLikeSerializer
 
     def get_permissions(self):
-        if self.request.method in ['POST']:
+        if self.request.method == 'POST':
             return [IsAuthenticated()]
-        if self.request.method in ['DELETE']:
-            return [perms.BlogLikeOwnerPerms()]
         return [AllowAny()]
+
+    @action(detail=True, methods=['post'], url_path='like')
+    def like(self, request, pk=None):
+        try:
+            blog = models.Blog.objects.get(pk=pk, active=True)
+        except models.Blog.DoesNotExist:
+            return Response({"detail": "Blog không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        # Tìm like của user với blog, nếu có thì toggle active, nếu không thì tạo mới
+        like_obj, created = models.BlogLike.objects.get_or_create(blog=blog, user=user)
+        if not created:
+            # Nếu đã like rồi, bỏ like (xóa hoặc chuyển active)
+            # Nếu muốn xóa luôn, có thể like_obj.delete()
+            # Ở đây giả sử toggle active:
+            like_obj.active = not like_obj.active
+            like_obj.save()
+            message = "Đã bỏ thích" if not like_obj.active else "Đã thích"
+        else:
+            like_obj.active = True
+            like_obj.save()
+            message = "Đã thích"
+
+        # Trả về số like hiện tại
+        like_count = blog.likes.filter(active=True).count()
+
+        return Response({
+            "blog_code": blog.blog_code,
+            "like_count": like_count,
+            "message": message
+        }, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path='like-count')
     def like_count(self, request, pk=None):
-        # pk ở đây là blog_code
         try:
-            blog = models.Blog.objects.get(pk=pk)
+            blog = models.Blog.objects.get(pk=pk, active=True)
         except models.Blog.DoesNotExist:
             return Response({"detail": "Blog không tồn tại"}, status=404)
 
-        count = blog.likes.count()  # 'likes' là related_name trong model BlogLike
-
+        count = blog.likes.count()
         return Response({"blog_code": blog.blog_code, "like_count": count})
+
+
