@@ -223,7 +223,7 @@ const MMOForum = () => {
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
             <Text style={styles.blogCategory}>
-              Danh mục: {b.category} | Tác giả: {b.author?.username}
+              Danh mục: {b.category} | Tác giả: {b.author?.username}| Ngày tạo: {new Date(b.created_date).toLocaleDateString()}
             </Text>
             <RenderHTML
               contentWidth={width}
