@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -265,5 +266,37 @@ class BlogLikeViewSet(viewsets.ViewSet):
             liked = blog.likes.filter(user=request.user, active=True).exists()
 
         return Response({"blog_code": blog.blog_code, "like_count": count, "liked": liked})
+
+class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
+    queryset = models.AccountStock.objects.filter(active=True)
+    serializer_class = serializers.AccountStockSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [perms.IsSellerStock()]
+        if self.action == 'create_account_stock':
+            return [perms.IsSeller()]
+        return [AllowAny()]
+
+    @action(detail=True, methods=['post'], url_path='create-stock')
+    def create_stock_for_product(self, request, pk=None):
+        try:
+            product = models.Product.objects.get(
+                pk=pk,
+                active=True,
+                store__seller=request.user
+            )
+        except models.Product.DoesNotExist:
+            return Response(
+                {"detail": "Sản phẩm không tồn tại hoặc bạn không sở hữu"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(product=product)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 

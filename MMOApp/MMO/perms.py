@@ -1,4 +1,6 @@
 from rest_framework import permissions
+from MMO import models
+
 
 class OwnerPerms(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
@@ -14,6 +16,10 @@ class IsSeller(permissions.IsAuthenticated):
 
     def has_object_permission(self, request, view, obj):
         return obj.seller == request.user
+
+class IsSellerStock(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return super().has_object_permission(request, view, obj) and obj.product.store.seller == request.user
 
 class IsSellerProduct(permissions.IsAuthenticated):
     def has_permission(self, request, view):
