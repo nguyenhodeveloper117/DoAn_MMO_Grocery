@@ -135,5 +135,114 @@ class BlogLikeSerializer(ModelSerializer):
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
-    
+
+class VoucherSerializer(ModelSerializer):
+    store = StoreSerializer(read_only=True)
+
+    class Meta:
+        model = models.Voucher
+        fields = 'voucher_code', 'store', 'code', 'discount_percent', 'max_discount', 'expired_at', 'quantity', 'created_date', 'updated_date'
+        read_only_fields = ['voucher_code', 'store', 'quantity', 'created_date', 'updated_date']
+
+class AccountStockSerializer(ModelSerializer):
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = models.AccountStock
+        fields = 'stock_code', 'product', 'content', 'is_sold', 'sold_at', 'created_date', 'updated_date'
+        read_only_fields = ['stock_code', 'product', 'created_date', 'updated_date']
+
+class OrderSerializer(ModelSerializer):
+    buyer = UserSerializer(read_only=True)
+    voucher = VoucherSerializer(read_only=True)
+
+    class Meta:
+        model = models.Order
+        fields = 'order_code', 'buyer', 'voucher', 'is_paid', 'status', 'released_at', 'created_date', 'updated_date'
+        read_only_fields = ['order_code', 'buyer', 'voucher' ,'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
+        return super().create(validated_data)
+
+class AccOrderDetailSerializer(ModelSerializer):
+    order = OrderSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = models.AccOrderDetail
+        fields = 'acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered', 'created_date', 'updated_date'
+        read_only_fields = ['acc_order_detail_code', 'order', 'product' ,'created_date', 'updated_date']
+
+class ServiceOrderDetailSerializer(ModelSerializer):
+    order = OrderSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = models.ServiceOrderDetail
+        fields = 'acc_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'status', 'delivered_at', 'created_date', 'updated_date'
+        read_only_fields = ['acc_order_detail_code', 'order', 'product', 'created_date', 'updated_date']
+
+class ComplaintSerializer(ModelSerializer):
+    order = OrderSerializer(read_only=True)
+    buyer = UserSerializer(read_only=True)
+    admin = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.Complaint
+        fields = ('complaint_code', 'order', 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2', 'evidence_image3',
+                  'evidence_video', 'resolved', 'decision', 'created_date', 'updated_date')
+        read_only_fields = ['complaint_code', 'order', 'buyer', 'admin', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
+        return super().create(validated_data)
+
+class ReviewSerializer(ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    buyer = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.Review
+        fields = ('review_code', 'product', 'buyer', 'rating', 'comment', 'created_date', 'updated_date')
+        read_only_fields = ['review_code', 'product', 'buyer', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
+        return super().create(validated_data)
+
+class FavoriteProductSerializer(ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.Review
+        fields = ('favorite_code', 'product', 'user', 'created_date', 'updated_date')
+        read_only_fields = ['favorite_code', 'product', 'user', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
+        return super().create(validated_data)
+
+class TransactionHistorySerializer(ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.Review
+        fields = ('transaction_code', 'user', 'type', 'amount', 'note' ,'created_date', 'updated_date')
+        read_only_fields = ['transaction_code', 'user', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
+        return super().create(validated_data)
+
+
+
+
+
+
+
+
+
+
 

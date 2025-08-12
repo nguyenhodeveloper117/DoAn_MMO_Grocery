@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from cloudinary.models import CloudinaryField
-from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -177,23 +176,6 @@ class AccOrderDetail(BaseModel):
             self.acc_order_detail_code = generate_code(AccOrderDetail, 'acc_order_detail_code', 'ADD')
         if self.order and hasattr(self.order, 'service_detail'):
             raise ValidationError("Order này đã có service detail. Không thể thêm acc detail.")
-
-        if self.product and self.quantity:
-            self.unit_price = self.product.price
-            raw_total = self.unit_price * self.quantity
-
-            # Áp dụng giảm giá từ voucher (nếu có)
-            if self.order and self.order.voucher:
-                percent = self.order.voucher.discount_percent
-                max_discount = self.order.voucher.max_discount
-
-                discount = raw_total * (percent / 100)
-                discount = min(discount, max_discount)
-
-                self.total_amount = raw_total - discount
-            else:
-                self.total_amount = raw_total
-
         super().save(*args, **kwargs)
 
 
@@ -222,22 +204,6 @@ class ServiceOrderDetail(BaseModel):
             self.service_order_detail_code = generate_code(ServiceOrderDetail, 'service_order_detail_code', 'SOD')
         if self.order and hasattr(self.order, 'acc_detail'):
             raise ValidationError("Order này đã có acc detail. Không thể thêm service detail.")
-        if self.product and self.quantity:
-            self.unit_price = self.product.price
-            raw_total = self.unit_price * self.quantity
-
-            # Áp dụng giảm giá từ voucher (nếu có)
-            if self.order and self.order.voucher:
-                percent = self.order.voucher.discount_percent
-                max_discount = self.order.voucher.max_discount
-
-                discount = raw_total * (percent / 100)
-                discount = min(discount, max_discount)
-
-                self.total_amount = raw_total - discount
-            else:
-                self.total_amount = raw_total
-
         super().save(*args, **kwargs)
 
 # Khiếu nại
