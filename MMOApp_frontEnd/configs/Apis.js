@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://127.0.0.1:8000";
-const BASE_URL = "http://192.168.1.23:8000";
+const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://192.168.1.23:8000";
 
 export const endpoints = {
     'login': '/o/token/',
@@ -30,7 +30,10 @@ export const endpoints = {
     "delete-comment": (blogId) => `blog-comments/${blogId}/`,
     "get-like": (blogId) => `blog-likes/${blogId}/like-count/`,
     "add-like": (blogId) => `blog-likes/${blogId}/like/`,
-    
+    "my-vouchers": '/vouchers/my-vouchers/',
+    "add-voucher": '/vouchers/',
+    "updateVoucher": (voucherId) => `vouchers/${voucherId}/`,
+    "deleteVoucher": (voucherId) => `vouchers/${voucherId}/`,
 };
 
 export const authApis = (token) => {

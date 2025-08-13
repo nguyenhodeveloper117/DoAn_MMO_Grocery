@@ -27,6 +27,7 @@ import AddForum from "./components/Forum/AddForum";
 import UpdateForum from "./components/Forum/UpdateForum";
 import MyForums from "./components/Forum/MyForums";
 import ForumDetail from "./components/Forum/ForumDetail";
+import Voucher from "./components/Store/VoucherStore";
 
 
 
@@ -188,6 +189,12 @@ const StoreNavigator = () => (
     }} />
     <StoreStack.Screen name="updateProduct" component={UpdateProduct} options={{
       title: 'Cập nhật sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="vouchers" component={Voucher} options={{
+      title: 'Quản lí voucher',
       headerTitleStyle: {
         ...MyStyles.header,
       }

@@ -140,6 +140,7 @@ const StoreSeller = () => {
   const navigateUpdateStore = () => nav.navigate("updateStore", { store });
   const navigateCreateProduct = () => nav.navigate("addProduct", { store });
   const navigateViewProduct = product => nav.navigate("productDetail", { product });
+  const navigateVoucher = () => nav.navigate("vouchers", { store });
 
   return (
     <>
@@ -170,6 +171,10 @@ const StoreSeller = () => {
 
               {store && (
                 <>
+                  <Text style={styles.productTitle}>Quản lí Voucher</Text>
+                  <Button mode="contained" onPress={navigateVoucher} style={styles.voucherButton}>
+                    Voucher
+                  </Button>
                   <Text style={styles.productTitle}>Sản phẩm của bạn</Text>
                   <Button mode="contained" onPress={navigateCreateProduct} style={styles.addButton}>
                     Thêm sản phẩm mới

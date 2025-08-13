@@ -82,6 +82,11 @@ const styles = StyleSheet.create({
         marginVertical: 16,
         borderRadius: 20,
     },
+    voucherButton: {
+        marginVertical: 16,
+        borderRadius: 20,
+        backgroundColor: '#f8572aff',
+    },
     buttonUpdateProduct: {
         flexDirection: "row",
         justifyContent: "space-around",

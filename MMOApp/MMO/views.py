@@ -306,7 +306,7 @@ class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView , generics.Destroy
     search_fields = ['code', 'discount_percent']
 
     def get_permissions(self):
-        if self.action == 'my_products':
+        if self.action == 'my_vouchers':
             return [perms.IsSellerProduct()]
         if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             return [perms.IsSellerProduct()]
