@@ -138,11 +138,17 @@ class BlogLikeSerializer(ModelSerializer):
 
 class VoucherSerializer(ModelSerializer):
     store = StoreSerializer(read_only=True)
-
     class Meta:
         model = models.Voucher
         fields = 'voucher_code', 'store', 'code', 'discount_percent', 'max_discount', 'expired_at', 'quantity', 'created_date', 'updated_date'
         read_only_fields = ['voucher_code', 'store', 'quantity', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        try:
+            store = user.store  # Do OneToOne: user.store sẽ trả về Store
+        except models.Store.DoesNotExist:
+            raise ValidationError("Người dùng chưa tạo gian hàng.")
 
 class AccountStockSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
