@@ -34,6 +34,11 @@ export const endpoints = {
     "add-voucher": '/vouchers/',
     "updateVoucher": (voucherId) => `vouchers/${voucherId}/`,
     "deleteVoucher": (voucherId) => `vouchers/${voucherId}/`,
+    "get-stocks": (productId) => `account-stocks/${productId}/product-stocks/`,
+    "add-stocks": (productId) => `account-stocks/${productId}/create-stock/`,
+    "delete-stocks": (stockId) => `account-stocks/${stockId}`,
+    "update-stocks": (stockId) => `account-stocks/${stockId}`,
+    
 };
 
 export const authApis = (token) => {

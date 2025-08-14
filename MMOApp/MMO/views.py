@@ -281,9 +281,11 @@ class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.Up
             return [perms.IsSellerStock()]
         if self.action == 'create_account_stock':
             return [perms.IsSeller()]
+        if self.action == 'get_stocks_for_product':
+            return [perms.IsSellerStock()]
         return [AllowAny()]
 
-    @action(detail=True, methods=['get'], url_path='stocks')
+    @action(detail=True, methods=['get'], url_path='product-stocks')
     def get_stocks_for_product(self, request, pk=None):
         try:
             product = models.Product.objects.get(
