@@ -78,7 +78,7 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
 
 
 class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = models.Product.objects.filter(active=True).order_by('-created_date')
+    queryset = models.Product.objects.filter(active=True, is_approved=True).order_by('-created_date')
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
     pagination_class = paginators.ProductPaginator
@@ -88,6 +88,7 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
     filterset_fields = {
         'type': ['exact'],
         'price': ['gte', 'lte'],
+        'is_approved': ['exact'],
     }
     search_fields = ['name']
 
@@ -102,7 +103,7 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
     def my_products(self, request):
         try:
             store = models.Store.objects.get(seller=request.user, active=True)
-            queryset = models.Product.objects.filter(store=store).order_by('created_date')
+            queryset = models.Product.objects.filter(store=store).order_by('-created_date')
 
             # Áp dụng filter + search thủ công
             filter_backends = [DjangoFilterBackend, filters.SearchFilter]

@@ -38,6 +38,7 @@ const StoreSeller = () => {
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
+  const [approvedStatus, setApprovedStatus] = useState("");
 
   // Refresh
   const [refreshing, setRefreshing] = useState(false);
@@ -77,6 +78,7 @@ const StoreSeller = () => {
             type: type || undefined,
             price__gte: priceMin || undefined,
             price__lte: priceMax || undefined,
+            is_approved: approvedStatus || undefined,
             page: nextPage
           }
         });
@@ -91,7 +93,7 @@ const StoreSeller = () => {
         console.error("Lỗi load sản phẩm:", err?.response?.data || err);
       }
     },
-    [store, searchText, type, priceMin, priceMax]
+    [store, searchText, type, priceMin, priceMax, approvedStatus]
   );
 
   // Create store
@@ -242,6 +244,17 @@ const StoreSeller = () => {
                 {typeOptions.map(opt => (
                   <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
                 ))}
+              </Picker>
+            </View>
+            <View style={styles.viewInput}>
+              <Picker
+                selectedValue={approvedStatus}
+                onValueChange={value => setApprovedStatus(value)}
+                mode="dropdown"
+              >
+                <Picker.Item label="-- Tất cả trạng thái --" value="" />
+                <Picker.Item label="Đã duyệt" value="true" />
+                <Picker.Item label="Chưa duyệt" value="false" />
               </Picker>
             </View>
             <TextInput placeholder="Giá tối thiểu" value={priceMin} onChangeText={setPriceMin} keyboardType="numeric" mode="outlined" style={styles.viewInput} />

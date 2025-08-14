@@ -107,8 +107,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     label: {
+        color: "#555",
         fontWeight: "normal",
-        fontSize: 18,
+        fontSize: 20,
     },
     menuItem: {
         paddingHorizontal: 30,

@@ -29,6 +29,7 @@ import MyForums from "./components/Forum/MyForums";
 import ForumDetail from "./components/Forum/ForumDetail";
 import Voucher from "./components/Store/VoucherStore";
 import Stock from "./components/Store/Stock";
+import HomeProductDetail from "./components/Home/HomeProductDetail";
 
 
 
@@ -36,31 +37,30 @@ const HomeStack = createNativeStackNavigator();
 const HomeNavigator = () => {
   return (
     <HomeStack.Navigator>
+      <HomeStack.Screen name="home" component={Home} options={({ navigation }) => ({
+        title: 'Tạp hoá MMO',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        },
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate("chat")}>
+            <IconButton icon="message" size={24} />
+          </TouchableOpacity>
+        ),
+      })} />
       <HomeStack.Screen
-        name="home"
-        component={Home}
-        options={({ navigation }) => ({ // Truyền navigation vào options
-          title: 'Tạp hoá MMO',
-          headerTitleStyle: {
-            ...MyStyles.header,
-          },
-          headerRight: () => (
-            <TouchableOpacity onPress={() => navigation.navigate("chat")}>
-              <IconButton icon="message" size={24} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      <HomeStack.Screen
-        name="chat"
-        component={ChatBox}
-        options={{
+        name="chat" component={ChatBox} options={{
           title: 'ChatBox',
           headerTitleStyle: {
             ...MyStyles.header,
           }
-        }}
-      />
+        }} />
+      <LoginStack.Screen name="homeProductDetail" component={HomeProductDetail} options={{
+        title: 'Chi tiết sản phẩm',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
     </HomeStack.Navigator>
   );
 };
@@ -210,7 +210,6 @@ const StoreNavigator = () => (
 );
 
 const Tab = createBottomTabNavigator();
-
 const TabNavigator = () => {
   const user = useContext(MyUserContext);
   return (

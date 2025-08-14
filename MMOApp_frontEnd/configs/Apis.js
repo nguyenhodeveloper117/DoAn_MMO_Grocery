@@ -15,6 +15,7 @@ export const endpoints = {
     'my-store': '/stores/my-store/',
     'create-store': '/stores/',
     'update-store': (storeId) => `/stores/${storeId}/`,
+    'get-products': "/products/",
     "my-products": "/products/my-products/",
     "create-product": "/products/",
     "update-product": (productId) => `/products/${productId}/`,
