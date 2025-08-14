@@ -40,6 +40,11 @@ const ProductDetail = () => {
     nav.navigate("updateProduct", { product });
   };
 
+  const navStocks = () => {
+    nav.navigate("stocks", { product });
+  };
+  
+
   return (
     <ScrollView contentContainerStyle={MyStyles.container}>
       <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
@@ -50,11 +55,14 @@ const ProductDetail = () => {
       <Text style={styles.info}>Số lượng còn: <Text style={styles.label}>{product.available_quantity}</Text></Text>
       <Text style={styles.info}>Số ngày bảo hành: <Text style={styles.label}>{product.warranty_days} ngày</Text></Text>
       <Text style={styles.info}>Mô tả: <Text style={styles.label}>{product.description}</Text></Text>
+      <Text style={styles.info}>Ngày tạo: <Text style={styles.label}>{new Date(product.created_date).toLocaleDateString()}</Text></Text>
+      <Text style={styles.info}>Ngày cập nhật: <Text style={styles.label}>{new Date(product.updated_date).toLocaleDateString()}</Text></Text>
       <Text style={styles.info}>Phê duyệt: <Text style={styles.label}>{product.is_approved ? "Đã duyệt" : "Chưa duyệt"}</Text></Text>
 
       <View style={styles.buttonUpdateProduct}>
-        <Button mode="outlined" onPress={handleEdit}>Chỉnh sửa</Button>
         <Button mode="contained" buttonColor="red" textColor="white" onPress={handleDelete}>Xoá</Button>
+        <Button mode="outlined" onPress={handleEdit}>Chỉnh sửa</Button>
+        <Button mode="contained" onPress={navStocks}>Kho sản phẩm</Button>
       </View>
     </ScrollView>
   );

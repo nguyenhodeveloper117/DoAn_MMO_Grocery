@@ -38,6 +38,11 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         color: '#2e7d32',
     },
+    nameVerification: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+    },
     infoBox: {
         width: '100%',
         backgroundColor: '#ffffff',
@@ -119,6 +124,12 @@ const styles = StyleSheet.create({
         width: '80%',
         borderRadius: 20,
     },
+    created_date: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginTop: 10,
+        marginBottom: 10
+    }
 });
 
 export default styles;

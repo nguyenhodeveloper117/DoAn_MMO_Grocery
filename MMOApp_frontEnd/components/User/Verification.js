@@ -144,9 +144,10 @@ const Verification = () => {
 
     return (
         <ScrollView contentContainerStyle={MyStyles.container}>
-            <Text style={styles.name}>
+            <Text style={styles.nameVerification}>
                 {verificationData.user?.first_name} {verificationData.user?.last_name}
             </Text>
+            <Text style={styles.created_date}>Ngày tạo: {new Date(verificationData.created_date).toLocaleDateString()} | Ngày cập nhật: {new Date(verificationData.created_date).toLocaleDateString()}</Text>
             <Text style={styles.label}>Trạng thái:</Text>
             <Text style={styles.info}>{verificationData.status}</Text>
 

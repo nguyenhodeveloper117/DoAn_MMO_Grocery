@@ -239,9 +239,6 @@ const MMOForum = () => {
             onPress={() => navigateToBlogDetail(b)}
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
-            <Text>
-              ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
-            </Text>
             <Text style={styles.blogCategory}>
               Danh mục: {b.category} | Tác giả: {b.author?.username} | Ngày tạo: {new Date(b.created_date).toLocaleDateString()}
             </Text>
@@ -259,6 +256,9 @@ const MMOForum = () => {
                 },
               }}
             />
+            <Text style={styles.marginTop}>
+              ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
+            </Text>
           </TouchableOpacity>
         ))
       )}

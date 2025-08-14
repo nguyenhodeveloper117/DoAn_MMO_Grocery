@@ -108,13 +108,18 @@ const styles = StyleSheet.create({
     },
     label: {
         fontWeight: "normal",
-        fontSize: 16,
+        fontSize: 18,
     },
     menuItem: {
         paddingHorizontal: 30,
     },
     marginBottom: {
         marginBottom: 10
+    },
+    created_date: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginTop: 10
     }
 
 });

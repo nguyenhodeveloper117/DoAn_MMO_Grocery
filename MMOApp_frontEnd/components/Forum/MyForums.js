@@ -244,9 +244,6 @@ const MyForums = () => {
             onPress={() => navigateToDetail(b)}
           >
             <Text style={styles.blogTitle}>{b.title}</Text>
-            <Text>
-              ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
-            </Text>
             <Text style={styles.blogCategory}>
               Danh mục: {b.category} | Cập nhật: {new Date(b.updated_date).toLocaleDateString()}
             </Text>
@@ -262,6 +259,10 @@ const MyForums = () => {
                 },
               }}
             />
+
+            <Text style={styles.marginTop}>
+              ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
+            </Text>
 
             <View style={styles.viewUpdateDeleteBlog}>
               <Button mode="outlined" style={styles.marginRight} onPress={() => navigateToUpdate(b)}>

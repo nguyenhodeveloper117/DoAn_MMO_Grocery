@@ -90,9 +90,10 @@ const Profile = () => {
                 <Text style={styles.info}>👤 Username: {user?.username}</Text>
                 <Text style={styles.info}>📧 Email: {user?.email}</Text>
                 <Text style={styles.info}>📞 SĐT: {user?.phone}</Text>
-                <Text style={styles.info}>🛡️ Vai trò: {user?.role}</Text>
-                <Text style={styles.info}>💰 Số dư: {user?.balance} VND</Text>
+                <Text style={styles.info}>🛡️ Vai trò: {user?.role}</Text>                
                 <Text style={styles.info}>✅ Verified: {user?.is_verified ? "Đã xác minh" : "Chưa xác minh"}</Text>
+                <Text style={styles.info}>☀️ Ngày tạo: {new Date(user?.date_joined).toLocaleDateString()}</Text>
+                <Text style={styles.info}>💰 Số dư: {user?.balance} VND</Text>
             </View>
 
             <View style={styles.buttonContainer}>

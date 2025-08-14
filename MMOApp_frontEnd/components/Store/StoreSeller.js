@@ -154,6 +154,7 @@ const StoreSeller = () => {
                 <View style={styles.storeBox}>
                   <Text style={styles.title}>{store.name}</Text>
                   <Text style={styles.desc}>{store.description}</Text>
+                  <Text style={styles.created_date}>Ngày tạo: {new Date(store.created_date).toLocaleDateString()} | Ngày cập nhật: {new Date(store.created_date).toLocaleDateString()}</Text>
                   <Button mode="contained" onPress={navigateUpdateStore} style={styles.Button}>
                     Chỉnh sửa gian hàng
                   </Button>
@@ -173,7 +174,7 @@ const StoreSeller = () => {
                 <>
                   <Text style={styles.productTitle}>Quản lí Voucher</Text>
                   <Button mode="contained" onPress={navigateVoucher} style={styles.voucherButton}>
-                    Voucher
+                    Voucher cửa hàng
                   </Button>
                   <Text style={styles.productTitle}>Sản phẩm của bạn</Text>
                   <Button mode="contained" onPress={navigateCreateProduct} style={styles.addButton}>
@@ -201,7 +202,7 @@ const StoreSeller = () => {
             <Card style={styles.cardProduct}>
               <Card.Title
                 title={item.name}
-                subtitle={`Giá: ${item.price || "-"} đ`}
+                subtitle={`Giá: ${item.price || "-"} đ | Loại: ${item.type}`}
                 left={props =>
                   item.image ? (
                     <Avatar.Image {...props} source={{ uri: item.image }} size={50} />
@@ -211,9 +212,8 @@ const StoreSeller = () => {
                 }
               />
               <Card.Content>
-                <Text style={styles.label}>Mã sản phẩm: {item.type || "Không có"}</Text>
                 <Text style={styles.label} numberOfLines={2}>
-                  Mô tả: {item.description}
+                  {item.description}
                 </Text>
               </Card.Content>
               <Card.Actions>

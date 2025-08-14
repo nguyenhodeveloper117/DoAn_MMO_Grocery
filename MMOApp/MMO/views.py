@@ -270,6 +270,11 @@ class BlogLikeViewSet(viewsets.ViewSet):
 class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
     queryset = models.AccountStock.objects.filter(active=True)
     serializer_class = serializers.AccountStockSerializer
+    pagination_class = paginators.StockPaginator
+
+    # Thêm search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['content', 'sold_at']
 
     def get_permissions(self):
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
@@ -277,6 +282,36 @@ class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.Up
         if self.action == 'create_account_stock':
             return [perms.IsSeller()]
         return [AllowAny()]
+
+    @action(detail=True, methods=['get'], url_path='stocks')
+    def get_stocks_for_product(self, request, pk=None):
+        try:
+            product = models.Product.objects.get(
+                pk=pk,
+                active=True,
+                store__seller=request.user
+            )
+        except models.Product.DoesNotExist:
+            return Response(
+                {"detail": "Sản phẩm không tồn tại hoặc bạn không sở hữu"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # base queryset (chỉ những stock active thuộc product)
+        qs = product.stocks.filter(active=True)
+
+        # áp dụng filter_backends (search, filters) nếu có
+        qs = self.filter_queryset(qs)
+
+        # phân trang bằng các helper của GenericAPIView
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # nếu không phân trang (ví dụ paginator = None), trả về danh sách đầy đủ
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='create-stock')
     def create_stock_for_product(self, request, pk=None):

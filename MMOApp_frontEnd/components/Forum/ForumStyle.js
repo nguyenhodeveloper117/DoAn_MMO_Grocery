@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     marginTop: {
-        marginTop: 20
+        marginTop: 15
     },
     marginRight: {
         marginRight: 5
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         fontStyle: "italic",
         fontSize: 12,
         marginTop: 4,
-        marginBottom: 20
+        marginBottom: 15
     },
     buttonAdd: {
         backgroundColor: "#4caf50",

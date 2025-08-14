@@ -6,8 +6,8 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = models.User
         # fields = '__all__'
-        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email', 'is_verified']
-        read_only_fields = ['user_code']
+        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email', 'is_verified', 'date_joined', 'last_login']
+        read_only_fields = ['user_code', 'date_joined', 'last_login']
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -47,8 +47,8 @@ class StoreSerializer(ModelSerializer):
     seller = UserSerializer(read_only=True)
     class Meta:
         model = models.Store
-        fields = ['store_code', 'seller', 'name', 'description']
-        read_only_fields = ['store_code', 'seller']
+        fields = ['store_code', 'seller', 'name', 'description', 'created_date', 'updated_date']
+        read_only_fields = ['store_code', 'seller', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['seller'] = self.context['request'].user  # Gán seller là user hiện tại
@@ -58,8 +58,8 @@ class VerificationSerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = models.Verification
-        fields = 'verification_code', 'user', 'cccd', 'front_id', 'back_id', 'portrait', 'status'
-        read_only_fields = ['verification_code' ,'user']
+        fields = 'verification_code', 'user', 'cccd', 'front_id', 'back_id', 'portrait', 'status', 'created_date', 'updated_date'
+        read_only_fields = ['verification_code' ,'user', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
@@ -82,8 +82,8 @@ class ProductSerializer(ModelSerializer):
     store = StoreSerializer(read_only=True)
     class Meta:
         model = models.Product
-        fields = 'product_code', 'store', 'name', 'image', 'description', 'price', 'format', 'type', 'available_quantity', 'warranty_days', 'is_approved'
-        read_only_fields = ['product_code', 'store', 'available_quantity', 'is_approved']
+        fields = 'product_code', 'store', 'name', 'image', 'description', 'price', 'format', 'type', 'available_quantity', 'warranty_days', 'is_approved', 'created_date', 'updated_date'
+        read_only_fields = ['product_code', 'store', 'available_quantity', 'is_approved', 'created_date', 'updated_date']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
