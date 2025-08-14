@@ -1,23 +1,11 @@
-// screens/VoucherManager.js
 import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  RefreshControl,
-  FlatList
-} from "react-native";
-import {
-  TextInput,
-  Button,
-  Card,
-  Dialog,
-  Portal
-} from "react-native-paper";
+import {View, Text, Alert, RefreshControl, FlatList} from "react-native";
+import {TextInput, Button, Card, Dialog, Portal} from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyUserContext } from "../../configs/Contexts";
 import { endpoints, authApis } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
+import styles from "./StoreStyle";
 
 const emptyForm = {
   code: "",
@@ -25,6 +13,12 @@ const emptyForm = {
   max_discount: "30000.00",
   expired_at: "",
   quantity: ""
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN"); // sẽ ra dạng dd/MM/yyyy
 };
 
 const Voucher = () => {
@@ -133,7 +127,7 @@ const Voucher = () => {
         value={searchText}
         onChangeText={setSearchText}
         mode="outlined"
-        style={{ marginBottom: 10 }}
+        style={styles.marginBottom}
       />
 
       <Button
@@ -143,7 +137,7 @@ const Voucher = () => {
           setEditing(null);
           setDialogVisible(true);
         }}
-        style={{ marginBottom: 10 }}
+        style={styles.marginBottom}
       >
         + Tạo voucher
       </Button>
@@ -152,13 +146,13 @@ const Voucher = () => {
         data={vouchers}
         keyExtractor={(item) => item.voucher_code}
         renderItem={({ item }) => (
-          <Card style={{ marginBottom: 10 }}>
+          <Card style={styles.marginBottom}>
             <Card.Title
               title={item.code}
               subtitle={`Giảm: ${item.discount_percent}% - SL: ${item.quantity}`}
             />
             <Card.Content>
-              <Text>HSD: {item.expired_at}</Text>
+              <Text>HSD: {formatDate(item.expired_at)}</Text>
               <Text>Max giảm: {item.max_discount}</Text>
             </Card.Content>
             <Card.Actions>
@@ -197,7 +191,7 @@ const Voucher = () => {
               value={form.code}
               onChangeText={(t) => setForm({ ...form, code: t })}
               mode="outlined"
-              style={{ marginBottom: 8 }}
+              style={styles.marginBottom}
             />
             <TextInput
               label="Discount %"
@@ -205,7 +199,7 @@ const Voucher = () => {
               onChangeText={(t) => setForm({ ...form, discount_percent: t })}
               keyboardType="numeric"
               mode="outlined"
-              style={{ marginBottom: 8 }}
+              style={styles.marginBottom}
             />
             <TextInput
               label="Max discount"
@@ -213,14 +207,14 @@ const Voucher = () => {
               onChangeText={(t) => setForm({ ...form, max_discount: t })}
               keyboardType="numeric"
               mode="outlined"
-              style={{ marginBottom: 8 }}
+              style={styles.marginBottom}
             />
             <TextInput
-              label="Expired at (ISO)"
+              label="Expired at (yyyy-mm-dd)"
               value={form.expired_at}
               onChangeText={(t) => setForm({ ...form, expired_at: t })}
               mode="outlined"
-              style={{ marginBottom: 8 }}
+              style={styles.marginBottom}
             />
             <TextInput
               label="Quantity"

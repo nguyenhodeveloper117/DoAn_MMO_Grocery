@@ -113,6 +113,9 @@ const styles = StyleSheet.create({
     menuItem: {
         paddingHorizontal: 30,
     },
+    marginBottom: {
+        marginBottom: 10
+    }
 
 });
 
