@@ -15,12 +15,6 @@ const emptyForm = {
   quantity: ""
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("vi-VN"); // sẽ ra dạng dd/MM/yyyy
-};
-
 const Voucher = () => {
   const user = useContext(MyUserContext);
 
@@ -152,7 +146,7 @@ const Voucher = () => {
               subtitle={`Giảm: ${item.discount_percent}% - SL: ${item.quantity}`}
             />
             <Card.Content>
-              <Text>HSD: {formatDate(item.expired_at)}</Text>
+              <Text>HSD: {new Date(item.expired_at).toLocaleDateString()}</Text>
               <Text>Max giảm: {item.max_discount}</Text>
             </Card.Content>
             <Card.Actions>
@@ -171,7 +165,7 @@ const Voucher = () => {
               >
                 Sửa
               </Button>
-              <Button color="red" onPress={() => deleteVoucher(item.voucher_code)}>
+              <Button style={styles.deleteButton} onPress={() => deleteVoucher(item.voucher_code)}>
                 Xoá
               </Button>
             </Card.Actions>

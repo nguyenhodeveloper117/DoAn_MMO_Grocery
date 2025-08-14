@@ -119,7 +119,7 @@ class AccountStock(BaseModel):
 class Voucher(BaseModel):
     voucher_code = models.CharField(primary_key=True, max_length=10, editable=False)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vouchers')
-    code = models.CharField(max_length=20, unique=True)
+    code = models.CharField(max_length=20)
     discount_percent = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('1')), MaxValueValidator(Decimal('100.00'))])
     max_discount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('30000'))
     expired_at = models.DateTimeField(null=False, blank=False)
@@ -127,6 +127,9 @@ class Voucher(BaseModel):
 
     def __str__(self):
         return f"{self.voucher_code}"
+
+    class Meta:
+        unique_together = ('store', 'code')
 
     def save(self, *args, **kwargs):
         if not self.voucher_code:

@@ -120,6 +120,9 @@ const styles = StyleSheet.create({
         fontStyle: "italic",
         fontSize: 12,
         marginTop: 10
+    },
+    deleteButton: {
+        backgroundColor: '#e50f0fff',
     }
 
 });
