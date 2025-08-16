@@ -148,7 +148,8 @@ class Order(BaseModel):
         ('delivered', 'Đã giao'),
         ('complained', 'Bị khiếu nại'),
         ('refunded', 'Đã hoàn tiền'),
-        ('completed', 'Hoàn thành')
+        ('completed', 'Hoàn thành'),
+        ('cancel', 'Huỷ')
     ])
     released_at = models.DateTimeField(null=True, blank=True)
 
@@ -176,7 +177,7 @@ class AccOrderDetail(BaseModel):
 
     def save(self, *args, **kwargs):
         if not self.acc_order_detail_code:
-            self.acc_order_detail_code = generate_code(AccOrderDetail, 'acc_order_detail_code', 'ADD')
+            self.acc_order_detail_code = generate_code(AccOrderDetail, 'acc_order_detail_code', 'AD')
         if self.order and hasattr(self.order, 'service_detail'):
             raise ValidationError("Order này đã có service detail. Không thể thêm acc detail.")
         super().save(*args, **kwargs)
@@ -204,7 +205,7 @@ class ServiceOrderDetail(BaseModel):
 
     def save(self, *args, **kwargs):
         if not self.service_order_detail_code:
-            self.service_order_detail_code = generate_code(ServiceOrderDetail, 'service_order_detail_code', 'SOD')
+            self.service_order_detail_code = generate_code(ServiceOrderDetail, 'service_order_detail_code', 'SO')
         if self.order and hasattr(self.order, 'acc_detail'):
             raise ValidationError("Order này đã có acc detail. Không thể thêm service detail.")
         super().save(*args, **kwargs)

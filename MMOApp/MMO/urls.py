@@ -14,6 +14,9 @@ router.register('blog-comments', views.BlogCommentViewSet, basename='blog-commen
 router.register('blog-likes', views.BlogLikeViewSet, basename='blog-like')
 router.register('account-stocks', views.AccountStockViewSet, basename='account-stock')
 router.register('vouchers', views.VoucherViewSet, basename='voucher')
+router.register('orders', views.OrderViewSet, basename='order')
+router.register('acc-orders-detail', views.AccOrderDetailViewSet, basename='acc-order-detail')
+router.register('service-orders-detail', views.ServiceOrderDetailViewSet, basename='service-orders-detail')
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),

@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,6 +8,7 @@ from rest_framework.decorators import action, api_view, parser_classes
 import cloudinary.uploader
 from . import perms, paginators, serializers
 from . import models
+
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = models.User.objects.filter(is_active=True)
@@ -30,6 +32,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIVi
         user.role = 'seller'
         user.save()
         return Response({'message': 'Đã cập nhật role thành seller'}, status=status.HTTP_200_OK)
+
 
 class StoreViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView):
     queryset = models.Store.objects.filter(active=True)
@@ -77,7 +80,8 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
             return Response({'error': 'Verification not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,
+                     generics.DestroyAPIView):
     queryset = models.Product.objects.filter(active=True, is_approved=True).order_by('-created_date')
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
@@ -123,7 +127,9 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
         except models.Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+
+class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                  generics.DestroyAPIView):
     queryset = models.Blog.objects.filter(active=True).order_by('-created_date')
     serializer_class = serializers.BlogSerializer
     pagination_class = paginators.BlogPaginator
@@ -163,6 +169,7 @@ class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
 @api_view(['POST'])
 @parser_classes([parsers.MultiPartParser, parsers.FormParser])
 def upload_image_cloudinary(request):
@@ -174,6 +181,7 @@ def upload_image_cloudinary(request):
         return Response({"url": result["secure_url"]}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class BlogCommentViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     queryset = models.BlogComment.objects.filter(active=True).order_by('-created_date')
@@ -218,6 +226,7 @@ class BlogCommentViewSet(viewsets.ViewSet, generics.DestroyAPIView):
         serializer.save(blog=blog, author=request.user)
         return Response(serializer.data, status=201)
 
+
 class BlogLikeViewSet(viewsets.ViewSet):
     queryset = models.BlogLike.objects.filter(active=True)
     serializer_class = serializers.BlogLikeSerializer
@@ -252,7 +261,8 @@ class BlogLikeViewSet(viewsets.ViewSet):
         # Trả về số like hiện tại
         like_count = blog.likes.filter(active=True).count()
 
-        return Response({"blog_code": blog.blog_code, "like_count": like_count, "message": message}, status=status.HTTP_200_OK)
+        return Response({"blog_code": blog.blog_code, "like_count": like_count, "message": message},
+                        status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path='like-count')
     def like_count(self, request, pk=None):
@@ -267,6 +277,7 @@ class BlogLikeViewSet(viewsets.ViewSet):
             liked = blog.likes.filter(user=request.user, active=True).exists()
 
         return Response({"blog_code": blog.blog_code, "like_count": count, "liked": liked})
+
 
 class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
     queryset = models.AccountStock.objects.filter(active=True)
@@ -335,7 +346,8 @@ class AccountStockViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.Up
         serializer.save(product=product)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView , generics.DestroyAPIView, generics.UpdateAPIView):
+
+class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView, generics.UpdateAPIView):
     queryset = models.Voucher.objects.filter(active=True)
     serializer_class = serializers.VoucherSerializer
 
@@ -367,3 +379,103 @@ class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView , generics.Destroy
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
+    queryset = models.Order.objects.filter(active=True)
+    serializer_class = serializers.OrderSerializer
+    pagination_class = paginators.OderPaginator
+
+    # Thêm filter và search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = {
+        'status': ['exact'],
+    }
+
+    # search_fields = []
+
+    def get_permissions(self):
+        if self.action in ['my_orders']:
+            return [perms.IsOrderOwner()]
+        if self.action in ['store_orders']:
+            return [perms.IsSellerOrder()]
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.request.method in ['PUT', 'PATCH']:
+            return [perms.CanCancel()]
+        return [AllowAny()]
+
+    # tất cả order của user
+    @action(detail=False, methods=['get'], url_path='my-orders')
+    def my_orders(self, request, *args, **kwargs):
+        qs = models.Order.objects.filter(
+            active=True,
+            buyer=request.user
+        ).select_related(
+            'buyer', 'voucher'
+        ).prefetch_related(
+            'acc_detail__product',
+            'service_detail__product'
+        )
+
+        # Áp dụng filter_backends (ví dụ ?status=processing)
+        qs = self.filter_queryset(qs).order_by('-created_date')
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+    # tất cả order của store của seller đang đăng nhập
+    @action(detail=False, methods=['get'], url_path='store-orders')
+    def store_orders(self, request, *args, **kwargs):
+        # yêu cầu user phải có store (vì IsSellerProduct đảm bảo là seller)
+        store = getattr(request.user, 'store', None)
+        if store is None:
+            return Response({"detail": "Seller chưa có store."}, status=400)
+
+        qs = models.Order.objects.filter(
+            active=True
+        ).filter(
+            Q(acc_detail__product__store=store) |
+            Q(service_detail__product__store=store)
+        ).select_related(
+            'buyer', 'voucher'
+        ).prefetch_related(
+            'acc_detail__product', 'service_detail__product'
+        ).distinct()
+
+        # Áp dụng filter_backends (ví dụ ?status=delivered)
+        qs = self.filter_queryset(qs).order_by('-created_date')
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+
+
+class AccOrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
+    queryset = models.AccOrderDetail.objects.filter(active=True)
+    serializer_class = serializers.AccOrderDetailSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET']:
+            return [perms.IsOrderOwnerOrSeller()]
+        if self.request.method in ['POST']:
+            return [perms.CanPostOrderDetail()]
+        return [AllowAny()]
+
+class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView):
+    queryset = models.ServiceOrderDetail.objects.filter(active=True)
+    serializer_class = serializers.ServiceOrderDetailSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'PUT', 'PATCH']:
+            return [perms.IsOrderOwnerOrSeller()]
+        if self.request.method in ['POST']:
+            return [perms.CanPostOrderDetail()]
+        return [AllowAny()]

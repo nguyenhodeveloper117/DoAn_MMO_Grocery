@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, ValidationError
 from . import models
 
@@ -175,22 +176,22 @@ class OrderSerializer(ModelSerializer):
         return super().create(validated_data)
 
 class AccOrderDetailSerializer(ModelSerializer):
-    order = OrderSerializer(read_only=True)
-    product = ProductSerializer(read_only=True)
+    order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
+    product = serializers.PrimaryKeyRelatedField(queryset=models.Product.objects.all())
 
     class Meta:
         model = models.AccOrderDetail
         fields = 'acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered', 'created_date', 'updated_date'
-        read_only_fields = ['acc_order_detail_code', 'order', 'product' ,'created_date', 'updated_date']
+        read_only_fields = ['acc_order_detail_code',  'order', 'product', 'created_date', 'updated_date']
 
 class ServiceOrderDetailSerializer(ModelSerializer):
-    order = OrderSerializer(read_only=True)
-    product = ProductSerializer(read_only=True)
+    order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
+    product = serializers.PrimaryKeyRelatedField(queryset=models.Product.objects.all())
 
     class Meta:
         model = models.ServiceOrderDetail
-        fields = 'acc_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'status', 'delivered_at', 'created_date', 'updated_date'
-        read_only_fields = ['acc_order_detail_code', 'order', 'product', 'created_date', 'updated_date']
+        fields = 'service_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'status', 'delivered_at', 'created_date', 'updated_date'
+        read_only_fields = ['service_order_detail_code', 'order', 'product', 'created_date', 'updated_date']
 
 class ComplaintSerializer(ModelSerializer):
     order = OrderSerializer(read_only=True)

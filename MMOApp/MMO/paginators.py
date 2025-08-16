@@ -11,3 +11,6 @@ class BlogCommentPaginator(pagination.PageNumberPagination):
 
 class StockPaginator(pagination.PageNumberPagination):
     page_size = 5
+
+class OderPaginator(pagination.PageNumberPagination):
+    page_size = 5
