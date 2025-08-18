@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, ValidationError
 from . import models
+from django.utils import timezone
+
 
 
 class UserSerializer(ModelSerializer):
@@ -182,7 +184,39 @@ class AccOrderDetailSerializer(ModelSerializer):
     class Meta:
         model = models.AccOrderDetail
         fields = 'acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered', 'created_date', 'updated_date'
-        read_only_fields = ['acc_order_detail_code',  'order', 'product', 'created_date', 'updated_date']
+        read_only_fields = ['acc_order_detail_code', "unit_price", "total_amount", 'content_delivered', 'order', 'product', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        product = validated_data["product"]
+        qty = validated_data["quantity"]
+
+        # Lấy stock chưa bán
+        stocks = models.AccountStock.objects.filter(product=product, is_sold=False)[:qty]
+        if len(stocks) < qty:
+            raise ValidationError("Không đủ tài khoản trong kho!")
+
+        # Tính giá
+        validated_data["unit_price"] = product.price
+        validated_data["total_amount"] = product.price * qty
+
+        # Ghép content từ stock
+        contents = []
+        for stock in stocks:
+            contents.append(stock.content)
+            stock.is_sold = True
+            stock.sold_at = timezone.now()
+            stock.save(update_fields=["is_sold", "sold_at"])
+
+        validated_data["content_delivered"] = "\n".join(contents)
+
+        detail = models.AccOrderDetail.objects.create(**validated_data)
+
+        # Update order status
+        order = detail.order
+        order.status = "delivered"
+        order.save(update_fields=["status"])
+
+        return detail
 
 class ServiceOrderDetailSerializer(ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
@@ -191,7 +225,24 @@ class ServiceOrderDetailSerializer(ModelSerializer):
     class Meta:
         model = models.ServiceOrderDetail
         fields = 'service_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'status', 'delivered_at', 'created_date', 'updated_date'
-        read_only_fields = ['service_order_detail_code', 'order', 'product', 'created_date', 'updated_date']
+        read_only_fields = ['service_order_detail_code', 'order', 'product', "unit_price", "total_amount", 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        product = validated_data["product"]
+        qty = validated_data["quantity"]
+
+        # set unit price and total
+        validated_data["unit_price"] = product.price
+        validated_data["total_amount"] = product.price * qty
+
+        detail = models.ServiceOrderDetail.objects.create(**validated_data)
+
+        # Cập nhật order status = processing
+        order = detail.order
+        order.status = "processing"
+        order.save(update_fields=["status"])
+
+        return detail
 
 class ComplaintSerializer(ModelSerializer):
     order = OrderSerializer(read_only=True)

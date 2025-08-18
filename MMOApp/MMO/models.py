@@ -150,7 +150,7 @@ class Order(BaseModel):
         ('refunded', 'Đã hoàn tiền'),
         ('completed', 'Hoàn thành'),
         ('cancel', 'Huỷ')
-    ])
+    ], default='processing')
     released_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

@@ -9,12 +9,13 @@ import styles from "./ForumStyle";
 import MyStyles from "../../styles/MyStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const BlogDetail = ({ route }) => {
     const { blog } = route.params;
     const { width } = useWindowDimensions();
     const user = useContext(MyUserContext);
-
+    const nav = useNavigation();
     const [comments, setComments] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -67,6 +68,7 @@ const BlogDetail = ({ route }) => {
     const handleLike = async () => {
         if (!user) {
             Alert.alert("Thông báo", "Bạn cần đăng nhập mới có thể thích bài viết");
+            nav.navigate("login");
             return;
         }
         try {
