@@ -145,14 +145,14 @@ class OrderAdmin(admin.ModelAdmin):
 
 # AccOrderDetail
 class AccOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered',
+    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'discount_amount', 'content_delivered',
                     'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name']
     readonly_fields = ['total_amount', 'unit_price']
     actions = [export_to_csv_acc]
 
 class ServiceOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status', 'total_amount',
+    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status', 'total_amount', 'discount_amount',
                     'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name', 'target_url']
     list_filter = ['status']

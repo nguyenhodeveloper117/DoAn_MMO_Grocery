@@ -1,15 +1,16 @@
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, ValidationError
 from . import models
 from django.utils import timezone
 
 
-
 class UserSerializer(ModelSerializer):
     class Meta:
         model = models.User
         # fields = '__all__'
-        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone', 'email', 'is_verified', 'date_joined', 'last_login']
+        fields = ['user_code', 'username', 'password', 'first_name', 'last_name', 'avatar', 'role', 'balance', 'phone',
+                  'email', 'is_verified', 'date_joined', 'last_login']
         read_only_fields = ['user_code', 'date_joined', 'last_login']
         extra_kwargs = {
             'password': {
@@ -46,8 +47,10 @@ class UserSerializer(ModelSerializer):
             data['avatar'] = instance.avatar
         return data
 
+
 class StoreSerializer(ModelSerializer):
     seller = UserSerializer(read_only=True)
+
     class Meta:
         model = models.Store
         fields = ['store_code', 'seller', 'name', 'description', 'created_date', 'updated_date']
@@ -57,12 +60,14 @@ class StoreSerializer(ModelSerializer):
         validated_data['seller'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
 
+
 class VerificationSerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
+
     class Meta:
         model = models.Verification
         fields = 'verification_code', 'user', 'cccd', 'front_id', 'back_id', 'portrait', 'status', 'created_date', 'updated_date'
-        read_only_fields = ['verification_code' ,'user', 'created_date', 'updated_date']
+        read_only_fields = ['verification_code', 'user', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
@@ -81,12 +86,15 @@ class VerificationSerializer(ModelSerializer):
 
         return data
 
+
 class ProductSerializer(ModelSerializer):
     store = StoreSerializer(read_only=True)
+
     class Meta:
         model = models.Product
         fields = 'product_code', 'store', 'name', 'image', 'description', 'price', 'format', 'type', 'available_quantity', 'warranty_days', 'is_approved', 'created_date', 'updated_date'
-        read_only_fields = ['product_code', 'store', 'available_quantity', 'is_approved', 'created_date', 'updated_date']
+        read_only_fields = ['product_code', 'store', 'available_quantity', 'is_approved', 'created_date',
+                            'updated_date']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -104,8 +112,10 @@ class ProductSerializer(ModelSerializer):
         validated_data['store'] = store
         return super().create(validated_data)
 
+
 class BlogSerializer(ModelSerializer):
     author = UserSerializer(read_only=True)
+
     class Meta:
         model = models.Blog
         fields = 'blog_code', 'author', 'title', 'content', 'product', 'category', 'created_date', 'updated_date'
@@ -115,9 +125,11 @@ class BlogSerializer(ModelSerializer):
         validated_data['author'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
 
+
 class BlogCommentSerializer(ModelSerializer):
     author = UserSerializer(read_only=True)
     blog = BlogSerializer(read_only=True)
+
     class Meta:
         model = models.BlogComment
         fields = 'blog_comment_code', 'author', 'blog', 'content', 'created_date', 'updated_date'
@@ -127,9 +139,11 @@ class BlogCommentSerializer(ModelSerializer):
         validated_data['author'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
 
+
 class BlogLikeSerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
     blog = BlogSerializer(read_only=True)
+
     class Meta:
         model = models.BlogLike
         fields = 'blog_like_code', 'user', 'blog'
@@ -139,8 +153,10 @@ class BlogLikeSerializer(ModelSerializer):
         validated_data['user'] = self.context['request'].user  # Gán seller là user hiện tại
         return super().create(validated_data)
 
+
 class VoucherSerializer(ModelSerializer):
     store = StoreSerializer(read_only=True)
+
     class Meta:
         model = models.Voucher
         fields = 'voucher_code', 'store', 'code', 'discount_percent', 'max_discount', 'expired_at', 'quantity', 'created_date', 'updated_date'
@@ -156,6 +172,7 @@ class VoucherSerializer(ModelSerializer):
         validated_data['store'] = store
         return super().create(validated_data)
 
+
 class AccountStockSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
 
@@ -164,6 +181,7 @@ class AccountStockSerializer(ModelSerializer):
         fields = 'stock_code', 'product', 'content', 'is_sold', 'sold_at', 'created_date', 'updated_date'
         read_only_fields = ['stock_code', 'product', 'created_date', 'updated_date']
 
+
 class OrderSerializer(ModelSerializer):
     buyer = UserSerializer(read_only=True)
     voucher = VoucherSerializer(read_only=True)
@@ -171,11 +189,32 @@ class OrderSerializer(ModelSerializer):
     class Meta:
         model = models.Order
         fields = 'order_code', 'buyer', 'voucher', 'is_paid', 'status', 'released_at', 'created_date', 'updated_date'
-        read_only_fields = ['order_code', 'buyer', 'voucher' ,'created_date', 'updated_date']
+        read_only_fields = ['order_code', 'buyer', 'voucher', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
+
+        # Lấy mã voucher từ request
+        code = self.context['request'].data.get("code")
+        if code:
+            with transaction.atomic():
+                try:
+                    voucher = models.Voucher.objects.select_for_update().get(
+                        code=code,  # tìm theo code
+                        expired_at__gt=timezone.now(),
+                        quantity__gt=0  # chỉ lấy voucher còn lượt (>0)
+                    )
+                except models.Voucher.DoesNotExist:
+                    raise ValidationError("Voucher không hợp lệ hoặc đã hết hạn!")
+
+                # Gán voucher vào order
+                validated_data['voucher'] = voucher
+
+                # Trừ 1 lượt
+                voucher.quantity -= 1
+                voucher.save(update_fields=["quantity"])
         return super().create(validated_data)
+
 
 class AccOrderDetailSerializer(ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
@@ -183,12 +222,34 @@ class AccOrderDetailSerializer(ModelSerializer):
 
     class Meta:
         model = models.AccOrderDetail
-        fields = 'acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'content_delivered', 'created_date', 'updated_date'
-        read_only_fields = ['acc_order_detail_code', "unit_price", "total_amount", 'content_delivered', 'order', 'product', 'created_date', 'updated_date']
+        fields = ('acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'discount_amount',
+                  'content_delivered', 'created_date', 'updated_date')
+        read_only_fields = ['acc_order_detail_code', "unit_price", "total_amount", 'discount_amount', 'content_delivered', 'order',
+                            'product', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         product = validated_data["product"]
         qty = validated_data["quantity"]
+
+        unit_price = product.price
+        total = unit_price * qty
+
+        # Check voucher trong order
+        order = validated_data["order"]
+        if order.voucher:
+            voucher = order.voucher
+
+            # Check store
+            if voucher.store != product.store:
+                raise ValidationError("Voucher không thuộc cửa hàng này!")
+
+            discount = int(total * voucher.discount_percent / 100)
+            if voucher.max_discount and discount > voucher.max_discount:
+                discount = voucher.max_discount
+            total -= discount
+            validated_data["discount_amount"] = discount  # Lưu số tiền giảm
+        else:
+            validated_data["discount_amount"] = 0
 
         # Lấy stock chưa bán
         stocks = models.AccountStock.objects.filter(product=product, is_sold=False)[:qty]
@@ -196,8 +257,8 @@ class AccOrderDetailSerializer(ModelSerializer):
             raise ValidationError("Không đủ tài khoản trong kho!")
 
         # Tính giá
-        validated_data["unit_price"] = product.price
-        validated_data["total_amount"] = product.price * qty
+        validated_data["unit_price"] = unit_price
+        validated_data["total_amount"] = total
 
         # Ghép content từ stock
         contents = []
@@ -218,22 +279,44 @@ class AccOrderDetailSerializer(ModelSerializer):
 
         return detail
 
+
 class ServiceOrderDetailSerializer(ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
     product = serializers.PrimaryKeyRelatedField(queryset=models.Product.objects.all())
 
     class Meta:
         model = models.ServiceOrderDetail
-        fields = 'service_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'status', 'delivered_at', 'created_date', 'updated_date'
-        read_only_fields = ['service_order_detail_code', 'order', 'product', "unit_price", "total_amount", 'created_date', 'updated_date']
+        fields = ('service_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'discount_amount',
+                  'status', 'delivered_at', 'created_date', 'updated_date')
+        read_only_fields = ['service_order_detail_code', 'order', 'product', "unit_price", "total_amount", 'discount_amount',
+                            'created_date', 'updated_date']
 
     def create(self, validated_data):
         product = validated_data["product"]
         qty = validated_data["quantity"]
 
-        # set unit price and total
-        validated_data["unit_price"] = product.price
-        validated_data["total_amount"] = product.price * qty
+        unit_price = product.price
+        total = unit_price * qty
+
+        # Check voucher trong order
+        order = validated_data["order"]
+        if order.voucher:
+            voucher = order.voucher
+
+            # Check store
+            if voucher.store != product.store:
+                raise ValidationError("Voucher không thuộc cửa hàng này!")
+
+            discount = int(total * voucher.discount_percent / 100)
+            if voucher.max_discount and discount > voucher.max_discount:
+                discount = voucher.max_discount
+            total -= discount
+            validated_data["discount_amount"] = discount # Lưu số tiền giảm
+        else:
+            validated_data["discount_amount"] = 0
+
+        validated_data["unit_price"] = unit_price
+        validated_data["total_amount"] = total
 
         detail = models.ServiceOrderDetail.objects.create(**validated_data)
 
@@ -244,6 +327,7 @@ class ServiceOrderDetailSerializer(ModelSerializer):
 
         return detail
 
+
 class ComplaintSerializer(ModelSerializer):
     order = OrderSerializer(read_only=True)
     buyer = UserSerializer(read_only=True)
@@ -251,13 +335,15 @@ class ComplaintSerializer(ModelSerializer):
 
     class Meta:
         model = models.Complaint
-        fields = ('complaint_code', 'order', 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2', 'evidence_image3',
+        fields = ('complaint_code', 'order', 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2',
+                  'evidence_image3',
                   'evidence_video', 'resolved', 'decision', 'created_date', 'updated_date')
         read_only_fields = ['complaint_code', 'order', 'buyer', 'admin', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
         return super().create(validated_data)
+
 
 class ReviewSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -272,6 +358,7 @@ class ReviewSerializer(ModelSerializer):
         validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
         return super().create(validated_data)
 
+
 class FavoriteProductSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
     user = UserSerializer(read_only=True)
@@ -285,25 +372,15 @@ class FavoriteProductSerializer(ModelSerializer):
         validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
         return super().create(validated_data)
 
+
 class TransactionHistorySerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Review
-        fields = ('transaction_code', 'user', 'type', 'amount', 'note' ,'created_date', 'updated_date')
+        fields = ('transaction_code', 'user', 'type', 'amount', 'note', 'created_date', 'updated_date')
         read_only_fields = ['transaction_code', 'user', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
         return super().create(validated_data)
-
-
-
-
-
-
-
-
-
-
-

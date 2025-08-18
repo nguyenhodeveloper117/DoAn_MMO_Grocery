@@ -170,6 +170,7 @@ class AccOrderDetail(BaseModel):
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     content_delivered = models.TextField()
 
     def __str__(self):
@@ -192,6 +193,7 @@ class ServiceOrderDetail(BaseModel):
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     quantity = models.IntegerField(help_text="Số lượng cần tăng, ví dụ: 1000 follow", validators=[MinValueValidator(1)])
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Chờ xác nhận'),
         ('in_progress', 'Đang thực hiện'),

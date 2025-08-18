@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useContext } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Alert, } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { authApis, endpoints } from "../../configs/Apis";
@@ -20,6 +20,7 @@ const HomeProductDetail = ({ route, navigation }) => {
     const [tongGoc, setTongGoc] = useState(product.price);
     const [discount, setDiscount] = useState(0);
     const [thanhToan, setThanhToan] = useState(product.price);
+    const [voucherInput, setVoucherInput] = useState("");
 
     const nav = useNavigation();
 
@@ -33,12 +34,23 @@ const HomeProductDetail = ({ route, navigation }) => {
             const res = await authApis(token).post(endpoints["check-voucher"], {
                 code,
                 total_amount: total,
+                product_code: product.product_code,
             });
             return res.data.discount_amount || 0;
         } catch (err) {
+            Alert.alert("Voucher không hợp lệ", err.response?.data?.error || "Có lỗi xảy ra");
             return 0;
         }
     };
+
+    // Debounce voucher
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setVoucher(voucherInput); // chỉ set voucher sau 0.5s ngừng gõ
+        }, 1000);
+
+        return () => clearTimeout(timer); // clear nếu còn đang nhập
+    }, [voucherInput]);
 
     // Tính toán giá realtime
     useEffect(() => {
@@ -46,7 +58,7 @@ const HomeProductDetail = ({ route, navigation }) => {
             let goc = product.price * qty;
             let giam = 0;
 
-            if (voucher && voucher.trim() !== "") {
+            if (voucher) {
                 giam = await checkVoucher(voucher, goc);
             }
 
@@ -73,7 +85,7 @@ const HomeProductDetail = ({ route, navigation }) => {
 
             // Tạo order
             let orderRes = await authApis(token).post(endpoints["add-order"], {
-                voucher_code: voucher || null,
+                code: voucher || null,
             });
             let order = orderRes.data;
 
@@ -104,6 +116,18 @@ const HomeProductDetail = ({ route, navigation }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // ---- Hỏi xác nhận trước khi đặt ----
+    const confirmOrder = () => {
+        Alert.alert(
+            "Xác nhận đặt hàng",
+            `Bạn có chắc muốn đặt hàng sản phẩm "${product.name}" với số lượng ${qty}?`,
+            [
+                { text: "Hủy", style: "cancel" },
+                { text: "Đồng ý", onPress: handleOrder },
+            ]
+        );
     };
 
     return (
@@ -162,8 +186,8 @@ const HomeProductDetail = ({ route, navigation }) => {
             <Text style={styles.label}>Mã giảm giá (nếu có):</Text>
             <TextInput
                 style={styles.input}
-                value={voucher}
-                onChangeText={setVoucher}
+                value={voucherInput}
+                onChangeText={setVoucherInput}
                 placeholder="Nhập mã voucher"
             />
 
@@ -180,7 +204,7 @@ const HomeProductDetail = ({ route, navigation }) => {
             {/* Nút đặt hàng */}
             <TouchableOpacity
                 style={styles.orderBtn}
-                onPress={handleOrder}
+                onPress={confirmOrder}
                 disabled={loading}
             >
                 {loading ? (

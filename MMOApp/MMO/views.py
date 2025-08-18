@@ -8,6 +8,7 @@ from rest_framework.decorators import action, api_view, parser_classes
 import cloudinary.uploader
 from . import perms, paginators, serializers
 from . import models
+from django.utils import timezone
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
@@ -358,6 +359,8 @@ class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyA
     def get_permissions(self):
         if self.action == 'my_vouchers':
             return [perms.IsSellerProduct()]
+        if self.action == 'check_voucher':
+            return [IsAuthenticated()]
         if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             return [perms.IsSellerProduct()]
         return [AllowAny()]
@@ -377,6 +380,49 @@ class VoucherViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyA
 
         except models.Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['post'], url_path='check')
+    def check_voucher(self, request):
+        code = request.data.get("code")
+        total_amount = int(request.data.get("total_amount", 0))
+        product_code = request.data.get("product_code")
+
+        try:
+            voucher = models.Voucher.objects.get(code=code)
+
+            # Kiểm tra hết hạn
+            if voucher.expired_at and voucher.expired_at < timezone.now():
+                return Response({"error": "Voucher đã hết hạn"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Kiểm tra số lượng còn lại
+            if voucher.quantity <= 0:
+                return Response({"error": "Voucher đã hết lượt sử dụng"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check store (voucher phải cùng store với sản phẩm)
+            if product_code:
+                try:
+                    product = models.Product.objects.get(product_code=product_code)
+                    if voucher.store != product.store:
+                        return Response({"error": "Voucher không thuộc cửa hàng này"},
+                                        status=status.HTTP_400_BAD_REQUEST)
+                except models.Product.DoesNotExist:
+                    return Response({"error": "Sản phẩm không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Tính giảm giá (theo %)
+            discount = int(total_amount * voucher.discount_percent / 100)
+
+            # Giới hạn max discount
+            if voucher.max_discount and discount > voucher.max_discount:
+                discount = voucher.max_discount
+
+            return Response({
+                "valid": True,
+                "discount_amount": discount,
+                "final_amount": int(total_amount - discount),
+            })
+
+        except models.Voucher.DoesNotExist:
+            return Response({"error": "Voucher không hợp lệ"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
