@@ -43,7 +43,7 @@ const ProductDetail = () => {
   const navStocks = () => {
     nav.navigate("stocks", { product });
   };
-  
+
 
   return (
     <ScrollView contentContainerStyle={MyStyles.container}>
@@ -62,7 +62,10 @@ const ProductDetail = () => {
       <View style={styles.buttonUpdateProduct}>
         <Button mode="contained" buttonColor="red" textColor="white" onPress={handleDelete}>Xoá</Button>
         <Button mode="outlined" onPress={handleEdit}>Chỉnh sửa</Button>
-        <Button mode="contained" onPress={navStocks}>Kho sản phẩm</Button>
+        
+        {product.type !== "service" && (
+            <Button mode="contained" onPress={navStocks}>Kho sản phẩm</Button>
+        )}
       </View>
     </ScrollView>
   );

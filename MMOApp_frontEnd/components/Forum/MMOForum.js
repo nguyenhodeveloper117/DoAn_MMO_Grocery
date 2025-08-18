@@ -242,20 +242,12 @@ const MMOForum = () => {
             <Text style={styles.blogCategory}>
               Danh mục: {b.category} | Tác giả: {b.author?.username} | Ngày tạo: {new Date(b.created_date).toLocaleDateString()}
             </Text>
-            
 
-            <RenderHTML
-              contentWidth={width}
-              source={{ html: limitHTML(b.content, 100) }}
-              tagsStyles={{
-                img: {
-                  maxWidth: "100%",
-                  height: "auto",
-                  maxHeight: 250,
-                  objectFit: "contain",
-                },
-              }}
-            />
+
+            <Text numberOfLines={3}>
+              {limitHTML(b.content, 100)}
+            </Text>
+
             <Text style={styles.marginTop}>
               ❤️ {likeCounts[b.blog_code] ?? 0} lượt thích
             </Text>

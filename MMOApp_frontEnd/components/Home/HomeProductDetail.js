@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useContext } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView,} from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { authApis, endpoints } from "../../configs/Apis";
@@ -117,7 +117,12 @@ const HomeProductDetail = ({ route, navigation }) => {
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>
             <Text style={styles.subInfoProduct}>Định dạng: {product.format}</Text>
             <Text style={styles.subInfoProduct}>Bảo hành: {product.warranty_days} ngày</Text>
-            <Text style={styles.subInfoProduct}>Kho: {product.available_quantity}</Text>
+
+            {product.type !== "service" && (
+                <Text style={styles.subInfoProduct}>
+                    Kho: {product.available_quantity}
+                </Text>
+            )}
 
             {/* Mô tả */}
             <Text style={styles.label}>Mô tả:</Text>

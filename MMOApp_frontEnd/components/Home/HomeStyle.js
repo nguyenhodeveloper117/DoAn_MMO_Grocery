@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     subInfoProduct: {
         fontStyle: "italic",
         fontSize: 12,
+        marginTop: 5
     },
 
 });
