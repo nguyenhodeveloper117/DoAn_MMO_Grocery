@@ -31,6 +31,7 @@ import Voucher from "./components/Store/VoucherStore";
 import Stock from "./components/Store/Stock";
 import HomeProductDetail from "./components/Home/HomeProductDetail";
 import UserOrder from "./components/Order/UserOrder";
+import OrderDetail from "./components/Order/Orderdetail";
 
 
 
@@ -215,6 +216,12 @@ const UserOrderNavigator = () => (
   <OrderStack.Navigator>
     <OrderStack.Screen name="userOrder" component={UserOrder} options={{
       title: 'Đơn hàng của tôi',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <OrderStack.Screen name="orderDetail" component={OrderDetail} options={{
+      title: 'Chi tiết đơn hàng',
       headerTitleStyle: {
         ...MyStyles.header,
       }

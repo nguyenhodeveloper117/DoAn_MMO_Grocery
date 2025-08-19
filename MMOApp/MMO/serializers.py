@@ -219,13 +219,14 @@ class OrderSerializer(ModelSerializer):
 class AccOrderDetailSerializer(ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
     product = serializers.PrimaryKeyRelatedField(queryset=models.Product.objects.all())
+    product_info = ProductSerializer(source="product", read_only=True)
 
     class Meta:
         model = models.AccOrderDetail
         fields = ('acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'discount_amount',
-                  'content_delivered', 'created_date', 'updated_date')
+                  'content_delivered', 'product_info', 'created_date', 'updated_date')
         read_only_fields = ['acc_order_detail_code', "unit_price", "total_amount", 'discount_amount', 'content_delivered', 'order',
-                            'product', 'created_date', 'updated_date']
+                            'product', 'product_info', 'created_date', 'updated_date']
 
     def create(self, validated_data):
         product = validated_data["product"]
@@ -283,12 +284,13 @@ class AccOrderDetailSerializer(ModelSerializer):
 class ServiceOrderDetailSerializer(ModelSerializer):
     order = serializers.PrimaryKeyRelatedField(queryset=models.Order.objects.all())
     product = serializers.PrimaryKeyRelatedField(queryset=models.Product.objects.all())
+    product_info = ProductSerializer(source="product", read_only=True)
 
     class Meta:
         model = models.ServiceOrderDetail
         fields = ('service_order_detail_code', 'order', 'product', 'target_url', 'note', 'unit_price', 'quantity', 'total_amount', 'discount_amount',
-                  'status', 'delivered_at', 'created_date', 'updated_date')
-        read_only_fields = ['service_order_detail_code', 'order', 'product', "unit_price", "total_amount", 'discount_amount',
+                  'status', 'delivered_at', 'product_info', 'created_date', 'updated_date')
+        read_only_fields = ['service_order_detail_code', 'order', 'product', "unit_price", "total_amount", 'discount_amount', 'product_info',
                             'created_date', 'updated_date']
 
     def create(self, validated_data):

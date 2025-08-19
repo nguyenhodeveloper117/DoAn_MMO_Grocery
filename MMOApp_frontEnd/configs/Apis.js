@@ -43,11 +43,10 @@ export const endpoints = {
     "add-order": '/orders/',
     "my-order": '/orders/my-orders/',
     "store-order": '/orders/store-orders/',
-    "update-order": (orderId) => `/orders/${orderId}/`,
-    "get-acc-order-detail": '/acc-orders-detail/',
-    "get-serive-order-detail": '/service-orders-detail/',
     "add-acc-order-detail": '/acc-orders-detail/',
     "add-service-order-detail": '/service-orders-detail/',
+    "get-order-detail": orderId => `/orders/${orderId}/details/`,
+    "update-order": (orderId) => `/orders/${orderId}/`,
     "update-service-order-detail": (serviceId) => `/service-orders-detail/${serviceId}/`,
     
 

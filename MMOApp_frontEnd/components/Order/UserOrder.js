@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../configs/Apis";
 import styles from "./OrderStyle";
 import MyStyles from "../../styles/MyStyles";
+import { useNavigation } from "@react-navigation/native";
 
 const statuses = [
     { value: "", label: "Tất cả" },
@@ -19,6 +20,7 @@ const statuses = [
 const pageSize = 5;
 
 const UserOrder = () => {
+    const nav = useNavigation();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -79,21 +81,26 @@ const UserOrder = () => {
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.card}>
-            <View style={styles.flex1}>
-                <Text style={styles.code}>Mã đơn: {item.order_code}</Text>
-                <Text style={styles.status}>Trạng thái: {item.status}</Text>
-                <Text style={styles.date}>
-                    Ngày tạo: {new Date(item.created_date).toLocaleString()} | Ngày cập nhật: {new Date(item.updated_date).toLocaleString()}
-                </Text>
-            </View>
+    <TouchableOpacity
+        style={styles.card}
+        onPress={() => nav.navigate("orderDetail", { order: item })}
+    >
+        <View style={styles.flex1}>
+            <Text style={styles.code}>Mã đơn: {item.order_code}</Text>
+            <Text style={styles.status}>Trạng thái: {item.status}</Text>
+            <Text style={styles.date}>
+                Ngày tạo: {new Date(item.created_date).toLocaleString()} | 
+                Ngày cập nhật: {new Date(item.updated_date).toLocaleString()}
+            </Text>
         </View>
-    );
+    </TouchableOpacity>
+);
+
 
     return (
         <FlatList
             data={orders}
-            keyExtractor={(item, index) => String(item.order_code || `index-${index}`)}
+            keyExtractor={(item, index) => `${item.order_code}_${index}`} // Tránh key bị trùng
             renderItem={renderItem}
             refreshing={refreshing}
             onRefresh={onRefresh}

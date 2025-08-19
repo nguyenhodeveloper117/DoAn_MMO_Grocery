@@ -110,6 +110,24 @@ class IsOrderOwnerOrSeller(permissions.IsAuthenticated):
         # Cho phép buyer hoặc seller truy cập (GET, PATCH, PUT, DELETE)
         return is_buyer or is_seller
 
+class IsOrderOrSeller(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        # buyer
+        if obj.buyer == request.user:
+            return True
+
+        # seller: lấy product trong acc_detail hoặc service_detail
+        product = None
+        if hasattr(obj, "acc_detail") and obj.acc_detail.product:
+            product = obj.acc_detail.product
+        elif hasattr(obj, "service_detail") and obj.service_detail.product:
+            product = obj.service_detail.product
+
+        if product and product.store.seller == request.user:
+            return True
+
+        return False
+
 class CanPostOrderDetail(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         order_id = request.data.get('order')

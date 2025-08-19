@@ -442,6 +442,8 @@ class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIV
             return [perms.IsOrderOwner()]
         if self.action in ['store_orders']:
             return [perms.IsSellerOrder()]
+        if self.action in ['details']:
+            return [perms.IsOrderOrSeller()]
         if self.request.method in ['POST']:
             return [IsAuthenticated()]
         if self.request.method in ['PUT', 'PATCH']:
@@ -502,24 +504,49 @@ class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIV
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'], url_path='details')
+    def details(self, request, pk=None):
+        # Lấy chi tiết đơn hàng theo order_code
+        try:
+            order = self.get_object()
 
-class AccOrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
+            if hasattr(order, "acc_detail"):
+                serializer = serializers.AccOrderDetailSerializer(order.acc_detail)
+                return Response({
+                    "type": "account",
+                    "order": order.order_code,
+                    "detail": serializer.data
+                })
+
+            if hasattr(order, "service_detail"):
+                serializer = serializers.ServiceOrderDetailSerializer(order.service_detail)
+                return Response({
+                    "type": "service",
+                    "order": order.order_code,
+                    "detail": serializer.data
+                })
+
+            return Response({"error": "Order chưa có detail"}, status=status.HTTP_404_NOT_FOUND)
+
+        except models.Order.DoesNotExist:
+            return Response({"error": "Không tìm thấy order"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AccOrderDetailViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = models.AccOrderDetail.objects.filter(active=True)
     serializer_class = serializers.AccOrderDetailSerializer
 
     def get_permissions(self):
-        if self.request.method in ['GET']:
-            return [perms.IsOrderOwnerOrSeller()]
         if self.request.method in ['POST']:
             return [perms.CanPostOrderDetail()]
         return [AllowAny()]
 
-class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView):
+class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.CreateAPIView):
     queryset = models.ServiceOrderDetail.objects.filter(active=True)
     serializer_class = serializers.ServiceOrderDetailSerializer
 
     def get_permissions(self):
-        if self.request.method in ['GET', 'PUT', 'PATCH']:
+        if self.request.method in ['PUT', 'PATCH']:
             return [perms.IsOrderOwnerOrSeller()]
         if self.request.method in ['POST']:
             return [perms.CanPostOrderDetail()]
