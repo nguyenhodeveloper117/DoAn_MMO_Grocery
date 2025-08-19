@@ -117,7 +117,7 @@ const BlogDetail = ({ route }) => {
                 {blog.title}
             </Text>
             <Text style={styles.blogCategory}>
-                Tác giả: {blog.author?.username} | Danh mục: {blog.category} | Ngày tạo: {new Date(blog.created_date).toLocaleDateString()} | Ngày cập nhật: {new Date(blog.created_date).toLocaleDateString()}
+                Tác giả: {blog.author?.username} | Danh mục: {blog.category} | Ngày tạo: {new Date(blog.created_date).toLocaleString()} | Ngày cập nhật: {new Date(blog.updated_date).toLocaleString()}
             </Text>
 
             <RenderHTML

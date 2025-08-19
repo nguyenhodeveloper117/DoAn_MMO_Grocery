@@ -435,8 +435,7 @@ class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIV
     filterset_fields = {
         'status': ['exact'],
     }
-
-    # search_fields = []
+    search_fields = ['order_code']
 
     def get_permissions(self):
         if self.action in ['my_orders']:

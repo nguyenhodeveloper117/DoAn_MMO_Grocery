@@ -30,6 +30,7 @@ import ForumDetail from "./components/Forum/ForumDetail";
 import Voucher from "./components/Store/VoucherStore";
 import Stock from "./components/Store/Stock";
 import HomeProductDetail from "./components/Home/HomeProductDetail";
+import UserOrder from "./components/Order/UserOrder";
 
 
 
@@ -209,6 +210,18 @@ const StoreNavigator = () => (
   </StoreStack.Navigator>
 );
 
+const OrderStack = createNativeStackNavigator();
+const UserOrderNavigator = () => (
+  <OrderStack.Navigator>
+    <OrderStack.Screen name="userOrder" component={UserOrder} options={{
+      title: 'Đơn hàng của tôi',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+  </OrderStack.Navigator>
+);
+
 const Tab = createBottomTabNavigator();
 const TabNavigator = () => {
   const user = useContext(MyUserContext);
@@ -223,6 +236,7 @@ const TabNavigator = () => {
           {user?.role === "seller" && (
             <Tab.Screen name="store" component={StoreNavigator} options={{ headerShown: false, title: "Cửa hàng", tabBarIcon: () => <Icon size={30} source="store" /> }} />
           )}
+          <Tab.Screen name="order" component={UserOrderNavigator} options={{ headerShown: false, title: "Đơn hàng", tabBarIcon: () => <Icon size={30} source="cart" /> }} />
           <Tab.Screen name="profile" component={ProfileNavigator} options={{ headerShown: false, title: "Tài khoản", tabBarIcon: () => <Icon size={30} source="account" /> }} />
         </>
       )}

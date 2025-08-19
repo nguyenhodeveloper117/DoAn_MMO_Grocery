@@ -156,7 +156,7 @@ const StoreSeller = () => {
                 <View style={styles.storeBox}>
                   <Text style={styles.title}>{store.name}</Text>
                   <Text style={styles.desc}>{store.description}</Text>
-                  <Text style={styles.created_date}>Ngày tạo: {new Date(store.created_date).toLocaleDateString()} | Ngày cập nhật: {new Date(store.created_date).toLocaleDateString()}</Text>
+                  <Text style={styles.created_date}>Ngày tạo: {new Date(store.created_date).toLocaleDateString()} | Ngày cập nhật: {new Date(store.updated_date).toLocaleString()}</Text>
                   <Button mode="contained" onPress={navigateUpdateStore} style={styles.Button}>
                     Chỉnh sửa gian hàng
                   </Button>

@@ -109,7 +109,7 @@ const HomeProductDetail = ({ route, navigation }) => {
             }
 
             alert("Đặt hàng thành công!");
-            nav.navigate("home", { reload: true });
+            nav.navigate("order", { reload: true });
         } catch (err) {
             console.error("Lỗi đặt hàng:", err.response?.data || err);
             alert("Đặt hàng thất bại!");
