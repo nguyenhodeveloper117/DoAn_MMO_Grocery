@@ -48,6 +48,7 @@ export const endpoints = {
     "get-order-detail": orderId => `/orders/${orderId}/details/`,
     "update-order": (orderId) => `/orders/${orderId}/`,
     "update-service-order-detail": (serviceId) => `/service-orders-detail/${serviceId}/`,
+    "store-stat": '/order-stats/', 
     
 
 };

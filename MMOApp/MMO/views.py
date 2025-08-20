@@ -1,14 +1,17 @@
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action, api_view, parser_classes
 import cloudinary.uploader
 from . import perms, paginators, serializers
 from . import models
 from django.utils import timezone
+from django.db.models import Count, Sum
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.utils.dateparse import parse_datetime
+from .models import Order
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
@@ -551,3 +554,58 @@ class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.UpdateAPIView, generi
         if self.request.method in ['POST']:
             return [perms.CanPostOrderDetail()]
         return [AllowAny()]
+
+class OrderStatsAPIView(APIView):
+    permission_classes = [perms.IsSeller]
+
+    def get(self, request):
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+
+        if start_date:
+            start_date = parse_datetime(start_date)
+        if end_date:
+            end_date = parse_datetime(end_date)
+
+        # store của seller hiện tại
+        store = getattr(request.user, "store", None)
+        if not store:
+            return Response({"error": "Bạn chưa có gian hàng"}, status=400)
+
+        # order liên quan tới store
+        orders = Order.objects.filter(
+            Q(acc_detail__product__store=store) |
+            Q(service_detail__product__store=store)
+        )
+
+        if start_date:
+            orders = orders.filter(created_date__gte=start_date)
+        if end_date:
+            orders = orders.filter(created_date__lte=end_date)
+
+        # tổng quan
+        stats = orders.filter(active=True).aggregate(
+            total_orders=Count("order_code", distinct=True),
+            acc_revenue=Sum("acc_detail__total_amount"),
+            service_revenue=Sum("service_detail__total_amount"),
+        )
+
+        # riêng từng loại
+        acc_stats = orders.filter(active=True, acc_detail__isnull=False).aggregate(
+            acc_orders=Count("order_code", distinct=True),
+            acc_revenue=Sum("acc_detail__total_amount"),
+        )
+        service_stats = orders.filter(active=True, service_detail__isnull=False).aggregate(
+            service_orders=Count("order_code", distinct=True),
+            service_revenue=Sum("service_detail__total_amount"),
+        )
+
+        # fix None -> 0
+        stats["total_orders"] = stats["total_orders"] or 0
+        stats["acc_orders"] = acc_stats["acc_orders"] or 0
+        stats["service_orders"] = service_stats["service_orders"] or 0
+        stats["acc_revenue"] = acc_stats["acc_revenue"] or 0
+        stats["service_revenue"] = service_stats["service_revenue"] or 0
+        stats["total_revenue"] = stats["acc_revenue"] + stats["service_revenue"]
+
+        return Response(stats)

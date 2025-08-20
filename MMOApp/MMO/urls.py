@@ -1,8 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from django.urls import path
 from .views import upload_image_cloudinary
+from .views import OrderStatsAPIView
 
 router = DefaultRouter()
 router.register('users', views.UserViewSet, basename='user')
@@ -20,5 +20,6 @@ router.register('service-orders-detail', views.ServiceOrderDetailViewSet, basena
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),
+    path("order-stats/", OrderStatsAPIView.as_view(), name="order-stats"),
     path('', include(router.urls)),
 ]

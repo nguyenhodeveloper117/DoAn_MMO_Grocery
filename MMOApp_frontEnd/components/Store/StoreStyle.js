@@ -2,6 +2,9 @@ import { StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 
 const styles = StyleSheet.create({
+    marginRight: {
+        marginRight: 8,
+    },
     ImagePicker: {
         marginBottom: 16,
         fontWeight: "bold",
@@ -32,9 +35,9 @@ const styles = StyleSheet.create({
         elevation: 4
     },
     viewInputType: {
-        borderWidth: 1, 
+        borderWidth: 1,
         borderColor: "#000000ff",
-        borderRadius: 4, 
+        borderRadius: 4,
         marginTop: 8,
     },
     viewFilter: {
@@ -87,6 +90,11 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: '#f8572aff',
     },
+    orderButton: {
+        marginVertical: 16,
+        borderRadius: 20,
+        backgroundColor: '#5b31f4ff',
+    },
     buttonUpdateProduct: {
         flexDirection: "row",
         justifyContent: "space-around",
@@ -124,8 +132,56 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         backgroundColor: '#e50f0fff',
+    },
+    center: {
+        textAlign: "center",
+        marginTop: 30,
+        fontSize: 14,
+        color: "#777",
+    },
+    flex1: {
+        flex: 1,
+    },
+    status: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginBottom: 6,
+    },
+    date: {
+        fontSize: 10,
+        color: "#444",
+    },
+    card: {
+        padding: 12,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderRadius: 8,
+        borderColor: "#ccc",
+        backgroundColor: "#fff",
+        flexDirection: "row",
+        alignItems: "flex-start",
+    },
+    statsCard: {
+        backgroundColor: "#fff",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+        elevation: 2
+    },
+    statsTitle: {
+        fontWeight: "bold",
+        fontSize: 16,
+        marginBottom: 6
+    },
+    width50: {
+        width: "50%",
+        padding: 4
+    },
+    diagram: {
+        marginTop: 20,
+        marginBottom: 20,
+        borderRadius: 8,
     }
-
 });
 
 export default styles;

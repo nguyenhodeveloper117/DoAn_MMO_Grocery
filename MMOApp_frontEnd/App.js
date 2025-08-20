@@ -32,6 +32,7 @@ import Stock from "./components/Store/Stock";
 import HomeProductDetail from "./components/Home/HomeProductDetail";
 import UserOrder from "./components/Order/UserOrder";
 import OrderDetail from "./components/Order/Orderdetail";
+import StoreOrder from "./components/Store/StoreOrder";
 
 
 
@@ -204,6 +205,18 @@ const StoreNavigator = () => (
     }} />
     <StoreStack.Screen name="vouchers" component={Voucher} options={{
       title: 'Quản lí voucher',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <StoreStack.Screen name="storeOrder" component={StoreOrder} options={{
+      title: 'Quản lí đơn hàng',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <OrderStack.Screen name="orderDetail" component={OrderDetail} options={{
+      title: 'Chi tiết đơn hàng',
       headerTitleStyle: {
         ...MyStyles.header,
       }

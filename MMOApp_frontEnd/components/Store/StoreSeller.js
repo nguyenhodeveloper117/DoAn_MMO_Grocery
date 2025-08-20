@@ -143,6 +143,7 @@ const StoreSeller = () => {
   const navigateCreateProduct = () => nav.navigate("addProduct", { store });
   const navigateViewProduct = product => nav.navigate("productDetail", { product });
   const navigateVoucher = () => nav.navigate("vouchers", { store });
+  const navigateStoreOrder = () => nav.navigate("storeOrder", { store });
 
   return (
     <>
@@ -174,6 +175,10 @@ const StoreSeller = () => {
 
               {store && (
                 <>
+                  <Text style={styles.productTitle}>Đơn hàng</Text>
+                  <Button mode="contained" onPress={navigateStoreOrder} style={styles.orderButton}>
+                    Xem đơn hàng
+                  </Button>
                   <Text style={styles.productTitle}>Quản lí Voucher</Text>
                   <Button mode="contained" onPress={navigateVoucher} style={styles.voucherButton}>
                     Voucher cửa hàng
