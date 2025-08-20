@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
+import styles from "./OrderStyle";
+import { useNavigation } from "@react-navigation/native";
+import { Alert } from "react-native";
 
 const OrderDetail = ({ route }) => {
     const { order } = route.params; // nhận từ UserOrder
     const [detail, setDetail] = useState(null);
     const [loading, setLoading] = useState(true);
+    const nav = useNavigation();
 
     useEffect(() => {
         const loadDetail = async () => {
@@ -24,7 +28,30 @@ const OrderDetail = ({ route }) => {
         loadDetail();
     }, [order]);
 
-    if (loading) return <ActivityIndicator style={{ marginTop: 20 }} />;
+    const handleCancelService = async (orderId, serviceDetailId) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+
+            // 1. PATCH order -> CANCEL
+            await authApis(token).patch(endpoints["update-order"](orderId), {
+                status: "cancel",
+            });
+
+            // 2. PATCH service order detail -> FAILED
+            await authApis(token).patch(endpoints["update-service-order-detail"](serviceDetailId), {
+                status: "failed",
+            });
+
+            alert("Đã huỷ dịch vụ thành công!");
+            nav.navigate("userOrder", { reload: true });
+        } catch (err) {
+            console.error("Lỗi huỷ dịch vụ:", err?.response?.data || err);
+            alert("Không thể huỷ dịch vụ!");
+        }
+    };
+
+
+    if (loading) return <ActivityIndicator style={styles.marginTop} />;
 
     if (!detail) {
         return <Text style={styles.center}>Không tìm thấy chi tiết đơn hàng</Text>;
@@ -33,7 +60,7 @@ const OrderDetail = ({ route }) => {
     return (
         <ScrollView contentContainerStyle={MyStyles.container}>
             {/* Order info */}
-            <View style={styles.card}>
+            <View style={styles.cardDetail}>
                 <Text style={styles.title}>Thông tin đơn hàng</Text>
                 <Text>Mã đơn: {order.order_code}</Text>
                 <Text>Trạng thái: {order.status}</Text>
@@ -42,87 +69,56 @@ const OrderDetail = ({ route }) => {
             </View>
 
             {/* Detail */}
-            <View style={styles.card}>
+            <View style={styles.cardDetail}>
                 <Text style={styles.title}>Chi tiết</Text>
-                {detail.type === "account" ? (
+                {detail.type === "service" ? (
                     <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name}</Text>
-                        <Text>Số lượng: {detail.detail.quantity}</Text>
-                        <Text>Giá: {detail.detail.unit_price}đ</Text>
-                        <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>
-                        <Text>Tổng: {detail.detail.total_amount}đ</Text>
-                        <Text>Nội dung: {detail.detail.content_delivered}</Text>
-                    </>
-                ) : (
-                    <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name}</Text>
+                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
                         <Text>Target URL: {detail.detail.target_url}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
                         <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>
                         <Text>Tổng: {detail.detail.total_amount}đ</Text>
                         <Text>Trạng thái dịch vụ: {detail.detail.status}</Text>
-                        <Text>Ngày hoàn thành: {detail.detail.delivered_at 
-                            ? new Date(detail.detail.delivered_at).toLocaleString() 
+                        <Text>Ngày hoàn thành: {detail.detail.delivered_at
+                            ? new Date(detail.detail.delivered_at).toLocaleString()
                             : "Chưa có"}</Text>
+
+                        {detail.detail.status === "pending" && order.status === "processing" && (
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() =>
+                                    Alert.alert(
+                                        "Xác nhận huỷ",
+                                        "Bạn có chắc chắn muốn huỷ dịch vụ này không?",
+                                        [
+                                            { text: "Không", style: "cancel" },
+                                            {
+                                                text: "Có",
+                                                style: "destructive",
+                                                onPress: () => handleCancelService(order.order_code, detail.detail.service_order_detail_code)
+                                            }
+                                        ]
+                                    )
+                                }
+                            >
+                                <Text style={styles.cancelButtonText}>Huỷ dịch vụ</Text>
+                            </TouchableOpacity>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        <Text>Số lượng: {detail.detail.quantity}</Text>
+                        <Text>Giá: {detail.detail.unit_price}đ</Text>
+                        <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>
+                        <Text>Tổng: {detail.detail.total_amount}đ</Text>
+                        <Text>Nội dung: {detail.detail.content_delivered}</Text>
                     </>
                 )}
             </View>
         </ScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    title: {
-        fontWeight: "bold",
-        fontSize: 18,
-        marginBottom: 12,
-        color: "#333",
-    },
-    label: {
-        fontSize: 14,
-        color: "#555",
-        marginBottom: 4,
-    },
-    value: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: "#111",
-        marginBottom: 8,
-    },
-    status: {
-        fontSize: 14,
-        fontWeight: "600",
-        marginBottom: 6,
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-    },
-    total: {
-        fontWeight: "bold",
-        fontSize: 16,
-        color: "#e63946",
-        marginTop: 8,
-    },
-    center: {
-        textAlign: "center",
-        marginTop: 30,
-        fontSize: 14,
-        color: "#777",
-    },
-});
-
 
 export default OrderDetail;

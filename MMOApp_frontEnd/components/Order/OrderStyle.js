@@ -7,6 +7,20 @@ const styles = StyleSheet.create({
     marginRight: {
         marginRight: 8,
     },
+    marginTop: {
+        marginTop: 20
+    },
+    cardDetail: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 3,
+    },
     card: {
         padding: 12,
         marginBottom: 10,
@@ -39,6 +53,46 @@ const styles = StyleSheet.create({
     },
     flex1: {
         flex: 1,
+    },
+    title: {
+        fontWeight: "bold",
+        fontSize: 18,
+        marginBottom: 12,
+        color: "#333",
+    },
+    label: {
+        fontSize: 14,
+        color: "#555",
+        marginBottom: 4,
+    },
+    value: {
+        fontSize: 15,
+        fontWeight: "500",
+        color: "#111",
+        marginBottom: 8,
+    },
+    total: {
+        fontWeight: "bold",
+        fontSize: 16,
+        color: "#e63946",
+        marginTop: 8,
+    },
+    center: {
+        textAlign: "center",
+        marginTop: 30,
+        fontSize: 14,
+        color: "#777",
+    },
+    cancelButton: {
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: "red",
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    cancelButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
 
