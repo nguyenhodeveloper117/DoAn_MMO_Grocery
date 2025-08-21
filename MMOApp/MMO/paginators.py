@@ -14,3 +14,6 @@ class StockPaginator(pagination.PageNumberPagination):
 
 class OderPaginator(pagination.PageNumberPagination):
     page_size = 5
+
+class ReviewPaginator(pagination.PageNumberPagination):
+    page_size = 5

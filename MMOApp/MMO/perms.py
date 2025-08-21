@@ -1,8 +1,9 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from MMO import models
+from django.db.models import Q
+
 
 
 class OwnerPerms(permissions.IsAuthenticated):
@@ -139,3 +140,35 @@ class CanPostOrderDetail(permissions.IsAuthenticated):
             return False
 
         return True
+
+class CanReviewProduct(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        product_id = request.data.get("product_code")
+        if not product_id:
+            return False
+        user = request.user
+
+        # Tìm order đã mua sản phẩm
+        order_qs = models.Order.objects.filter(
+            buyer=user,
+            active=True,
+            # is_paid=True
+        ).filter(
+            Q(acc_detail__product_id=product_id) |
+            Q(service_detail__product_id=product_id)
+        )
+
+        if not order_qs.exists():
+            return False
+
+        # Kiểm tra order nào đó đã review chưa
+        reviewed = models.Review.objects.filter(
+            buyer=user,
+            product_id=product_id,
+            # Chỉ cho phép mỗi order 1 review => check order
+        ).filter(
+            Q(product__acc_order_details__order__in=order_qs) |
+            Q(product__service_order_details__order__in=order_qs)
+        ).exists()
+
+        return not reviewed

@@ -609,3 +609,28 @@ class OrderStatsAPIView(APIView):
         stats["total_revenue"] = stats["acc_revenue"] + stats["service_revenue"]
 
         return Response(stats)
+
+class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
+    queryset = models.Review.objects.filter(active=True)
+    serializer_class = serializers.ReviewSerializer
+    pagination_class = paginators.ReviewPaginator
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [perms.CanReviewProduct()]
+        if self.action in ['get_reviews_by_product']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['GET'], url_path='by-product/(?P<product_code>[^/.]+)')
+    def get_reviews_by_product(self, request, product_code=None):
+        # Lấy danh sách review của một product cụ thể
+        reviews = self.queryset.filter(product__product_code=product_code).order_by("-created_date")
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(reviews, request)
+        if page is not None:
+            serializer = self.serializer_class(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        serializer = self.serializer_class(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

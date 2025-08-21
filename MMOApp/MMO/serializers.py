@@ -350,15 +350,31 @@ class ComplaintSerializer(ModelSerializer):
 class ReviewSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
     buyer = UserSerializer(read_only=True)
+    product_code = serializers.CharField(write_only=True)
 
     class Meta:
         model = models.Review
-        fields = ('review_code', 'product', 'buyer', 'rating', 'comment', 'created_date', 'updated_date')
+        fields = ('review_code', 'product', 'buyer', 'rating', 'comment', 'product_code', 'created_date', 'updated_date')
         read_only_fields = ['review_code', 'product', 'buyer', 'created_date', 'updated_date']
 
     def create(self, validated_data):
-        validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
-        return super().create(validated_data)
+        # Lấy product_code ra và xóa khỏi validated_data
+        product_code = validated_data.pop("product_code", None)
+        if not product_code:
+            raise serializers.ValidationError({"product_code": "This field is required."})
+
+        try:
+            product = models.Product.objects.get(product_code=product_code)
+        except models.Product.DoesNotExist:
+            raise serializers.ValidationError({"product_code": "Invalid product_code"})
+
+        # Thêm buyer
+        validated_data["buyer"] = self.context["request"].user
+        # Gán product
+        validated_data["product"] = product
+
+        # Tạo review
+        return models.Review.objects.create(**validated_data)
 
 
 class FavoriteProductSerializer(ModelSerializer):
