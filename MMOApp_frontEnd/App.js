@@ -222,6 +222,12 @@ const StoreNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <OrderStack.Screen name="orderProductDetail" component={HomeProductDetail} options={{
+      title: 'Chi tiết sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </StoreStack.Navigator>
 );
 

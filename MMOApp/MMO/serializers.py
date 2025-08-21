@@ -395,31 +395,15 @@ class ReviewSerializer(ModelSerializer):
 class FavoriteProductSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
     user = UserSerializer(read_only=True)
-    product_code = serializers.CharField(write_only=True)
 
     class Meta:
         model = models.FavoriteProduct
-        fields = ('favorite_code', 'product', 'user', 'product_code', 'created_date', 'updated_date')
+        fields = ('favorite_code', 'product', 'user', 'created_date', 'updated_date')
         read_only_fields = ['favorite_code', 'product', 'user', 'created_date', 'updated_date']
 
     def create(self, validated_data):
-        # Lấy product_code ra và xóa khỏi validated_data
-        product_code = validated_data.pop("product_code", None)
-        if not product_code:
-            raise serializers.ValidationError({"product_code": "This field is required."})
-
-        try:
-            product = models.Product.objects.get(product_code=product_code)
-        except models.Product.DoesNotExist:
-            raise serializers.ValidationError({"product_code": "Invalid product_code"})
-
-        # Thêm user
-        validated_data["user"] = self.context["request"].user
-        # Gán product
-        validated_data["product"] = product
-
-        # Tạo
-        return models.FavoriteProduct.objects.create(**validated_data)
+        validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
+        return super().create(validated_data)
 
 
 class TransactionHistorySerializer(ModelSerializer):

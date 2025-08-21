@@ -108,7 +108,13 @@ const StoreOrderDetail = ({ route }) => {
                     </>
                 ) : (
                     <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        {/* Nút chuyển hướng sang trang chi tiết sản phẩm */}
+                        <TouchableOpacity
+                            style={styles.detailButton}
+                            onPress={() => nav.navigate("orderProductDetail", { product: detail.detail.product_info })}
+                        >
+                            <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
+                        </TouchableOpacity>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
                         <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>

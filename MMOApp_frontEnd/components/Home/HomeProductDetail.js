@@ -7,6 +7,7 @@ import Apis, { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./HomeStyle";
 import { useNavigation } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons";
 
 const HomeProductDetail = ({ route, navigation }) => {
     const { product } = route.params;
@@ -27,11 +28,44 @@ const HomeProductDetail = ({ route, navigation }) => {
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
 
+    const [favorited, setFavorited] = useState(false);
+
 
     const nav = useNavigation();
 
     const user = useContext(MyUserContext);
     const dispatch = useContext(MyDispatchContext);
+
+    // ---- Load trạng thái yêu thích ----
+    const loadFavoriteStatus = async () => {
+        if (!user) return; // chưa login thì bỏ qua
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await authApis(token).get(endpoints["status-favorite"](product.product_code));
+            setFavorited(res.data.favourited);
+        } catch (err) {
+            console.error("Lỗi load favorite status:", err.response?.data || err);
+        }
+    };
+
+    const handleAddFavorite = async () => {
+        if (!user) {
+            Alert.alert("Thông báo", "Bạn cần đăng nhập mới có thể thêm vào yêu thích");
+            nav.navigate("login");
+            return;
+        }
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await authApis(token).post(endpoints["add-favorite"](product.product_code));
+
+            setFavorited(res.data.message === "Đã thêm favorite");
+
+            Alert.alert("Thông báo", res.data.message || (res.data.favourited ? "Đã thêm yêu thích" : "Đã bỏ yêu thích"));
+        } catch (err) {
+            console.error("Lỗi thêm vào yêu thích:", err.response?.data || err);
+            Alert.alert("Lỗi", "Không thể thêm vào yêu thích!");
+        }
+    };
 
     // Gọi API check voucher
     const checkVoucher = async (code, total) => {
@@ -72,6 +106,7 @@ const HomeProductDetail = ({ route, navigation }) => {
 
     useEffect(() => {
         loadReviews(1);
+        loadFavoriteStatus();
     }, [product.product_code]);
 
     const loadMore = () => {
@@ -157,6 +192,8 @@ const HomeProductDetail = ({ route, navigation }) => {
         }
     };
 
+
+
     // ---- Hỏi xác nhận trước khi đặt ----
     const confirmOrder = () => {
         Alert.alert(
@@ -169,6 +206,7 @@ const HomeProductDetail = ({ route, navigation }) => {
         );
     };
 
+
     return (
         <ScrollView contentContainerStyle={MyStyles.container}>
             {/* Ảnh sản phẩm */}
@@ -177,6 +215,14 @@ const HomeProductDetail = ({ route, navigation }) => {
             {/* Tên và giá */}
             <Text style={styles.name}>{product.name} | {product.store.name}</Text>
             <Text style={styles.price}>{product.price.toLocaleString()} VNĐ</Text>
+
+            <View style={styles.favoriteBtn}>
+                <TouchableOpacity onPress={handleAddFavorite} style={styles.favoriteBtn}>
+                    <AntDesign name={favorited ? "heart" : "hearto"} size={24} color={favorited ? "red" : "black"} />
+                    <Text style={{ marginLeft: 5 }}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
+                </TouchableOpacity>
+            </View>
+
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>
             <Text style={styles.subInfoProduct}>Định dạng: {product.format}</Text>
             <Text style={styles.subInfoProduct}>Bảo hành: {product.warranty_days} ngày</Text>

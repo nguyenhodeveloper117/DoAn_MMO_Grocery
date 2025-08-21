@@ -635,14 +635,12 @@ class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
         serializer = self.serializer_class(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class FavoriteProductViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
+class FavoriteProductViewSet(viewsets.ViewSet):
     queryset = models.FavoriteProduct.objects.filter(active=True)
     serializer_class = serializers.FavoriteProductSerializer
 
     def get_permissions(self):
-        if self.request.method in ['POST', 'DELETE']:
-            return [IsAuthenticated()]
-        if self.action in ['my_favorites']:
+        if self.action in ['my_favorites', 'add_favorites', 'favourite_status']:
             return [IsAuthenticated()]
         return [AllowAny()]
 
@@ -662,3 +660,41 @@ class FavoriteProductViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.
         products = [fav.product for fav in favorites]
         serializer = serializers.ProductSerializer(products, many=True, context={"request": request})
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='add-favorites')
+    def add_favorites(self, request, pk=None):
+        try:
+            product = models.Product.objects.get(pk=pk, active=True)
+        except models.Product.DoesNotExist:
+            return Response({"detail": "Product không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        # Tìm FavoriteProduct của user với favorite, nếu có thì toggle active, nếu không thì tạo mới
+        favorite_obj, created = models.FavoriteProduct.objects.get_or_create(product=product, user=user)
+        if not created:
+            # Nếu đã favorite rồi, bỏ favorite (xóa hoặc chuyển active)
+            # Nếu muốn xóa luôn, có thể favorite_obj.delete()
+            # Ở đây giả sử toggle active:
+            favorite_obj.active = not favorite_obj.active
+            favorite_obj.save()
+            message = "Đã bỏ thêm favorite" if not favorite_obj.active else "Đã thêm favorite"
+        else:
+            favorite_obj.active = True
+            favorite_obj.save()
+            message = "Đã thêm favorite"
+
+        return Response({"product_code": product.product_code, "message": message},
+                        status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='favourite-status')
+    def favourite_status(self, request, pk=None):
+        try:
+            product = models.Product.objects.get(pk=pk, active=True)
+        except models.Product.DoesNotExist:
+            return Response({"detail": "Product không tồn tại"}, status=404)
+
+        favourited= False
+        if request.user.is_authenticated:
+            favourited = product.favorited_by.filter(user=request.user, active=True).exists()
+
+        return Response({"product_code": product.product_code, "favourited": favourited})

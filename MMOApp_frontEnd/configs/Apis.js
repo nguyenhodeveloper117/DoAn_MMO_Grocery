@@ -52,7 +52,8 @@ export const endpoints = {
     "get-reviews": (productId) => `/reviews/by-product/${productId}/`,
     "add-review": '/reviews/',
     "my-favorite": '/favorites/my-favorites/',
-    "add-favorite": '/favorites/',
+    "add-favorite": (productId) => `/favorites/${productId}/add-favorites/`,
+    "status-favorite": (productId) => `/favorites/${productId}/favourite-status/`,
 
 };
 

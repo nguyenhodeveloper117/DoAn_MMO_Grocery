@@ -143,6 +143,11 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         fontSize: 14,
     },
+    favoriteBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 8,
+    }
 });
 
 export default styles;
