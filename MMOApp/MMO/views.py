@@ -634,3 +634,31 @@ class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
         serializer = self.serializer_class(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class FavoriteProductViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = models.FavoriteProduct.objects.filter(active=True)
+    serializer_class = serializers.FavoriteProductSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'DELETE']:
+            return [IsAuthenticated()]
+        if self.action in ['my_favorites']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-favorites')
+    def my_favorites(self, request):
+        user = request.user
+        search = request.query_params.get("search")  # ?search=apple
+
+        favorites = models.FavoriteProduct.objects.filter(
+            user=user,
+            active=True
+        ).select_related("product")
+
+        if search:
+            favorites = favorites.filter(product__name__icontains=search)
+
+        products = [fav.product for fav in favorites]
+        serializer = serializers.ProductSerializer(products, many=True, context={"request": request})
+        return Response(serializer.data)
