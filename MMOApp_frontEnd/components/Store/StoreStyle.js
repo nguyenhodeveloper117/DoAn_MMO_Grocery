@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 200,
         resizeMode: "contain",
-        marginVertical: 15,
+        marginBottom: 12
     },
     centered: {
         alignItems: "center",
@@ -181,6 +181,34 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
         borderRadius: 8,
+    },
+    reviewBox: {
+        padding: 10,
+        marginVertical: 5,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        backgroundColor: "#f9f9f9",
+    },
+    reviewUser: {
+        fontWeight: "bold",
+    },
+    loadMoreBtn: {
+        padding: 10,
+        alignItems: "center",
+        backgroundColor: "#eee",
+        borderRadius: 8,
+        marginTop: 10,
+    },
+    loadMoreText: {
+        color: "blue",
+        fontWeight: "bold",
+    },
+    reviewTitle: {
+        fontWeight: "bold",
+        fontSize: 25,
+        marginBottom: 6,
+        marginTop: 20,
     }
 });
 

@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, ScrollView, Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Button } from "react-native-paper";
+import { ActivityIndicator, Button } from "react-native-paper";
 import MyStyles from "../../styles/MyStyles";
 import Apis, { authApis, endpoints } from "../../configs/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,6 +10,11 @@ import styles from "./StoreStyle";
 const ProductDetail = () => {
   const { product } = useRoute().params;
   const nav = useNavigation();
+  const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const handleDelete = async () => {
     Alert.alert(
@@ -34,6 +39,39 @@ const ProductDetail = () => {
         },
       ]
     );
+  };
+
+  const loadReviews = async (p = 1) => {
+    try {
+      if (p === 1) setLoading(true);
+
+      const res = await Apis.get(`${endpoints["get-reviews"](product.product_code)}?page=${p}`);
+
+      if (p === 1) {
+        setReviews(res.data.results);
+      } else {
+        setReviews((prev) => [...prev, ...res.data.results]);
+      }
+
+      setHasMore(res.data.next !== null);
+    } catch (err) {
+      console.error("Lỗi load reviews:", err.response?.data || err);
+    } finally {
+      if (p === 1) setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReviews(1);
+  }, [product.product_code]);
+
+  const loadMore = () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    loadReviews(nextPage);
+    setPage(nextPage);
   };
 
   const handleEdit = () => {
@@ -62,11 +100,39 @@ const ProductDetail = () => {
       <View style={styles.buttonUpdateProduct}>
         <Button mode="contained" buttonColor="red" textColor="white" onPress={handleDelete}>Xoá</Button>
         <Button mode="outlined" onPress={handleEdit}>Chỉnh sửa</Button>
-        
+
         {product.type !== "service" && (
-            <Button mode="contained" onPress={navStocks}>Kho sản phẩm</Button>
+          <Button mode="contained" onPress={navStocks}>Kho sản phẩm</Button>
         )}
       </View>
+
+      <Text style={styles.reviewTitle}>Đánh giá sản phẩm:</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="blue" />
+      ) : reviews.length === 0 ? (
+        <Text>Chưa có đánh giá nào.</Text>
+      ) : (
+        reviews.map((r, idx) => (
+          <View key={idx} style={styles.reviewBox}>
+            <Text style={styles.reviewUser}>👤 {r.buyer.username} - ⭐ {r.rating}/5</Text>
+            <Text></Text>
+            {r.comment && <Text>{r.comment}</Text>}
+          </View>
+        ))
+      )}
+
+      {hasMore && !loading && (
+        <TouchableOpacity
+          onPress={loadMore}
+          disabled={loadingMore}
+          style={styles.loadMoreBtn}
+        >
+          <Text style={styles.loadMoreText}>
+            {loadingMore ? "Đang tải..." : "Xem thêm"}
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };

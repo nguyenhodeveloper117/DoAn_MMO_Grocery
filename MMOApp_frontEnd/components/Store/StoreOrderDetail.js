@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { TextInput, Button, View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
-import styles from "./OrderStyle";
+import styles from "../Order/OrderStyle";
 import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
 
-const OrderDetail = ({ route }) => {
+const StoreOrderDetail = ({ route }) => {
     const { order } = route.params; // nhận từ UserOrder
     const [detail, setDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     const nav = useNavigation();
-    const [review, setReview] = useState("");
-    const [rating, setRating] = useState(5);
 
     useEffect(() => {
         const loadDetail = async () => {
@@ -49,24 +47,6 @@ const OrderDetail = ({ route }) => {
         } catch (err) {
             console.error("Lỗi huỷ dịch vụ:", err?.response?.data || err);
             alert("Không thể huỷ dịch vụ!");
-        }
-    };
-
-    const handleAddReview = async () => {
-        try {
-            const token = await AsyncStorage.getItem("token");
-            await authApis(token).post(endpoints["add-review"], {
-                product_code: detail.detail.product_info?.product_code, // đúng key theo API
-                rating: rating,
-                comment: review,
-            });
-            alert("Đã gửi đánh giá thành công!");
-            setReview("");
-            setRating(5);
-            nav.navigate("order", { reload: true });
-        } catch (err) {
-            console.error("Lỗi gửi đánh giá:", err?.response?.data || err);
-            alert("Không thể gửi đánh giá!");
         }
     };
 
@@ -137,28 +117,8 @@ const OrderDetail = ({ route }) => {
                     </>
                 )}
             </View>
-
-            <View style={styles.cardDetail}>
-                <Text style={styles.title}>Đánh giá sản phẩm</Text>
-
-                <View style={styles.row}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                        <TouchableOpacity key={star} onPress={() => setRating(star)}>
-                            <Text style={{ fontSize: 24, color: star <= rating ? "gold" : "gray" }}>★</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nhập đánh giá..."
-                    value={review}
-                    onChangeText={setReview}
-                    multiline
-                />
-                <Button title="Gửi đánh giá" onPress={handleAddReview} />
-            </View>
         </ScrollView>
     );
 };
 
-export default OrderDetail;
+export default StoreOrderDetail;

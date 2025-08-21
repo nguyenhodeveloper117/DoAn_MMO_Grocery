@@ -33,6 +33,7 @@ import HomeProductDetail from "./components/Home/HomeProductDetail";
 import UserOrder from "./components/Order/UserOrder";
 import OrderDetail from "./components/Order/Orderdetail";
 import StoreOrder from "./components/Store/StoreOrder";
+import StoreOrderDetail from "./components/Store/StoreOrderDetail";
 
 
 
@@ -215,7 +216,7 @@ const StoreNavigator = () => (
         ...MyStyles.header,
       }
     }} />
-    <OrderStack.Screen name="orderDetail" component={OrderDetail} options={{
+    <OrderStack.Screen name="storeOrderDetail" component={StoreOrderDetail} options={{
       title: 'Chi tiết đơn hàng',
       headerTitleStyle: {
         ...MyStyles.header,

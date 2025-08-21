@@ -8,6 +8,8 @@ import { useNavigation } from "@react-navigation/native";
 import styles from "./StoreStyle";
 import { Dimensions } from "react-native";
 import { BarChart, PieChart } from "react-native-chart-kit";
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const statuses = [
     { value: "", label: "Tất cả" },
@@ -46,6 +48,9 @@ const StoreOrder = () => {
     const { start, end } = getTodayRange();
     const [startDate, setStartDate] = useState(start.toISOString());
     const [endDate, setEndDate] = useState(end.toISOString());
+
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
 
     const debounceTimeout = useRef(null);
 
@@ -121,10 +126,15 @@ const StoreOrder = () => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const d = new Date(dateString);
+        return d.toLocaleDateString("vi-VN"); // -> 21/08/2025
+    };
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => nav.navigate("orderDetail", { order: item })}
+            onPress={() => nav.navigate("storeOrderDetail", { order: item })}
         >
             <View style={styles.flex1}>
                 <Text style={styles.code}>Mã đơn: {item.order_code}</Text>
@@ -242,21 +252,42 @@ const StoreOrder = () => {
                     {/* Chọn thời gian */}
                     <TextInput
                         label="Ngày bắt đầu"
-                        value={startDate}
-                        onChangeText={setStartDate}
+                        value={formatDate(startDate)}
+                        editable={false}
                         mode="outlined"
                         style={styles.marginBottom}
+                        onPressIn={() => setShowStartPicker(true)}
                     />
+                    {showStartPicker && (
+                        <DateTimePicker
+                            value={new Date(startDate)}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                setShowStartPicker(false);
+                                if (selectedDate) setStartDate(selectedDate.toISOString());
+                            }}
+                        />
+                    )}
                     <TextInput
                         label="Ngày kết thúc"
-                        value={endDate}
-                        onChangeText={setEndDate}
+                        value={formatDate(endDate)}
+                        editable={false}
                         mode="outlined"
                         style={styles.marginBottom}
+                        onPressIn={() => setShowEndPicker(true)}
                     />
-                    <Button mode="contained" onPress={loadStats} style={styles.marginBottom}>
-                        Lọc thống kê
-                    </Button>
+                    {showEndPicker && (
+                        <DateTimePicker
+                            value={new Date(endDate)}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                setShowEndPicker(false);
+                                if (selectedDate) setEndDate(selectedDate.toISOString());
+                            }}
+                        />
+                    )}
 
                     {/* Quick range filter */}
                     <ScrollView
@@ -284,9 +315,11 @@ const StoreOrder = () => {
                         ))}
                     </ScrollView>
 
+                    <Button mode="contained" onPress={loadStats} style={styles.marginBottom}>
+                        Lọc thống kê
+                    </Button>
+
                     {renderStats()}
-
-
 
                     {/* Search */}
                     <TextInput

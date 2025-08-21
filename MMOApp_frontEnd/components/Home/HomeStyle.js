@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
         borderColor: "#ccc",
     },
     productTitle: {
-        fontWeight: "bold", 
+        fontWeight: "bold",
         marginBottom: 4
     },
     productCategory: {
@@ -95,8 +95,8 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     viewRenderItem: {
-        flexDirection: "row", 
-        alignItems: "flex-start" 
+        flexDirection: "row",
+        alignItems: "flex-start"
     },
     flex1: {
         flex: 1
@@ -109,7 +109,40 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 5
     },
-
+    reviewBox: {
+        padding: 10,
+        marginVertical: 5,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        backgroundColor: "#f9f9f9",
+    },
+    reviewUser: {
+        fontWeight: "bold",
+    },
+    loadMoreBtn: {
+        padding: 10,
+        alignItems: "center",
+        backgroundColor: "#eee",
+        borderRadius: 8,
+        marginTop: 10,
+    },
+    loadMoreText: {
+        color: "blue",
+        fontWeight: "bold",
+    },
+    reviewStar: {
+        color: "orange",
+        marginTop: 2,
+        marginBottom: 4,
+        fontSize: 14,
+    },
+    noReview: {
+        color: "gray",
+        marginTop: 2,
+        marginBottom: 4,
+        fontSize: 14,
+    },
 });
 
 export default styles;

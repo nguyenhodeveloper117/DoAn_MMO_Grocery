@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Alert, } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
-import { authApis, endpoints } from "../../configs/Apis";
+import Apis, { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./HomeStyle";
 import { useNavigation } from "@react-navigation/native";
@@ -21,6 +21,12 @@ const HomeProductDetail = ({ route, navigation }) => {
     const [discount, setDiscount] = useState(0);
     const [thanhToan, setThanhToan] = useState(product.price);
     const [voucherInput, setVoucherInput] = useState("");
+
+    const [reviews, setReviews] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+
 
     const nav = useNavigation();
 
@@ -41,6 +47,39 @@ const HomeProductDetail = ({ route, navigation }) => {
             Alert.alert("Voucher không hợp lệ", err.response?.data?.error || "Có lỗi xảy ra");
             return 0;
         }
+    };
+
+    const loadReviews = async (p = 1) => {
+        try {
+            if (p === 1) setLoading(true);
+
+            const res = await Apis.get(`${endpoints["get-reviews"](product.product_code)}?page=${p}`);
+
+            if (p === 1) {
+                setReviews(res.data.results);
+            } else {
+                setReviews((prev) => [...prev, ...res.data.results]);
+            }
+
+            setHasMore(res.data.next !== null);
+        } catch (err) {
+            console.error("Lỗi load reviews:", err.response?.data || err);
+        } finally {
+            if (p === 1) setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    useEffect(() => {
+        loadReviews(1);
+    }, [product.product_code]);
+
+    const loadMore = () => {
+        if (!hasMore || loadingMore) return;
+        setLoadingMore(true);
+        const nextPage = page + 1;
+        loadReviews(nextPage);
+        setPage(nextPage);
     };
 
     // Debounce voucher
@@ -213,6 +252,35 @@ const HomeProductDetail = ({ route, navigation }) => {
                     <Text style={styles.orderText}>Đặt hàng</Text>
                 )}
             </TouchableOpacity>
+
+            <Text style={styles.label}>Đánh giá sản phẩm:</Text>
+
+            {loading ? (
+                <ActivityIndicator size="large" color="blue" />
+            ) : reviews.length === 0 ? (
+                <Text>Chưa có đánh giá nào.</Text>
+            ) : (
+                reviews.map((r, idx) => (
+                    <View key={idx} style={styles.reviewBox}>
+                        <Text style={styles.reviewUser}>👤 {r.buyer.username} - ⭐ {r.rating}/5</Text>
+                        <Text></Text>
+                        {r.comment && <Text>{r.comment}</Text>}
+                    </View>
+                ))
+            )}
+
+            {hasMore && !loading && (
+                <TouchableOpacity
+                    onPress={loadMore}
+                    disabled={loadingMore}
+                    style={styles.loadMoreBtn}
+                >
+                    <Text style={styles.loadMoreText}>
+                        {loadingMore ? "Đang tải..." : "Xem thêm"}
+                    </Text>
+                </TouchableOpacity>
+            )}
+
         </ScrollView>
     );
 };

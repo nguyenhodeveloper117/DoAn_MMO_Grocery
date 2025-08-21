@@ -49,7 +49,10 @@ export const endpoints = {
     "update-order": (orderId) => `/orders/${orderId}/`,
     "update-service-order-detail": (serviceId) => `/service-orders-detail/${serviceId}/`,
     "store-stat": '/order-stats/', 
-    
+    "get-reviews": (productId) => `/reviews/by-product/${productId}/`,
+    "add-review": '/reviews/',
+    "my-favorite": '/favorites/my-favorites/',
+    "add-favorite": '/favorites/',
 
 };
 

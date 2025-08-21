@@ -1,6 +1,9 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+    row: {
+        flexDirection: "row"
+    },
     marginBottom: {
         marginBottom: 12,
     },
@@ -93,6 +96,15 @@ const styles = StyleSheet.create({
     cancelButtonText: {
         color: "#fff",
         fontWeight: "bold",
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 8,
+        padding: 10,
+        marginVertical: 8,
+        minHeight: 60,
+        textAlignVertical: "top",
     },
 });
 

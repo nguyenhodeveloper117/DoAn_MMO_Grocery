@@ -27,7 +27,7 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False, default='customer')
     avatar = CloudinaryField(null=True, default="https://res.cloudinary.com/dnwyvuqej/image/upload/v1733499646/default_avatar_uv0h7z.jpg")
-    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0) # Số dư
+    balance = models.DecimalField(max_digits=12, decimal_places=0, default=0) # Số dư
     phone = models.CharField(max_length=10, blank=False, null=False, unique=True)
     is_verified = models.BooleanField(default=False)  # Xác thực thông tin
 
@@ -85,7 +85,7 @@ class Product(BaseModel):
     name = models.CharField(max_length=100)
     image = CloudinaryField(null=False, blank=False)
     description = models.TextField()
-    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('1000000000'))])
+    price = models.DecimalField(max_digits=12, decimal_places=0, validators=[MinValueValidator(Decimal('0')), MaxValueValidator(Decimal('1000000000'))])
     format = models.TextField(help_text="Định dạng gửi về, ví dụ: TK|MK|Email|OTP")
     type = models.CharField(max_length=20, choices=[('account', 'Tài khoản'), ('service', 'Dịch vụ'), ('software', 'Phần mềm'), ('course', 'Khoá học')])
     available_quantity = property(lambda self: self.stocks.filter(is_sold=False).count())
@@ -120,8 +120,8 @@ class Voucher(BaseModel):
     voucher_code = models.CharField(primary_key=True, max_length=10, editable=False)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='vouchers')
     code = models.CharField(max_length=20)
-    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('1')), MaxValueValidator(Decimal('100.00'))])
-    max_discount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('30000'))
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=0, validators=[MinValueValidator(Decimal('1')), MaxValueValidator(Decimal('100.00'))])
+    max_discount = models.DecimalField(max_digits=10, decimal_places=0, default=Decimal('30000'))
     expired_at = models.DateTimeField(null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False, validators=[MinValueValidator(1), MaxValueValidator(1000)])
 
@@ -167,9 +167,9 @@ class AccOrderDetail(BaseModel):
     acc_order_detail_code = models.CharField(primary_key=True, max_length=10, editable=False)
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='acc_detail')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='acc_order_details')
-    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     discount_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     content_delivered = models.TextField()
 
@@ -190,9 +190,9 @@ class ServiceOrderDetail(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name='service_order_details')
     target_url = models.URLField(help_text="Link TikTok/YouTube/Instagram cần tăng tương tác")
     note = models.TextField(null=True, blank=True)  # Ghi chú thêm nếu có
-    unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     quantity = models.IntegerField(help_text="Số lượng cần tăng, ví dụ: 1000 follow", validators=[MinValueValidator(1)])
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     discount_amount = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Chờ xác nhận'),
@@ -323,7 +323,7 @@ class TransactionHistory(BaseModel):
     transaction_code = models.CharField(primary_key=True, max_length=20, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
     type = models.CharField(max_length=20, choices=TRANSACTION_TYPE, null=False, blank=False)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, null=False, blank=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=0, null=False, blank=False)
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):

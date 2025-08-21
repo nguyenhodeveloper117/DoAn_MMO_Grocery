@@ -619,7 +619,7 @@ class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
         if self.request.method in ['POST']:
             return [perms.CanReviewProduct()]
         if self.action in ['get_reviews_by_product']:
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [AllowAny()]
 
     @action(detail=False, methods=['GET'], url_path='by-product/(?P<product_code>[^/.]+)')

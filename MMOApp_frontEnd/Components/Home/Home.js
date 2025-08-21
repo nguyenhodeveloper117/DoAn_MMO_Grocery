@@ -33,6 +33,21 @@ const Home = () => {
 
     const pageSize = 5;
 
+
+    const fetchAvgRating = async (productCode) => {
+        try {
+            const res = await Apis.get(endpoints["get-reviews"](productCode));
+            const reviews = res.data.results || [];
+            if (reviews.length === 0) return null;
+
+            const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+            return (sum / reviews.length).toFixed(1);
+        } catch (err) {
+            console.error("Lỗi load reviews:", err?.response?.data || err);
+            return null;
+        }
+    };
+
     const loadProducts = useCallback(
         async (pageNumber = 1, append = false) => {
             if (append && pageNumber > totalPages) return;
@@ -47,10 +62,19 @@ const Home = () => {
                     },
                 });
 
-                const data = res.data.results || res.data;
+                let data = res.data.results || res.data;
+
+                // Lấy avg_rating cho từng product
+                const dataWithRating = await Promise.all(
+                    data.map(async (p) => {
+                        const avg = await fetchAvgRating(p.product_code);
+                        return { ...p, avg_rating: avg };
+                    })
+                );
+
                 // Khi merge data
                 setProducts(prev => {
-                    const merged = append ? [...prev, ...data] : data;
+                    const merged = append ? [...prev, ...dataWithRating] : dataWithRating;
                     return merged.filter(
                         (item, index, self) =>
                             index === self.findIndex(t => t.product_code === item.product_code)
@@ -69,6 +93,7 @@ const Home = () => {
         },
         [searchText, category, totalPages]
     );
+
 
     // debounce search & filter
     useEffect(() => {
@@ -105,9 +130,17 @@ const Home = () => {
                 <Text style={styles.productTitle} >
                     {item.name}
                 </Text>
+                {item.avg_rating ? (
+                    <Text style={styles.reviewStar}>
+                        ⭐ {item.avg_rating}/5
+                    </Text>
+                ) : (
+                    <Text style={styles.noReview}>⭐ Chưa có đánh giá</Text>
+                )}
+
 
                 <Text style={styles.productCategory} >
-                    Loại: {item.type} | {item.price}đ | {new Date(item.created_date).toLocaleDateString()}
+                    {item.price}đ | Loại: {item.type} | {new Date(item.created_date).toLocaleDateString()}
                 </Text>
                 <Text
                     numberOfLines={2}
