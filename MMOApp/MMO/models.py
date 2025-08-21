@@ -242,6 +242,7 @@ class Complaint(BaseModel):
 class Review(BaseModel):
     review_code = models.CharField(primary_key=True, max_length=10, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='reviews')
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField(null=False, blank=False, validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(null=True, blank=True)

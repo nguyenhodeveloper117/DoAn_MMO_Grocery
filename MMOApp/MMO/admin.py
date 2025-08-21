@@ -186,7 +186,7 @@ class ComplaintAdmin(admin.ModelAdmin):
 
 # Review
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ['review_code', 'product', 'buyer', 'rating', 'active', 'created_date', 'updated_date']
+    list_display = ['review_code', 'product', 'order', 'buyer', 'rating', 'active', 'created_date', 'updated_date']
     search_fields = ['product__name', 'buyer__username']
 
 

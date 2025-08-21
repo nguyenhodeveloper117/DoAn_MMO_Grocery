@@ -106,6 +106,15 @@ const styles = StyleSheet.create({
         minHeight: 60,
         textAlignVertical: "top",
     },
+    detailButton: {
+        backgroundColor: "#007bff",
+        marginVertical: 8,
+    },
+    detailButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
 });
 
 export default styles;

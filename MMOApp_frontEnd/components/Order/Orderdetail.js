@@ -56,17 +56,17 @@ const OrderDetail = ({ route }) => {
         try {
             const token = await AsyncStorage.getItem("token");
             await authApis(token).post(endpoints["add-review"], {
-                product_code: detail.detail.product_info?.product_code, // đúng key theo API
+                product_code: detail.detail.product_info?.product_code,
+                order_code: order.order_code,
                 rating: rating,
                 comment: review,
             });
             alert("Đã gửi đánh giá thành công!");
             setReview("");
             setRating(5);
-            nav.navigate("order", { reload: true });
         } catch (err) {
-            console.error("Lỗi gửi đánh giá:", err?.response?.data || err);
-            alert("Không thể gửi đánh giá!");
+            console.error("Lỗi đánh giá sản phẩm", err?.response?.data || err);
+            alert("Bạn đã đánh giá sản phẩm này rồi!");
         }
     };
 
@@ -128,7 +128,13 @@ const OrderDetail = ({ route }) => {
                     </>
                 ) : (
                     <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        {/* Nút chuyển hướng sang trang chi tiết sản phẩm */}
+                        <TouchableOpacity
+                            style={styles.detailButton}
+                            onPress={() => nav.navigate("productDetail", { product: detail.detail.product_info })}
+                        >
+                            <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
+                        </TouchableOpacity>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
                         <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>

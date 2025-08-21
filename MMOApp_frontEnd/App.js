@@ -240,6 +240,12 @@ const UserOrderNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <OrderStack.Screen name="productDetail" component={HomeProductDetail} options={{
+      title: 'Chi tiết sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </OrderStack.Navigator>
 );
 

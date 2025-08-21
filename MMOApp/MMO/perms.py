@@ -141,34 +141,37 @@ class CanPostOrderDetail(permissions.IsAuthenticated):
 
         return True
 
+
 class CanReviewProduct(permissions.IsAuthenticated):
     def has_permission(self, request, view):
-        product_id = request.data.get("product_code")
-        if not product_id:
+        product_code = request.data.get("product_code")
+        order_code = request.data.get("order_code")
+
+        if not product_code or not order_code:
             return False
+
         user = request.user
 
-        # Tìm order đã mua sản phẩm
-        order_qs = models.Order.objects.filter(
-            buyer=user,
-            active=True,
-            # is_paid=True
-        ).filter(
-            Q(acc_detail__product_id=product_id) |
-            Q(service_detail__product_id=product_id)
-        )
-
-        if not order_qs.exists():
+        # Lấy order cụ thể
+        try:
+            order = models.Order.objects.get(order_code=order_code, buyer=user, active=True)
+        except models.Order.DoesNotExist:
             return False
 
-        # Kiểm tra order nào đó đã review chưa
-        reviewed = models.Review.objects.filter(
+        # Kiểm tra order này có mua sản phẩm này không
+        has_product = (
+                (hasattr(order, 'acc_detail') and order.acc_detail.product.product_code == product_code) or
+                (hasattr(order, 'service_detail') and order.service_detail.product.product_code == product_code)
+        )
+
+        if not has_product:
+            return False
+
+        # Kiểm tra order này đã review sản phẩm này chưa
+        already_reviewed = models.Review.objects.filter(
             buyer=user,
-            product_id=product_id,
-            # Chỉ cho phép mỗi order 1 review => check order
-        ).filter(
-            Q(product__acc_order_details__order__in=order_qs) |
-            Q(product__service_order_details__order__in=order_qs)
+            product__product_code=product_code,
+            order=order
         ).exists()
 
-        return not reviewed
+        return not already_reviewed

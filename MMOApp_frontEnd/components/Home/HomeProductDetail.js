@@ -175,7 +175,7 @@ const HomeProductDetail = ({ route, navigation }) => {
             <Image source={{ uri: product.image }} style={styles.imageProductDetail} />
 
             {/* Tên và giá */}
-            <Text style={styles.name}>{product.name}</Text>
+            <Text style={styles.name}>{product.name} | {product.store.name}</Text>
             <Text style={styles.price}>{product.price.toLocaleString()} VNĐ</Text>
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>
             <Text style={styles.subInfoProduct}>Định dạng: {product.format}</Text>
