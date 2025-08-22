@@ -332,19 +332,37 @@ class ServiceOrderDetailSerializer(ModelSerializer):
 
 class ComplaintSerializer(ModelSerializer):
     order = OrderSerializer(read_only=True)
+    order_code = serializers.CharField(write_only=True)
     buyer = UserSerializer(read_only=True)
     admin = UserSerializer(read_only=True)
 
     class Meta:
         model = models.Complaint
-        fields = ('complaint_code', 'order', 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2',
+        fields = ('complaint_code', 'order', 'order_code' , 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2',
                   'evidence_image3',
                   'evidence_video', 'resolved', 'decision', 'created_date', 'updated_date')
         read_only_fields = ['complaint_code', 'order', 'buyer', 'admin', 'created_date', 'updated_date']
 
     def create(self, validated_data):
-        validated_data['buyer'] = self.context['request'].user  # Gán buyer là user hiện tại
-        return super().create(validated_data)
+        order_code = validated_data.pop("order_code", None)
+        if not order_code:
+            raise serializers.ValidationError({"order_code": "This field is required."})
+
+        # Lấy order
+        try:
+            order = models.Order.objects.get(order_code=order_code, buyer=self.context["request"].user, active=True)
+        except models.Order.DoesNotExist:
+            raise serializers.ValidationError({"order_code": "Invalid order_code"})
+
+        # Tạo review
+        validated_data["buyer"] = self.context["request"].user
+        validated_data["order"] = order
+
+        # Cập nhật trạng thái order sang complained
+        order.status = "complained"
+        order.save(update_fields=["status", "updated_date"])
+
+        return models.Complaint.objects.create(**validated_data)
 
 
 class ReviewSerializer(ModelSerializer):

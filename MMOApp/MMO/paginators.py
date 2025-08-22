@@ -17,3 +17,6 @@ class OderPaginator(pagination.PageNumberPagination):
 
 class ReviewPaginator(pagination.PageNumberPagination):
     page_size = 5
+
+class ComplaintPaginator(pagination.PageNumberPagination):
+    page_size = 5

@@ -24,6 +24,16 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
+    cardDetailComplaint: {
+        backgroundColor: "#c11111ff",
+        borderRadius: 12,
+        padding: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 3,
+    },
     card: {
         padding: 12,
         marginBottom: 10,
@@ -62,6 +72,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 12,
         color: "#333",
+    },
+    complaintTitle: {
+        fontWeight: "bold",
+        fontSize: 18,
+        color: "#f5eaeaff",
+        textAlign: "center",
     },
     label: {
         fontSize: 14,
@@ -129,6 +145,36 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
+    uploadBtn: {
+        backgroundColor: "#007bff",
+        padding: 10,
+        borderRadius: 8,
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    previewRow:
+    {
+        flexDirection: "row",
+        gap: 8,
+        marginVertical: 8
+    },
+    previewImg: {
+        width: 90,
+        height: 90,
+        borderRadius: 6
+    },
+    labelComplaint: {
+        marginVertical: 10,
+        fontWeight: "600"
+    },
+    submitBtn: {
+        marginTop: 10,
+        padding: 8,
+        backgroundColor: "#e51313ff",
+    },
+    whiteText: {
+        color: "#fff"
+    }
 });
 
 export default styles;

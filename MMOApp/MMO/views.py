@@ -698,3 +698,17 @@ class FavoriteProductViewSet(viewsets.ViewSet):
             favourited = product.favorited_by.filter(user=request.user, active=True).exists()
 
         return Response({"product_code": product.product_code, "favourited": favourited})
+
+
+class ComplaintViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
+    queryset = models.Complaint.objects.filter(active=True)
+    serializer_class = serializers.ComplaintSerializer
+    pagination_class = paginators.ComplaintPaginator
+    parser_classes = [parsers.MultiPartParser]
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PATCH', 'PUT']:
+            return [perms.HasPermComplaint()]
+        if self.action in ['get_reviews_by_product']:
+            return [AllowAny()]
+        return [AllowAny()]

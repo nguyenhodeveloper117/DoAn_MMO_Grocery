@@ -35,6 +35,7 @@ import OrderDetail from "./components/Order/Orderdetail";
 import StoreOrder from "./components/Store/StoreOrder";
 import StoreOrderDetail from "./components/Store/StoreOrderDetail";
 import FavoriteProducts from "./components/User/FavouriteProduct";
+import OrderComplaint from "./components/Order/OrderComplaint";
 
 
 
@@ -261,6 +262,12 @@ const UserOrderNavigator = () => (
     }} />
     <OrderStack.Screen name="productDetail" component={HomeProductDetail} options={{
       title: 'Chi tiết sản phẩm',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <OrderStack.Screen name="orderComplaint" component={OrderComplaint} options={{
+      title: 'Khiếu nại',
       headerTitleStyle: {
         ...MyStyles.header,
       }

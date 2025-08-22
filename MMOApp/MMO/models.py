@@ -224,14 +224,18 @@ class Complaint(BaseModel):
     evidence_video = CloudinaryField(null=True, blank=True)
     resolved = models.BooleanField(default=False)
     decision = models.CharField(max_length=20, choices=[
+        ('pending', 'Đang xem xét'),
         ('refund', 'Hoàn tiền người mua'),
         ('release', 'Trả tiền cho người bán'),
         ('negotiate', 'Yêu cầu thương lượng lại')
-    ], null=True, blank=True)
+    ], null=True, blank=True, default='pending')
     admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='handled_complaints', limit_choices_to={'role': 'admin'})
 
     def __str__(self):
         return f"{self.complaint_code}"
+
+    class Meta:
+        unique_together = ('buyer', 'order')  # 1 user chỉ complain 1 lần
 
     def save(self, *args, **kwargs):
         if not self.complaint_code:

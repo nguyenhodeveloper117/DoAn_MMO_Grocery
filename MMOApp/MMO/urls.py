@@ -19,6 +19,7 @@ router.register('acc-orders-detail', views.AccOrderDetailViewSet, basename='acc-
 router.register('service-orders-detail', views.ServiceOrderDetailViewSet, basename='service-orders-detail')
 router.register('reviews', views.ReviewViewSet, basename='review')
 router.register('favorites', views.FavoriteProductViewSet, basename='favorite')
+router.register('complaints', views.ComplaintViewSet, basename='complaint')
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),

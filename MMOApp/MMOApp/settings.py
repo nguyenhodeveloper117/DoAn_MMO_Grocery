@@ -143,8 +143,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Tăng giới hạn lên 10MB hoặc cao hơn nếu cần
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100 MB
 
 import cloudinary
 import cloudinary.uploader

@@ -193,3 +193,19 @@ class CanReviewProduct(permissions.IsAuthenticated):
         ).exists()
 
         return not already_reviewed
+
+class HasPermComplaint(permissions.IsAuthenticated):
+    # Chỉ cho phép user tạo khiếu nại nếu họ là buyer của order đó.
+    def has_permission(self, request, view):
+        user = request.user
+        order_id = request.data.get("order_code")  # truyền lên từ client
+        if not order_id:
+            return False
+
+        # Kiểm tra order có tồn tại và buyer chính là user không
+        return models.Order.objects.filter(
+            order_code=order_id,
+            buyer=user
+        ).exists()
+
+        return True

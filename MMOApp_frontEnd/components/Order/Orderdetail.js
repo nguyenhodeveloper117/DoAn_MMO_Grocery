@@ -170,6 +170,12 @@ const OrderDetail = ({ route }) => {
                 />
                 <Button title="Gửi đánh giá" onPress={handleAddReview} />
             </View>
+
+            <View style={styles.cardDetailComplaint}>
+                <TouchableOpacity onPress={() => nav.navigate("orderComplaint", { order: order, order_detail: detail })}>
+                    <Text style={styles.complaintTitle}>Khiếu nại</Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 };
