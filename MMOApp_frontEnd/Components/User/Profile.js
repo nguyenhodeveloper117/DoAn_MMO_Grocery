@@ -79,6 +79,10 @@ const Profile = () => {
         nav.navigate("terms");
     }
 
+    const navigateToFavoriteProducts = () => {
+        nav.navigate("favoriteProducts");
+    }
+
     return (
         <ScrollView contentContainerStyle={MyStyles.container}>
             <View style={styles.avatarContainer}>
@@ -99,6 +103,9 @@ const Profile = () => {
             <View style={styles.buttonContainer}>
                 <Button onPress={navigateToUserDetails} mode="contained" style={styles.editButton}>
                     Chỉnh sửa thông tin
+                </Button>
+                <Button onPress={navigateToFavoriteProducts} mode="contained" style={styles.favoriteButton}>
+                    Sản phẩm đã thích
                 </Button>
                 <Button onPress={navigateToKYC} mode="contained" style={styles.kycButton}>
                     Xác minh KYC

@@ -34,6 +34,7 @@ import UserOrder from "./components/Order/UserOrder";
 import OrderDetail from "./components/Order/Orderdetail";
 import StoreOrder from "./components/Store/StoreOrder";
 import StoreOrderDetail from "./components/Store/StoreOrderDetail";
+import FavoriteProducts from "./components/User/FavouriteProduct";
 
 
 
@@ -122,6 +123,18 @@ const ProfileNavigator = () => (
     }} />
     <ProfileStack.Screen name="updateVerification" component={UpdateVerification} options={{
       title: 'Cập nhật xác minh',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ProfileStack.Screen name="favoriteProducts" component={FavoriteProducts} options={{
+      title: 'Sản phẩm đã thích',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ProfileStack.Screen name="homeProductDetail" component={HomeProductDetail} options={{
+      title: 'Chi tiết sản phẩm',
       headerTitleStyle: {
         ...MyStyles.header,
       }
