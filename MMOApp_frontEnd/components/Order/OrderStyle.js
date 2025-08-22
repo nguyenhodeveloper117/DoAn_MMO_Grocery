@@ -97,6 +97,20 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    processingButton: {
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: "orange",
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    completedButton: {
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: "green",
+        borderRadius: 8,
+        alignItems: "center",
+    },
     input: {
         borderWidth: 1,
         borderColor: "#ccc",

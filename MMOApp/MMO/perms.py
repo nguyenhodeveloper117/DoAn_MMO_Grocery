@@ -53,7 +53,7 @@ class IsVerified(permissions.IsAuthenticated):
         return super().has_permission(request, view) and request.user.role == 'customer' and request.user.is_verified
 
 
-class CanCancel(permissions.IsAuthenticated):
+class CanUpdate(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         # Đảm bảo người dùng đăng nhập trước
         if not super().has_permission(request, view):
@@ -77,14 +77,32 @@ class CanCancel(permissions.IsAuthenticated):
         if not (is_buyer or is_seller):
             raise PermissionDenied("Bạn không có quyền huỷ đơn này.")
 
-        # Chỉ huỷ khi trạng thái đơn là "processing"
-        if order.status != 'processing':
-            raise PermissionDenied("Chỉ có thể huỷ đơn khi đang xử lý.")
+        # lấy action từ client
+        action = request.data.get("action")
 
-        # Nếu là đơn dịch vụ thì trạng thái service_detail phải là "pending"
-        if hasattr(order, 'service_detail') and order.service_detail is not None:
-            if order.service_detail.status != 'pending':
-                raise PermissionDenied("Chỉ có thể huỷ dịch vụ khi ở trạng thái chờ chấp nhận.")
+        if action == "cancel":
+            if order.status != "processing":
+                raise PermissionDenied("Chỉ có thể huỷ đơn khi đang xử lý.")
+            if hasattr(order, "service_detail") and order.service_detail:
+                if order.service_detail.status != "pending":
+                    raise PermissionDenied("Chỉ có thể huỷ dịch vụ khi đang chờ chấp nhận.")
+
+        elif action == "accept":  # cập nhật sang in_progress
+            if order.status != "processing":
+                raise PermissionDenied("Đơn phải ở trạng thái processing mới có thể chấp nhận.")
+            if hasattr(order, "service_detail") and order.service_detail:
+                if order.service_detail.status != "pending":
+                    raise PermissionDenied("Dịch vụ phải pending mới được chấp nhận.")
+
+        elif action == "complete":  # cập nhật sang completed
+            if order.status != "processing":
+                raise PermissionDenied("Đơn phải ở trạng thái processing mới có thể hoàn thành.")
+            if hasattr(order, "service_detail") and order.service_detail:
+                if order.service_detail.status != "in_progress":
+                    raise PermissionDenied("Dịch vụ phải in_progress mới được hoàn thành.")
+
+        else:
+            raise PermissionDenied("Hành động không hợp lệ.")
 
         return True
 

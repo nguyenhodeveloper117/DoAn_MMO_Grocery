@@ -450,7 +450,7 @@ class OrderViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIV
         if self.request.method in ['POST']:
             return [IsAuthenticated()]
         if self.request.method in ['PUT', 'PATCH']:
-            return [perms.CanCancel()]
+            return [perms.CanUpdate()]
         return [AllowAny()]
 
     # tất cả order của user

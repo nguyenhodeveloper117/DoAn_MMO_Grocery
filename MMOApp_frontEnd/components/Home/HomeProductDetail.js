@@ -153,6 +153,12 @@ const HomeProductDetail = ({ route, navigation }) => {
             return;
         }
 
+        // validate service target url
+        if (product.type === "service" && !targetUrl.trim()) {
+            alert("Vui lòng nhập Link dịch vụ (Target URL)!");
+            return;
+        }
+
         try {
             setLoading(true);
             const token = await AsyncStorage.getItem("token");

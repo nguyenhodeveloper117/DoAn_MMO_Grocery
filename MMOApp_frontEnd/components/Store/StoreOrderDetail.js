@@ -34,6 +34,7 @@ const StoreOrderDetail = ({ route }) => {
 
             // 1. PATCH order -> CANCEL
             await authApis(token).patch(endpoints["update-order"](orderId), {
+                action: "cancel", 
                 status: "cancel",
             });
 
@@ -43,10 +44,56 @@ const StoreOrderDetail = ({ route }) => {
             });
 
             alert("Đã huỷ dịch vụ thành công!");
-            nav.navigate("userOrder", { reload: true });
+            nav.navigate("storeOrder", { reload: true });
         } catch (err) {
             console.error("Lỗi huỷ dịch vụ:", err?.response?.data || err);
             alert("Không thể huỷ dịch vụ!");
+        }
+    };
+
+    const handleUpdateServiceProcessing = async (orderId, serviceDetailId) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+
+            // 1. PATCH order -> CANCEL
+            await authApis(token).patch(endpoints["update-order"](orderId), {
+                action: "accept",
+                status: "processing",
+            });
+
+            // 2. PATCH service order detail -> FAILED
+            await authApis(token).patch(endpoints["update-service-order-detail"](serviceDetailId), {
+                status: "in_progress",
+            });
+
+            alert("Đã cập nhật dịch vụ thành Processing thành công!");
+            nav.navigate("storeOrder", { reload: true });
+        } catch (err) {
+            console.error("Lỗi cập nhật dịch vụ:", err?.response?.data || err);
+            alert("Không thể cập nhật dịch vụ!");
+        }
+    };
+
+    const handleUpdateServiceCompleted = async (orderId, serviceDetailId) => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+
+            // 1. PATCH order -> CANCEL
+            await authApis(token).patch(endpoints["update-order"](orderId), {
+                action: "complete",
+                status: "delivered",
+            });
+
+            // 2. PATCH service order detail -> FAILED
+            await authApis(token).patch(endpoints["update-service-order-detail"](serviceDetailId), {
+                status: "completed",
+            });
+
+            alert("Đã cập nhật dịch vụ thành Completed thành công!");
+            nav.navigate("storeOrder", { reload: true });
+        } catch (err) {
+            console.error("Lỗi cập nhật dịch vụ:", err?.response?.data || err);
+            alert("Không thể cập nhật dịch vụ!");
         }
     };
 
@@ -74,6 +121,7 @@ const StoreOrderDetail = ({ route }) => {
                 {detail.type === "service" ? (
                     <>
                         <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        <Text>Loại: {detail.detail.product_info?.type}</Text>
                         <Text>Target URL: {detail.detail.target_url}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
@@ -105,6 +153,50 @@ const StoreOrderDetail = ({ route }) => {
                                 <Text style={styles.cancelButtonText}>Huỷ dịch vụ</Text>
                             </TouchableOpacity>
                         )}
+
+                        {detail.detail.status === "pending" && order.status === "processing" && (
+                            <TouchableOpacity
+                                style={styles.processingButton}
+                                onPress={() =>
+                                    Alert.alert(
+                                        "Xác nhận cập nhật",
+                                        "Bạn có chắc chắn chấp nhận đơn hàng này không?",
+                                        [
+                                            { text: "Không", style: "cancel" },
+                                            {
+                                                text: "Có",
+                                                style: "destructive",
+                                                onPress: () => handleUpdateServiceProcessing(order.order_code, detail.detail.service_order_detail_code)
+                                            }
+                                        ]
+                                    )
+                                }
+                            >
+                                <Text style={styles.cancelButtonText}>Chấp nhận</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {detail.detail.status === "in_progress" && order.status === "processing" && (
+                            <TouchableOpacity
+                                style={styles.completedButton}
+                                onPress={() =>
+                                    Alert.alert(
+                                        "Xác nhận cập nhật",
+                                        "Bạn có chắc chắn hoàn thành đơn hàng này không?",
+                                        [
+                                            { text: "Không", style: "cancel" },
+                                            {
+                                                text: "Có",
+                                                style: "destructive",
+                                                onPress: () => handleUpdateServiceCompleted(order.order_code, detail.detail.service_order_detail_code)
+                                            }
+                                        ]
+                                    )
+                                }
+                            >
+                                <Text style={styles.cancelButtonText}>Hoàn thành đơn hàng</Text>
+                            </TouchableOpacity>
+                        )}
                     </>
                 ) : (
                     <>
@@ -115,6 +207,7 @@ const StoreOrderDetail = ({ route }) => {
                         >
                             <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
                         </TouchableOpacity>
+                        <Text>Loại: {detail.detail.product_info?.type}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
                         <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>

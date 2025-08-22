@@ -93,7 +93,13 @@ const OrderDetail = ({ route }) => {
                 <Text style={styles.title}>Chi tiết</Text>
                 {detail.type === "service" ? (
                     <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        <TouchableOpacity
+                            style={styles.detailButton}
+                            onPress={() => nav.navigate("productDetail", { product: detail.detail.product_info })}
+                        >
+                            <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
+                        </TouchableOpacity>
+                        <Text>Loại: {detail.detail.product_info?.type}</Text>
                         <Text>Target URL: {detail.detail.target_url}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
@@ -135,6 +141,7 @@ const OrderDetail = ({ route }) => {
                         >
                             <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
                         </TouchableOpacity>
+                        <Text>Loại: {detail.detail.product_info?.type}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
                         <Text>Giá: {detail.detail.unit_price}đ</Text>
                         <Text>Giảm giá: {detail.detail.discount_amount}đ</Text>
