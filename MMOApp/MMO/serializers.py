@@ -339,8 +339,7 @@ class ComplaintSerializer(ModelSerializer):
     class Meta:
         model = models.Complaint
         fields = ('complaint_code', 'order', 'order_code' , 'buyer', 'admin', 'message', 'evidence_image1', 'evidence_image2',
-                  'evidence_image3',
-                  'evidence_video', 'resolved', 'decision', 'created_date', 'updated_date')
+                  'evidence_image3', 'evidence_video', 'resolved', 'decision', 'created_date', 'updated_date')
         read_only_fields = ['complaint_code', 'order', 'buyer', 'admin', 'created_date', 'updated_date']
 
     def create(self, validated_data):
@@ -348,14 +347,28 @@ class ComplaintSerializer(ModelSerializer):
         if not order_code:
             raise serializers.ValidationError({"order_code": "This field is required."})
 
-        # Lấy order
+        user = self.context["request"].user
+
+        # Lấy order theo code
         try:
-            order = models.Order.objects.get(order_code=order_code, buyer=self.context["request"].user, active=True)
+            order = models.Order.objects.get(order_code=order_code, active=True)
         except models.Order.DoesNotExist:
             raise serializers.ValidationError({"order_code": "Invalid order_code"})
 
-        # Tạo review
-        validated_data["buyer"] = self.context["request"].user
+        # Kiểm tra quyền: buyer hoặc seller
+        is_buyer = order.buyer == user
+        acc_detail = getattr(order, "acc_detail", None)
+        service_detail = getattr(order, "service_detail", None)
+        is_seller = (
+                (acc_detail and acc_detail.product and acc_detail.product.store.seller == user)
+                or (service_detail and service_detail.product and service_detail.product.store.seller == user)
+        )
+
+        if not (is_buyer or is_seller):
+            raise serializers.ValidationError({"order_code": "Bạn không có quyền tạo khiếu nại cho order này"})
+
+        # Gán thông tin
+        validated_data["buyer"] = user  # complaint luôn gắn với user
         validated_data["order"] = order
 
         # Cập nhật trạng thái order sang complained
@@ -363,6 +376,16 @@ class ComplaintSerializer(ModelSerializer):
         order.save(update_fields=["status", "updated_date"])
 
         return models.Complaint.objects.create(**validated_data)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.evidence_image1:
+            data['evidence_image1'] = instance.evidence_image1.url
+        if instance.evidence_image2:
+            data['evidence_image2'] = instance.evidence_image2.url
+        if instance.evidence_image3:
+            data['evidence_image3'] = instance.evidence_image3.url
+        return data
 
 
 class ReviewSerializer(ModelSerializer):

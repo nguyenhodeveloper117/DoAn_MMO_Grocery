@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextInput, Button, View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { TextInput, Button, View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
@@ -14,6 +14,8 @@ const OrderDetail = ({ route }) => {
     const nav = useNavigation();
     const [review, setReview] = useState("");
     const [rating, setRating] = useState(5);
+    const [complaints, setComplaints] = useState([]);
+
 
     useEffect(() => {
         const loadDetail = async () => {
@@ -28,6 +30,22 @@ const OrderDetail = ({ route }) => {
             }
         };
         loadDetail();
+    }, [order]);
+
+    // Load complaint khi vào màn chi tiết đơn hàng
+    useEffect(() => {
+        const loadComplaints = async () => {
+            try {
+                const token = await AsyncStorage.getItem("token");
+                const res = await authApis(token).get(endpoints["get-complaints"](order.order_code));
+                if (res.data) {
+                    setComplaints(res.data);  // lưu toàn bộ mảng
+                }
+            } catch (err) {
+                console.error("Lỗi load complaint:", err?.response?.data || err);
+            }
+        };
+        loadComplaints();
     }, [order]);
 
     const handleCancelService = async (orderId, serviceDetailId) => {
@@ -171,10 +189,40 @@ const OrderDetail = ({ route }) => {
                 <Button title="Gửi đánh giá" onPress={handleAddReview} />
             </View>
 
-            <View style={styles.cardDetailComplaint}>
-                <TouchableOpacity onPress={() => nav.navigate("orderComplaint", { order: order, order_detail: detail })}>
-                    <Text style={styles.complaintTitle}>Khiếu nại</Text>
-                </TouchableOpacity>
+            <View style={styles.cardDetail}>
+                {complaints.length > 0 ? (
+                    complaints.map((complaint) => (
+                        <View key={complaint.complaint_code} style={styles.complaintCard}>
+                            <Text style={styles.title}>Thông tin khiếu nại</Text>
+                            <Text style={styles.value}>Nội dung: {complaint.message}</Text>
+                            <Text style={styles.value}>Quyết định: {complaint.decision}</Text>
+                            <Text style={styles.value}>
+                                Đã giải quyết: {complaint?.resolved ? "Đã giải quyết" : "Chưa giải quyết"}
+                            </Text>
+                            <Text style={styles.value}>
+                                Giải quyết bởi: {complaint?.admin?.first_name} {complaint?.admin?.last_name}
+                            </Text>
+
+                            {complaint?.evidence_video && (
+                                <TouchableOpacity onPress={() => Linking.openURL(complaint.evidence_video)} style={styles.marginTop}>
+                                    <Text style={{ color: "blue", textDecorationLine: "underline" }}>
+                                        Xem video minh chứng
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                            {complaint?.evidence_image1 && <Image source={{ uri: complaint.evidence_image1 }} style={styles.complaintImg} />}
+                            {complaint?.evidence_image2 && <Image source={{ uri: complaint.evidence_image2 }} style={styles.complaintImg} />}
+                            {complaint?.evidence_image3 && <Image source={{ uri: complaint.evidence_image3 }} style={styles.complaintImg} />}
+                        </View>
+                    ))
+                ) : (
+                    <TouchableOpacity
+                        style={styles.cardDetailComplaint}
+                        onPress={() => nav.navigate("orderComplaint", { order: order, order_detail: detail })}
+                    >
+                        <Text style={styles.complaintTitle}>Khiếu nại</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </ScrollView>
     );

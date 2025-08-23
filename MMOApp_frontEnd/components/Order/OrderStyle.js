@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 3,
+        marginBottom: 12,
     },
     card: {
         padding: 12,
@@ -174,6 +175,12 @@ const styles = StyleSheet.create({
     },
     whiteText: {
         color: "#fff"
+    },
+    complaintImg: {
+        width: "100%",
+        height: 300,
+        marginTop: 16,
+        marginBottom: 16,
     }
 });
 

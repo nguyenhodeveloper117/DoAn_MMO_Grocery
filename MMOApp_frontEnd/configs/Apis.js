@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://127.0.0.1:8000";
-const BASE_URL = "http://192.168.1.24:8000";
+const BASE_URL = "http://127.0.0.1:8000";
+// const BASE_URL = "http://192.168.1.24:8000";
 
 export const endpoints = {
     'login': '/o/token/',
@@ -55,6 +55,7 @@ export const endpoints = {
     "add-favorite": (productId) => `/favorites/${productId}/add-favorites/`,
     "status-favorite": (productId) => `/favorites/${productId}/favourite-status/`,
     "add-complaint": '/complaints/',
+    "get-complaints": (orderId) => `/complaints/order/${orderId}/`,
 
 };
 

@@ -242,6 +242,12 @@ const StoreNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <OrderStack.Screen name="orderComplaint" component={OrderComplaint} options={{
+      title: 'Khiếu nại',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </StoreStack.Navigator>
 );
 
