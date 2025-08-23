@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { View, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import * as DocumentPicker from "expo-document-picker";
 import { authApis, endpoints } from "../../configs/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./OrderStyle";
 
 const OrderComplaint = ({ route, navigation }) => {
-    const { order } = route.params || {}; // truyền từ OrderDetails
+    const { order } = route.params || {};
     const [message, setMessage] = useState("");
-    const [images, setImages] = useState([null, null, null]); // lưu 3 ảnh
-    const [video, setVideo] = useState(null); // lưu video
+    const [images, setImages] = useState([null, null, null]);
+    const [videoUrl, setVideoUrl] = useState(""); // link video
     const [loading, setLoading] = useState(false);
 
     // chọn ảnh
@@ -20,7 +19,7 @@ const OrderComplaint = ({ route, navigation }) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaType,
             allowsEditing: true,
-            aspect: [1, 1], // Ensure a square aspect ratio for round profile images
+            aspect: [1, 1],
             quality: 0.8,
         });
 
@@ -31,17 +30,9 @@ const OrderComplaint = ({ route, navigation }) => {
         }
     };
 
-    // chọn video
-    const pickVideo = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-            allowsEditing: false,
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setVideo(result.assets[0]);
-        }
+    const isValidUrl = (string) => {
+        const pattern = /^(https?:\/\/[^\s]+)$/;
+        return pattern.test(string);
     };
 
     const submitComplaint = async () => {
@@ -49,9 +40,18 @@ const OrderComplaint = ({ route, navigation }) => {
             alert("Vui lòng nhập nội dung khiếu nại!");
             return;
         }
-
         if (!images[0]) {
             alert("Vui lòng chọn ít nhất 1 ảnh minh chứng!");
+            return;
+        }
+
+        if (!videoUrl.trim()) {
+            alert("Vui lòng dán link video minh chứng!");
+            return;
+        }
+        
+        if (!isValidUrl(videoUrl.trim())) {
+            alert("Link video không hợp lệ! Vui lòng dán link đầy đủ (http/https).");
             return;
         }
 
@@ -59,10 +59,10 @@ const OrderComplaint = ({ route, navigation }) => {
             setLoading(true);
             let formData = new FormData();
 
-            formData.append("order_code", order.order_code); // gửi order_code
+            formData.append("order_code", order.order_code);
             formData.append("message", message);
 
-            // append ảnh
+            // ảnh
             images.forEach((img, idx) => {
                 if (img?.uri) {
                     let uri = img.uri;
@@ -77,16 +77,9 @@ const OrderComplaint = ({ route, navigation }) => {
                 }
             });
 
-            // append video
-            if (video?.uri) {
-                let uri = video.uri;
-                let filename = uri.split("/").pop();
-
-                formData.append("evidence_video", {
-                    uri,
-                    name: filename,
-                    type: "video/mp4",
-                });
+            // video link
+            if (videoUrl.trim()) {
+                formData.append("evidence_video", videoUrl.trim());
             }
 
             const token = await AsyncStorage.getItem("token");
@@ -99,7 +92,7 @@ const OrderComplaint = ({ route, navigation }) => {
                 navigation.goBack();
             }
         } catch (err) {
-            console.error(err);
+            console.error("Lỗi gửi khiếu nại:", err.response?.data || err);
             alert("Có lỗi xảy ra khi gửi khiếu nại!");
         } finally {
             setLoading(false);
@@ -135,11 +128,14 @@ const OrderComplaint = ({ route, navigation }) => {
                 )}
             </View>
 
-            <Text style={styles.labelComplaint}>Video minh chứng</Text>
-            <TouchableOpacity onPress={pickVideo} style={styles.uploadBtn}>
-                <Text style={styles.whiteText}>{video ? "Đổi Video" : "Chọn Video"}</Text>
-            </TouchableOpacity>
-            {video && <Text style={styles.marginTop}>📹 {video.name}</Text>}
+            <Text style={styles.labelComplaint}>Link video minh chứng</Text>
+            <TextInput
+                label="Dán link video (OneDrive, Drive, Icloud...)"
+                mode="outlined"
+                value={videoUrl}
+                onChangeText={setVideoUrl}
+                style={styles.marginBottom}
+            />
 
             <Button
                 mode="contained"

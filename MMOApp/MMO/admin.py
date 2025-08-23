@@ -162,10 +162,10 @@ class ServiceOrderDetailAdmin(admin.ModelAdmin):
 # Complaint
 class ComplaintAdmin(admin.ModelAdmin):
     list_display = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin',
-                    'active','created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'video_display']
+                    'active','created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'evidence_video']
     search_fields = ['order__order_code', 'buyer__username']
     list_filter = ['resolved', 'decision']
-    readonly_fields = ['image_display1', 'image_display2', 'image_display3', 'video_display']
+    readonly_fields = ['image_display1', 'image_display2', 'image_display3']
 
     def image_display1(self, obj):
         if obj.evidence_image1:
@@ -178,10 +178,6 @@ class ComplaintAdmin(admin.ModelAdmin):
     def image_display3(self, obj):
         if obj.evidence_image3:
             return mark_safe(f"<img src='{obj.evidence_image3.url}' width='80' />")
-
-    def video_display(self, obj):
-        if obj.evidence_video:
-            return mark_safe(f"<img src='{obj.evidence_video.url}' width='80' />")
 
 
 # Review

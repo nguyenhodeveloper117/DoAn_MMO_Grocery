@@ -221,7 +221,7 @@ class Complaint(BaseModel):
     evidence_image1 = CloudinaryField(null=False, blank=False)
     evidence_image2 = CloudinaryField(null=True, blank=True)
     evidence_image3 = CloudinaryField(null=True, blank=True)
-    evidence_video = CloudinaryField(null=True, blank=True)
+    evidence_video = models.URLField(null=False, blank=False)
     resolved = models.BooleanField(default=False)
     decision = models.CharField(max_length=20, choices=[
         ('pending', 'Đang xem xét'),

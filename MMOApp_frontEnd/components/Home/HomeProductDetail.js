@@ -36,6 +36,11 @@ const HomeProductDetail = ({ route, navigation }) => {
     const user = useContext(MyUserContext);
     const dispatch = useContext(MyDispatchContext);
 
+    const isValidUrl = (string) => {
+        const pattern = /^(https?:\/\/[^\s]+)$/;
+        return pattern.test(string);
+    };
+
     // ---- Load trạng thái yêu thích ----
     const loadFavoriteStatus = async () => {
         if (!user) return; // chưa login thì bỏ qua
@@ -156,6 +161,12 @@ const HomeProductDetail = ({ route, navigation }) => {
         // validate service target url
         if (product.type === "service" && !targetUrl.trim()) {
             alert("Vui lòng nhập Link dịch vụ (Target URL)!");
+            return;
+        }
+
+        // validate service target url
+        if (product.type === "service" && (!isValidUrl(targetUrl.trim()))) {
+            alert("Link video không hợp lệ! Vui lòng dán link đầy đủ (http/https)");
             return;
         }
 

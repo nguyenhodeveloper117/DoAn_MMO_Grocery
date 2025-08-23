@@ -209,3 +209,35 @@ class HasPermComplaint(permissions.IsAuthenticated):
         ).exists()
 
         return True
+
+class CanViewComplaint(permissions.BasePermission):
+    """
+    Chỉ buyer (người mua) hoặc seller (người bán sản phẩm trong order) mới được xem khiếu nại
+    """
+    def has_permission(self, request, view):
+        order_code = view.kwargs.get("order_code")
+        if not order_code:
+            return False
+
+        from . import models
+        order = models.Order.objects.filter(order_code=order_code).first()
+        if not order:
+            return False
+
+        user = request.user
+
+        # Buyer
+        if order.buyer == user:
+            return True
+
+        # Seller của product trong order (acc/service)
+        product = None
+        if hasattr(order, "acc_detail") and order.acc_detail:
+            product = order.acc_detail.product
+        elif hasattr(order, "service_detail") and order.service_detail:
+            product = order.service_detail.product
+
+        if product and product.store.seller == user:
+            return True
+
+        return False

@@ -709,6 +709,16 @@ class ComplaintViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Update
     def get_permissions(self):
         if self.request.method in ['POST', 'PATCH', 'PUT']:
             return [perms.HasPermComplaint()]
-        if self.action in ['get_reviews_by_product']:
-            return [AllowAny()]
+        if self.action in ['get_complaints_by_order']:
+            return [perms.CanViewComplaint()]
         return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path="order/(?P<order_code>[^/.]+)")
+    def get_complaints_by_order(self, request, order_code=None):
+        order = models.Order.objects.filter(order_code=order_code).first()
+        if not order:
+            return Response({"detail": "Order không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+
+        complaints = models.Complaint.objects.filter(order=order, active=True)
+        serializer = self.get_serializer(complaints, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
