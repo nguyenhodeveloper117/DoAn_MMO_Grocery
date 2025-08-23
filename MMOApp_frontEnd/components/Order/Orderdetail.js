@@ -113,7 +113,7 @@ const OrderDetail = ({ route }) => {
                     <>
                         <TouchableOpacity
                             style={styles.detailButton}
-                            onPress={() => nav.navigate("productDetail", { product: detail.detail.product_info })}
+                            onPress={() => nav.navigate("homeProductDetail", { product: detail.detail.product_info })}
                         >
                             <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
                         </TouchableOpacity>
@@ -195,6 +195,7 @@ const OrderDetail = ({ route }) => {
                         <View key={complaint.complaint_code} style={styles.complaintCard}>
                             <Text style={styles.title}>Thông tin khiếu nại</Text>
                             <Text style={styles.value}>Nội dung: {complaint.message}</Text>
+                            <Text style={styles.value}>Người khiếu nại: {complaint.buyer.username}</Text>
                             <Text style={styles.value}>Quyết định: {complaint.decision}</Text>
                             <Text style={styles.value}>
                                 Đã giải quyết: {complaint?.resolved ? "Đã giải quyết" : "Chưa giải quyết"}

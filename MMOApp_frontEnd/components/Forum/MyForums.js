@@ -231,6 +231,8 @@ const MyForums = () => {
         ))}
       </ScrollView>
 
+      <Text style={styles.infoTotal}>Tổng số trang: {totalPages}</Text>
+
       {/* Danh sách blog */}
       {loading ? (
         <ActivityIndicator size="large" color="blue" />

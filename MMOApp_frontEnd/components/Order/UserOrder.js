@@ -139,6 +139,8 @@ const UserOrder = () => {
                             </Button>
                         ))}
                     </ScrollView>
+
+                    <Text style={styles.infoTotal}>Tổng số trang: {totalPages}</Text>
                 </View>
             }
         />

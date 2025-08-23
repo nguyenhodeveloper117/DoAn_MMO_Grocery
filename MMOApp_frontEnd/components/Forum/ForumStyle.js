@@ -97,7 +97,12 @@ const styles = StyleSheet.create({
         flexDirection: "row", 
         alignItems: "center", 
         marginVertical: 15
-    }
+    },
+    infoTotal: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginBottom: 10
+    },
 });
 
 export default styles;

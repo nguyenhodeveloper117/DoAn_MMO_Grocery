@@ -1,11 +1,10 @@
-import React, { useCallback, useContext, useEffect, useRef, useState, useMemo } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, ScrollView, Image } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, ScrollView } from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { Button, TextInput } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
 import Apis, { endpoints } from "../../configs/Apis";
-import MyStyles from "../../styles/MyStyles";
 import styles from "./HomeStyle";
-import { MyUserContext } from "../../configs/Contexts";
+import MyStyles from "../../styles/MyStyles";
 
 const categories = [
     { value: "", label: "Tất cả" },
@@ -15,9 +14,12 @@ const categories = [
     { value: "course", label: "Khoá học" },
 ];
 
-const Home = () => {
+const pageSize = 5;
+
+const HomeStoreProduct = () => {
+    const route = useRoute();
     const nav = useNavigation();
-    const user = useContext(MyUserContext);
+    const { store } = route.params; // store truyền từ HomeProductDetail
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,12 +29,9 @@ const Home = () => {
     const [category, setCategory] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
 
-    const [isFirstLoadDone, setIsFirstLoadDone] = useState(false);
     const debounceTimeout = useRef(null);
-
-    const pageSize = 5;
-
 
     const fetchAvgRating = async (productCode) => {
         try {
@@ -54,7 +53,7 @@ const Home = () => {
             if (!append) setLoading(true);
 
             try {
-                const res = await Apis.get(endpoints["get-products"], {
+                const res = await Apis.get(endpoints["get-product-store"](store.store_code), {
                     params: {
                         search: searchText || undefined,
                         type: category || undefined,
@@ -64,7 +63,7 @@ const Home = () => {
 
                 let data = res.data.results || res.data;
 
-                // Lấy avg_rating cho từng product
+                // Gắn avg_rating cho từng sản phẩm
                 const dataWithRating = await Promise.all(
                     data.map(async (p) => {
                         const avg = await fetchAvgRating(p.product_code);
@@ -72,28 +71,26 @@ const Home = () => {
                     })
                 );
 
-                // Khi merge data
-                setProducts(prev => {
+                setProducts((prev) => {
                     const merged = append ? [...prev, ...dataWithRating] : dataWithRating;
                     return merged.filter(
                         (item, index, self) =>
-                            index === self.findIndex(t => t.product_code === item.product_code)
+                            index === self.findIndex((t) => t.product_code === item.product_code)
                     );
                 });
-                setPage(pageNumber);
 
+                setPage(pageNumber);
                 const count = res.data.count || 0;
+                setTotalProducts(count);
                 setTotalPages(Math.max(1, Math.ceil(count / pageSize)));
             } catch (err) {
-                console.error("Lỗi load products:", err?.response?.data || err);
+                console.error("Lỗi load sản phẩm:", err?.response?.data || err);
             } finally {
                 if (!append) setLoading(false);
-                setIsFirstLoadDone(true);
             }
         },
-        [searchText, category, totalPages]
+        [searchText, category, store.store_code, totalPages]
     );
-
 
     // debounce search & filter
     useEffect(() => {
@@ -103,6 +100,10 @@ const Home = () => {
         }, 500);
         return () => clearTimeout(debounceTimeout.current);
     }, [searchText, category]);
+
+    useEffect(() => {
+        loadProducts(1, false);
+    }, [store.store_code]);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -121,38 +122,26 @@ const Home = () => {
             style={[styles.product, styles.viewRenderItem]}
             onPress={() => nav.navigate("homeProductDetail", { product: item })}
         >
-            <Image
-                source={{ uri: item.image }}
-                style={styles.image}
-            />
+            <Image source={{ uri: item.image }} style={styles.image} />
 
             <View style={styles.flex1}>
-                <Text style={styles.productTitle} >
-                    {item.name}
-                </Text>
+                <Text style={styles.productTitle}>{item.name}</Text>
                 {item.avg_rating ? (
-                    <Text style={styles.reviewStar}>
-                        ⭐ {item.avg_rating}/5
-                    </Text>
+                    <Text style={styles.reviewStar}>⭐ {item.avg_rating}/5</Text>
                 ) : (
                     <Text style={styles.noReview}>⭐ Chưa có đánh giá</Text>
                 )}
 
-
-                <Text style={styles.productCategory} >
-                    {item.price}đ | Loại: {item.type} | {new Date(item.created_date).toLocaleDateString()}
+                <Text style={styles.productCategory}>
+                    {item.price}đ | Loại: {item.type} |{" "}
+                    {new Date(item.created_date).toLocaleDateString()}
                 </Text>
-                <Text
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                    style={styles.productDes}
-                >
+                <Text numberOfLines={2} ellipsizeMode="tail" style={styles.productDes}>
                     {item.description}
                 </Text>
             </View>
         </TouchableOpacity>
     );
-
 
     return (
         <FlatList
@@ -164,12 +153,18 @@ const Home = () => {
             onEndReached={loadMore}
             onEndReachedThreshold={0.3}
             contentContainerStyle={MyStyles.container}
-            ListFooterComponent={
-                page < totalPages && <ActivityIndicator />
-            }
-            ListEmptyComponent={<Text style={styles.noProduct}>Chưa có sản phẩm nào!</Text>}
+            ListFooterComponent={page < totalPages && <ActivityIndicator />}
+            ListEmptyComponent={<Text style={styles.noProduct}>Không có sản phẩm nào!</Text>}
             ListHeaderComponent={
                 <View>
+                    {/* Info Store */}
+                    <View style={[styles.priceBox, styles.marginBottom]}>
+                        <Text style={styles.name}>{store.name}</Text>
+                        <Text style={styles.subInfoProduct}>Mô tả: {store.description}</Text>
+                        <Text style={styles.created_date}>Ngày tạo: {new Date(store.created_date).toLocaleDateString()}</Text>
+                        <Text style={styles.infoTotal}>Tổng sản phẩm: {totalProducts}</Text>
+                    </View>
+
                     {/* Search */}
                     <TextInput
                         placeholder="Tìm kiếm sản phẩm..."
@@ -203,8 +198,7 @@ const Home = () => {
                 </View>
             }
         />
-
     );
 };
 
-export default Home;
+export default HomeStoreProduct;

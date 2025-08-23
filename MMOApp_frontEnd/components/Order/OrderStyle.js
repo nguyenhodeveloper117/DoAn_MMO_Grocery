@@ -181,7 +181,12 @@ const styles = StyleSheet.create({
         height: 300,
         marginTop: 16,
         marginBottom: 16,
-    }
+    },
+    infoTotal: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginBottom: 10
+    },
 });
 
 export default styles;

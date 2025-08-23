@@ -119,6 +119,12 @@ const styles = StyleSheet.create({
         fontWeight: "normal",
         fontSize: 20,
     },
+    approve: {
+        color: "#190303ff",
+        fontWeight: "600",
+        fontSize: 20,
+        marginTop: 6
+    },
     menuItem: {
         paddingHorizontal: 30,
     },

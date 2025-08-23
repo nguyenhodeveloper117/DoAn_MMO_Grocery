@@ -36,6 +36,7 @@ import StoreOrder from "./components/Store/StoreOrder";
 import StoreOrderDetail from "./components/Store/StoreOrderDetail";
 import FavoriteProducts from "./components/User/FavouriteProduct";
 import OrderComplaint from "./components/Order/OrderComplaint";
+import HomeStoreProduct from "./components/Home/HomeStoreProduct";
 
 
 
@@ -63,6 +64,12 @@ const HomeNavigator = () => {
         }} />
       <LoginStack.Screen name="homeProductDetail" component={HomeProductDetail} options={{
         title: 'Chi tiết sản phẩm',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
+      <LoginStack.Screen name="homeStoreProduct" component={HomeStoreProduct} options={{
+        title: 'Gian hàng người bán',
         headerTitleStyle: {
           ...MyStyles.header,
         }
@@ -236,7 +243,7 @@ const StoreNavigator = () => (
         ...MyStyles.header,
       }
     }} />
-    <OrderStack.Screen name="orderProductDetail" component={HomeProductDetail} options={{
+    <OrderStack.Screen name="homeProductDetail" component={HomeProductDetail} options={{
       title: 'Chi tiết sản phẩm',
       headerTitleStyle: {
         ...MyStyles.header,
@@ -244,6 +251,12 @@ const StoreNavigator = () => (
     }} />
     <OrderStack.Screen name="orderComplaint" component={OrderComplaint} options={{
       title: 'Khiếu nại',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <LoginStack.Screen name="homeStoreProduct" component={HomeStoreProduct} options={{
+      title: 'Gian hàng người bán',
       headerTitleStyle: {
         ...MyStyles.header,
       }
@@ -266,7 +279,7 @@ const UserOrderNavigator = () => (
         ...MyStyles.header,
       }
     }} />
-    <OrderStack.Screen name="productDetail" component={HomeProductDetail} options={{
+    <OrderStack.Screen name="homeProductDetail" component={HomeProductDetail} options={{
       title: 'Chi tiết sản phẩm',
       headerTitleStyle: {
         ...MyStyles.header,
@@ -274,6 +287,12 @@ const UserOrderNavigator = () => (
     }} />
     <OrderStack.Screen name="orderComplaint" component={OrderComplaint} options={{
       title: 'Khiếu nại',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <LoginStack.Screen name="homeStoreProduct" component={HomeStoreProduct} options={{
+      title: 'Gian hàng người bán',
       headerTitleStyle: {
         ...MyStyles.header,
       }

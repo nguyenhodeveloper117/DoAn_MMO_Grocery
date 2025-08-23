@@ -131,6 +131,27 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
         except models.Store.DoesNotExist:
             return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, methods=['get'], url_path='store-products')
+    def store_products(self, request, pk=None):
+        # Lấy tất cả sản phẩm của một store dựa vào store_code
+        try:
+            store = models.Store.objects.get(store_code=pk, active=True)
+            queryset = models.Product.objects.filter(store=store, active = True, is_approved=True).order_by('-created_date')
+
+            for backend in [DjangoFilterBackend, filters.SearchFilter]:
+                queryset = backend().filter_queryset(request, queryset, self)
+
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+
+        except models.Store.DoesNotExist:
+            return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class BlogViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
                   generics.DestroyAPIView):

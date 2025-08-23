@@ -222,6 +222,7 @@ const StoreSeller = () => {
                 <Text style={styles.label} numberOfLines={2}>
                   {item.description}
                 </Text>
+                <Text style={styles.approve}>Phê duyệt: {item.is_approved ? "Đã duyệt" : "Chưa duyệt"}</Text>
               </Card.Content>
               <Card.Actions>
                 <Button onPress={() => navigateViewProduct(item)}>Xem chi tiết</Button>

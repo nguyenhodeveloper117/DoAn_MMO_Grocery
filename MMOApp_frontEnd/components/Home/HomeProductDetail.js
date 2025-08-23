@@ -234,9 +234,15 @@ const HomeProductDetail = ({ route, navigation }) => {
             <Text style={styles.price}>{product.price.toLocaleString()} VNĐ</Text>
 
             <View style={styles.favoriteBtn}>
+                <TouchableOpacity style={styles.favoriteBtn} onPress={() => nav.navigate("homeStoreProduct", { store: product.store })}>
+                    <Text style={styles.storeBtn}>Xem cửa hàng</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.favoriteBtn}>
                 <TouchableOpacity onPress={handleAddFavorite} style={styles.favoriteBtn}>
                     <AntDesign name={favorited ? "heart" : "hearto"} size={24} color={favorited ? "red" : "black"} />
-                    <Text style={{ marginLeft: 5 }}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
+                    <Text style={styles.marginLeft}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
                 </TouchableOpacity>
             </View>
 

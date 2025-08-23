@@ -137,7 +137,13 @@ const StoreOrderDetail = ({ route }) => {
                 <Text style={styles.title}>Chi tiết</Text>
                 {detail.type === "service" ? (
                     <>
-                        <Text>Sản phẩm: {detail.detail.product_info?.name} | {detail.detail.product_info?.store.name}</Text>
+                        {/* Nút chuyển hướng sang trang chi tiết sản phẩm */}
+                        <TouchableOpacity
+                            style={styles.detailButton}
+                            onPress={() => nav.navigate("homeProductDetail", { product: detail.detail.product_info })}
+                        >
+                            <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
+                        </TouchableOpacity>
                         <Text>Loại: {detail.detail.product_info?.type}</Text>
                         <Text>Target URL: {detail.detail.target_url}</Text>
                         <Text>Số lượng: {detail.detail.quantity}</Text>
@@ -239,6 +245,7 @@ const StoreOrderDetail = ({ route }) => {
                     complaints.map((complaint) => (
                         <View key={complaint.complaint_code} style={styles.complaintCard}>
                             <Text style={styles.title}>Thông tin khiếu nại</Text>
+                            <Text style={styles.value}>Người khiếu nại: {complaint.buyer.username}</Text>
                             <Text style={styles.value}>Nội dung: {complaint.message}</Text>
                             <Text style={styles.value}>Quyết định: {complaint.decision}</Text>
                             <Text style={styles.value}>

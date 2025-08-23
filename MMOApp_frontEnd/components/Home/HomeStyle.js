@@ -7,6 +7,9 @@ const styles = StyleSheet.create({
     marginRight: {
         marginRight: 8,
     },
+    marginLeft: {
+        marginLeft: 5,
+    },
     product: {
         padding: 10,
         marginBottom: 10,
@@ -109,6 +112,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 5
     },
+    infoTotal: {
+        fontStyle: "italic",
+        fontSize: 12,
+        marginBottom: 10
+    },
     reviewBox: {
         padding: 10,
         marginVertical: 5,
@@ -146,8 +154,19 @@ const styles = StyleSheet.create({
     favoriteBtn: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 8,
-    }
+        paddingVertical: 5,
+    },
+    storeBtn: {
+        backgroundColor: "green",
+        padding: 14,
+        borderRadius: 8,
+        alignItems: "center",
+        color: "#fff",
+    },
+    created_date: {
+        fontStyle: "italic",
+        fontSize: 12,
+    },
 });
 
 export default styles;

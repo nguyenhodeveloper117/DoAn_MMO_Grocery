@@ -226,6 +226,8 @@ const MMOForum = () => {
         </View>
       )}
 
+      <Text style={styles.infoTotal}>Tổng số trang: {totalPages}</Text>
+
       {/* Blog list */}
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
