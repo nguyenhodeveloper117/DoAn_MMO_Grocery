@@ -14,7 +14,6 @@ from django.utils.dateparse import parse_date
 from django.db.models import Sum
 
 
-
 class MyAdminSite(admin.AdminSite):
     site_header = 'MMO App'
 
@@ -232,6 +231,7 @@ class MyAdminSite(admin.AdminSite):
         }
         return TemplateResponse(request, 'admin/stats_view.html', context)
 
+
 @admin.action(description="Xuất CSV Acc Order")
 def export_to_csv_acc(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
@@ -252,13 +252,15 @@ def export_to_csv_acc(modeladmin, request, queryset):
         ])
     return response
 
+
 @admin.action(description="Xuất CSV Service Order")
 def export_to_csv_service(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="service_order_details.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Mã đơn dịch vụ', 'Sản phẩm', 'Số lượng', 'Giá', 'Tổng tiền', 'Trạng thái', 'Link giao hàng', 'Ghi chú'])
+    writer.writerow(
+        ['Mã đơn dịch vụ', 'Sản phẩm', 'Số lượng', 'Giá', 'Tổng tiền', 'Trạng thái', 'Link giao hàng', 'Ghi chú'])
 
     for obj in queryset:
         writer.writerow([
@@ -278,8 +280,8 @@ def export_to_csv_service(modeladmin, request, queryset):
 # User
 class UserAdmin(admin.ModelAdmin):
     list_display = ['user_code', 'username', 'first_name', 'last_name', 'balance', 'email', 'role', 'is_verified',
-                    'is_superuser' ,'is_staff', 'is_active', 'date_joined', 'last_login', 'avatar_display']
-    list_filter = ['role', 'is_staff', 'is_active']
+                    'is_superuser', 'is_staff', 'is_active', 'date_joined', 'last_login', 'avatar_display']
+    list_filter = ['role', 'is_staff', 'is_active', 'is_verified', 'is_superuser']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     ordering = ['-date_joined']
     readonly_fields = ['avatar_display']
@@ -293,12 +295,13 @@ class UserAdmin(admin.ModelAdmin):
             obj.set_password(obj.password)
         super().save_model(request, obj, form, change)
 
+
 # Verification
 class VerificationAdmin(admin.ModelAdmin):
     list_display = ['verification_code', 'user', 'cccd', 'front_id_image', 'back_id_image', 'portrait_image', 'status',
                     'active', 'created_date', 'updated_date']
     search_fields = ['verification_code', 'user__username']
-    list_filter = ['status']
+    list_filter = ['status', 'active']
     readonly_fields = ['front_id_image', 'back_id_image', 'portrait_image']
 
     def front_id_image(self, obj):
@@ -313,18 +316,20 @@ class VerificationAdmin(admin.ModelAdmin):
         if obj.portrait:
             return mark_safe(f"<img src='{obj.portrait.url}' width='80' />")
 
+
 # Store
 class StoreAdmin(admin.ModelAdmin):
     list_display = ['store_code', 'name', 'seller', 'active', 'created_date', 'updated_date']
     search_fields = ['name', 'seller__username']
-    list_filter = ['created_date']
+    list_filter = ['created_date', 'active']
+
 
 # Product
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['product_code', 'name', 'store', 'type', 'price', 'available_quantity', 'is_approved',
                     'active', 'created_date', 'updated_date', 'image_display']
     search_fields = ['name', 'store__name']
-    list_filter = ['type', 'is_approved']
+    list_filter = ['type', 'is_approved', 'store', 'active']
 
     readonly_fields = ['image_display']
 
@@ -332,9 +337,10 @@ class ProductAdmin(admin.ModelAdmin):
         if obj.image:
             return mark_safe(f"<img src='{obj.image.url}' width='80' />")
 
+
 class AccountStockAdmin(admin.ModelAdmin):
     list_display = ['stock_code', 'product', 'is_sold', 'sold_at', 'active', 'created_date', 'updated_date']
-    list_filter = ['is_sold', 'product']
+    list_filter = ['is_sold', 'product', 'active']
     search_fields = ['stock_code', 'product__name', 'content']
     readonly_fields = ['stock_code', 'sold_at', 'created_date', 'updated_date']
     list_per_page = 20
@@ -345,37 +351,70 @@ class VoucherAdmin(admin.ModelAdmin):
     list_display = ['voucher_code', 'code', 'store', 'discount_percent', 'max_discount', 'expired_at', 'quantity',
                     'active', 'created_date', 'updated_date']
     search_fields = ['code', 'store__name']
-    list_filter = ['expired_at']
+    list_filter = ['expired_at', 'active', 'store__store_code']
+
+
+class ComplaintInlineAdmin(admin.StackedInline):
+    model = Complaint
+    fk_name = 'order'
+    readonly_fields = ['complaint_code', 'image_display1', 'image_display2', 'image_display3', 'created_date',
+                       'updated_date']  # Dùng để hiển thị ảnh
+
+    fields = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin',
+              'active', 'created_date', 'updated_date', 'evidence_image1', 'evidence_image2', 'evidence_image3',
+              'image_display1', 'image_display2', 'image_display3', 'evidence_video']  # Sắp xếp field hiển thị
+    extra = 0
+
+    def image_display1(self, obj):
+        if obj.evidence_image1:
+            return mark_safe(f"<img src='{obj.evidence_image1.url}' width='80' />")
+
+    def image_display2(self, obj):
+        if obj.evidence_image2:
+            return mark_safe(f"<img src='{obj.evidence_image2.url}' width='80' />")
+
+    def image_display3(self, obj):
+        if obj.evidence_image3:
+            return mark_safe(f"<img src='{obj.evidence_image3.url}' width='80' />")
+
 
 # Order
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_code', 'buyer', 'is_paid', "voucher", 'status', 'released_at', 'active', 'created_date', 'updated_date']
+    list_display = ['order_code', 'buyer', 'is_paid', "voucher", 'status', 'released_at', 'active', 'created_date',
+                    'updated_date']
     search_fields = ['order_code', 'buyer__username']
-    list_filter = ['status', 'is_paid']
+    list_filter = ['status', 'is_paid', 'active']
+    inlines = [ComplaintInlineAdmin, ]
 
 
 # AccOrderDetail
 class AccOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount', 'discount_amount', 'content_delivered',
+    list_display = ['acc_order_detail_code', 'order', 'product', 'unit_price', 'quantity', 'total_amount',
+                    'discount_amount', 'content_delivered',
                     'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name']
+    list_filter = ['active']
     readonly_fields = ['total_amount', 'unit_price']
     actions = [export_to_csv_acc]
 
+
 class ServiceOrderDetailAdmin(admin.ModelAdmin):
-    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status', 'total_amount', 'discount_amount',
+    list_display = ['service_order_detail_code', 'order', 'product', 'target_url', 'unit_price', 'quantity', 'status',
+                    'total_amount', 'discount_amount',
                     'active', 'created_date', 'updated_date']
     search_fields = ['order__order_code', 'product__name', 'target_url']
-    list_filter = ['status']
+    list_filter = ['status', 'active']
     readonly_fields = ['total_amount', 'unit_price']
     actions = [export_to_csv_service]
+
 
 # Complaint
 class ComplaintAdmin(admin.ModelAdmin):
     list_display = ['complaint_code', 'order', 'buyer', 'message', 'resolved', 'decision', 'admin',
-                    'active','created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3', 'evidence_video']
+                    'active', 'created_date', 'updated_date', 'image_display1', 'image_display2', 'image_display3',
+                    'evidence_video']
     search_fields = ['order__order_code', 'buyer__username']
-    list_filter = ['resolved', 'decision']
+    list_filter = ['resolved', 'decision', 'order__order_code', 'active']
     readonly_fields = ['image_display1', 'image_display2', 'image_display3']
 
     def image_display1(self, obj):
@@ -395,35 +434,40 @@ class ComplaintAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['review_code', 'product', 'order', 'buyer', 'rating', 'active', 'created_date', 'updated_date']
     search_fields = ['product__name', 'buyer__username']
-
+    list_filter = ['product__product_code', 'rating', 'active']
 
 # Blog
 class BlogAdmin(admin.ModelAdmin):
     list_display = ['blog_code', 'title', 'author', 'category', 'active', 'created_date', 'updated_date']
-    search_fields = ['title', 'author__username', 'category']
+    search_fields = ['title']
+    list_filter = ['author__user_code', 'category', 'active']
 
 
 # BlogComment
 class BlogCommentAdmin(admin.ModelAdmin):
     list_display = ['blog_comment_code', 'blog', 'author', 'active', 'created_date', 'updated_date']
     search_fields = ['blog__title', 'author__username']
+    list_filter = ['blog__blog_code', 'active']
+
 
 # Blog Like
 class BlogLikeAdmin(admin.ModelAdmin):
     list_display = ['blog_like_code', 'blog', 'user', 'active', 'created_date', 'updated_date']
     search_fields = ['blog__title', 'user__username']
+    list_filter = ['blog__blog_code', 'active']
 
 # TransactionHistory
 class TransactionHistoryAdmin(admin.ModelAdmin):
     list_display = ['transaction_code', 'user', 'type', 'amount', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username']
-    list_filter = ['type']
+    list_filter = ['type', 'active']
 
 
 # FavoriteProduct
 class FavoriteProductAdmin(admin.ModelAdmin):
     list_display = ['favorite_code', 'user', 'product', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username', 'product__name']
+    list_filter = ['user__user_code', 'active']
 
 
 # Custom Admin site
