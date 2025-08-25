@@ -2,15 +2,168 @@
 
 {% block content %}
 <div class="stats-container">
-    <h1>THỐNG KÊ</h1>
+    <h1>📊 Thống kê độ uy tín Store</h1>
+
+    <!-- Form lọc -->
+    <form method="get" class="filter-form">
+        <label>Mã Store:
+            <input type="text" name="store_code" value="{{ store_code }}">
+        </label>
+        <label>Từ:
+            <input type="date" name="from" value="{{ date_from }}">
+        </label>
+        <label>Đến:
+            <input type="date" name="to" value="{{ date_to }}">
+        </label>
+        <button type="submit">Lọc</button>
+    </form>
+
+    {% if store %}
+    <h2>Kết quả cho Store: {{ store.name }} ({{ store.pk }})</h2>
+
+    <!-- Cards chỉ số -->
+    <div class="cards">
+        <div class="card">Tổng đơn: {{ total_orders }}</div>
+        <div class="card">Hoàn tất: {{ completed_orders }}</div>
+        <div class="card">Hoàn tiền: {{ refunded_orders }}</div>
+        <div class="card">Bị khiếu nại: {{ complained_orders }}</div>
+        <div class="card">⭐ Rating TB: {{ avg_rating }}</div>
+        <div class="card">⏱ TB giao hàng:
+            {% if avg_delivery_hours %}{{ avg_delivery_hours }} giờ{% else %}N/A{% endif %}
+        </div>
+        <div class="card">Tỉ lệ hoàn tất: {{ fulfill_rate_pct }}%</div>
+        <div class="card">Tỉ lệ khiếu nại: {{ complaint_rate_pct }}%</div>
+        <div class="card">Tỉ lệ hoàn tiền: {{ refund_rate_pct }}%</div>
+        <div class="card">💰 Doanh thu: {{ revenue_total }}</div>
+    </div>
+
+    <!-- Điểm uy tín -->
+    <div class="score-container">
+        <h3>Điểm uy tín: {{ reputation_score }}/100</h3>
+        <div class="progress">
+            <div class="progress-bar" style="width: {{ reputation_score }}%"></div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ -->
+    <div class="charts">
+        <canvas id="ordersChart"></canvas>
+        <canvas id="revenueChart"></canvas>
+        <canvas id="ratingChart"></canvas>
+    </div>
+    {% endif %}
 </div>
 
-<!-- Thêm Chart.js qua CDN -->
+<!-- Thêm Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
+    const labels = {{ labels|safe }};
+    const orderCounts = {{ order_counts|safe }};
+    const ratingLabels = {{ rating_labels|safe }};
+    const ratingValues = {{ rating_values|safe }};
+    const revenueValues = {{ revenue_values|default:"[]"|safe }};
+
+    if (labels.length) {
+        new Chart(document.getElementById('ordersChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số đơn hàng theo ngày',
+                    data: orderCounts,
+                    borderColor: 'blue',
+                    backgroundColor: 'lightblue',
+                    tension: 0.3
+                }]
+            }
+        });
+    }
+
+    if (ratingLabels.length) {
+        new Chart(document.getElementById('ratingChart'), {
+            type: 'bar',
+            data: {
+                labels: ratingLabels,
+                datasets: [{
+                    label: 'Rating trung bình theo ngày',
+                    data: ratingValues,
+                    backgroundColor: 'orange'
+                }]
+            },
+            options: {
+                scales: {
+                    y: { min: 0, max: 5, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    if (labels.length && revenueValues.length) {
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu theo ngày',
+                    data: revenueValues,
+                    borderColor: 'green',
+                    backgroundColor: 'lightgreen',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 </script>
 
 <style>
+    .stats-container {
+        padding: 20px;
+    }
+    .filter-form {
+        margin-bottom: 20px;
+    }
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .card {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .score-container {
+        margin-bottom: 20px;
+    }
+    .progress {
+        width: 100%;
+        background: #ddd;
+        height: 20px;
+        border-radius: 10px;
+    }
+    .progress-bar {
+        height: 100%;
+        background: green;
+        border-radius: 10px;
+    }
+    .charts {
+        display: grid;
+        grid-template-columns: 1fr; /* chỉ 1 cột */
+        gap: 20px;
+    }
 </style>
 {% endblock %}

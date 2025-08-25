@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";

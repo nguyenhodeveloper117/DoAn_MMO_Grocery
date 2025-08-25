@@ -147,6 +147,12 @@ const ProfileNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <LoginStack.Screen name="homeStoreProduct" component={HomeStoreProduct} options={{
+      title: 'Gian hàng người bán',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
   </ProfileStack.Navigator>
 );
 
