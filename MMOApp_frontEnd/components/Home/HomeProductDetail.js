@@ -246,6 +246,18 @@ const HomeProductDetail = ({ route, navigation }) => {
                 </TouchableOpacity>
             </View>
 
+            <TouchableOpacity
+                style={styles.chatBtn}
+                onPress={() =>
+                    nav.navigate("chatBox", {
+                        seller: product.store.seller,
+                        user: user, // pass thông tin người mua hiện tại
+                    })
+                }
+            >
+                <Text style={styles.storeBtn}>💬 Chat với người bán</Text>
+            </TouchableOpacity>
+
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>
             <Text style={styles.subInfoProduct}>Định dạng: {product.format}</Text>
             <Text style={styles.subInfoProduct}>Bảo hành: {product.warranty_days} ngày</Text>

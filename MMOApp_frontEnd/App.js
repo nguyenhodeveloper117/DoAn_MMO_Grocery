@@ -5,7 +5,6 @@ import Login from "./components/User/Login";
 import Register from "./components/User/Register";
 import Profile from "./components/User/Profile";
 import MMOForum from "./components/Forum/MMOForum";
-import ChatBox from "./components/Chat/ChatBox";
 import UpdateUser from "./components/User/UpdateUser";
 import Verification from "./components/User/Verification";
 import ForgotPassword from "./components/User/ForgotPassword";
@@ -37,6 +36,8 @@ import StoreOrderDetail from "./components/Store/StoreOrderDetail";
 import FavoriteProducts from "./components/User/FavouriteProduct";
 import OrderComplaint from "./components/Order/OrderComplaint";
 import HomeStoreProduct from "./components/Home/HomeStoreProduct";
+import ConversationList from "./components/Chat/ConversationList";
+import ChatBox from "./components/Chat/ChatBox";
 
 
 
@@ -50,14 +51,21 @@ const HomeNavigator = () => {
           ...MyStyles.header,
         },
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("chat")}>
+          <TouchableOpacity onPress={() => navigation.navigate("conversationList")}>
             <IconButton icon="message" size={24} />
           </TouchableOpacity>
         ),
       })} />
       <HomeStack.Screen
-        name="chat" component={ChatBox} options={{
-          title: 'ChatBox',
+        name="conversationList" component={ConversationList} options={{
+          title: 'Danh sách cuộc trò chuyện',
+          headerTitleStyle: {
+            ...MyStyles.header,
+          }
+        }} />
+      <HomeStack.Screen
+        name="chatBox" component={ChatBox} options={{
+          title: 'Cuộc trò chuyện',
           headerTitleStyle: {
             ...MyStyles.header,
           }

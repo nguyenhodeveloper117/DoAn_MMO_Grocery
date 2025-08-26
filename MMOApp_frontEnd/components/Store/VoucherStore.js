@@ -10,7 +10,7 @@ import styles from "./StoreStyle";
 const emptyForm = {
   code: "",
   discount_percent: "",
-  max_discount: "30000.00",
+  max_discount: "30000",
   expired_at: "",
   quantity: ""
 };
