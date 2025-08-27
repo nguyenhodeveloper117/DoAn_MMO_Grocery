@@ -233,11 +233,29 @@ const HomeProductDetail = ({ route, navigation }) => {
             <Text style={styles.name}>{product.name} | {product.store.name}</Text>
             <Text style={styles.price}>{product.price.toLocaleString()} VNĐ</Text>
 
-            <View style={styles.favoriteBtn}>
-                <TouchableOpacity style={styles.favoriteBtn} onPress={() => nav.navigate("homeStoreProduct", { store: product.store })}>
+            <View style={styles.flexStoreChat}>
+                <TouchableOpacity
+                    style={styles.favoriteBtn}
+                    onPress={() => nav.navigate("homeStoreProduct", { store: product.store })}
+                >
                     <Text style={styles.storeBtn}>Xem cửa hàng</Text>
                 </TouchableOpacity>
+
+                {user && (
+                    <TouchableOpacity
+                        style={styles.chatBtn}
+                        onPress={() =>
+                            nav.navigate("chatBox", {
+                                seller: product.store.seller,
+                                user: user,
+                            })
+                        }
+                    >
+                        <Text style={styles.chatBtn1}>💬</Text>
+                    </TouchableOpacity>
+                )}
             </View>
+
 
             <View style={styles.favoriteBtn}>
                 <TouchableOpacity onPress={handleAddFavorite} style={styles.favoriteBtn}>
@@ -245,18 +263,6 @@ const HomeProductDetail = ({ route, navigation }) => {
                     <Text style={styles.marginLeft}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
                 </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-                style={styles.chatBtn}
-                onPress={() =>
-                    nav.navigate("chatBox", {
-                        seller: product.store.seller,
-                        user: user, // pass thông tin người mua hiện tại
-                    })
-                }
-            >
-                <Text style={styles.storeBtn}>💬 Chat với người bán</Text>
-            </TouchableOpacity>
 
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>
             <Text style={styles.subInfoProduct}>Định dạng: {product.format}</Text>

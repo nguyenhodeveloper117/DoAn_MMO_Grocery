@@ -156,6 +156,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 5,
     },
+    chatBtn: { 
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 5,
+    },
     storeBtn: {
         backgroundColor: "green",
         padding: 14,
@@ -163,10 +168,22 @@ const styles = StyleSheet.create({
         alignItems: "center",
         color: "#fff",
     },
+    chatBtn1: {
+        backgroundColor: "#b5faf9ff",
+        padding: 14,
+        borderRadius: 8,
+        alignItems: "center",
+        color: "#fff",
+        marginLeft: 10
+    },
     created_date: {
         fontStyle: "italic",
         fontSize: 12,
     },
+    flexStoreChat: { 
+        flexDirection: "row", 
+        alignItems: "center" 
+    }
 });
 
 export default styles;

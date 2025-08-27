@@ -1,11 +1,32 @@
 // components/Chat/ChatBox.js
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { rtdb } from "../../configs/firebaseConfig";
 import { ref, push, onChildAdded, serverTimestamp, set, update } from "firebase/database";
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
+import { useNavigation } from "@react-navigation/native";
+import MyStyles from "../../styles/MyStyles";
+import styles from "./ChatStyle";
 
 const ChatBox = ({ route }) => {
+    const navigation = useNavigation();
+    const ctxUser = useContext(MyUserContext);
+    const dispatch = useContext(MyDispatchContext);
+    const currentUser = user || ctxUser;
     const { seller, user } = route.params;
+
+    // // nếu chưa đăng nhập thì redirect sang login
+    // useEffect(() => {
+    //     if (!currentUser) {
+    //         alert("Bạn cần đăng nhập để nhắn tinZ!");
+    //         navigation.navigate("login");
+    //     }
+    // }, [currentUser]);
+
+    // if (!currentUser) {
+    //     return null; // chưa render gì khi đang redirect
+    // }
+
     const chatId = [user.user_code, seller.user_code].sort().join("_");
     const messagesRefPath = `chats/${chatId}/messages`;
 
@@ -62,18 +83,19 @@ const ChatBox = ({ route }) => {
         return (
             <View style={[styles.bubble, mine ? styles.myBubble : styles.otherBubble]}>
                 <Text style={mine ? styles.myText : styles.otherText}>{item.text}</Text>
+                <Text style={styles.date}>{item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown"}</Text>
             </View>
         );
     };
 
     return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <KeyboardAvoidingView style={styles.flex1} behavior={Platform.OS === "ios" ? "padding" : undefined}>
             <FlatList
                 ref={listRef}
                 data={messages}
                 keyExtractor={(i) => i.id}
                 renderItem={renderItem}
-                contentContainerStyle={{ padding: 10 }}
+                contentContainerStyle={styles.padding}
             />
 
             <View style={styles.inputRow}>
@@ -84,22 +106,11 @@ const ChatBox = ({ route }) => {
                     placeholder="Nhập tin nhắn..."
                 />
                 <TouchableOpacity style={styles.btn} onPress={sendMessage}>
-                    <Text style={{ color: "#fff" }}>Gửi</Text>
+                    <Text style={styles.white}>Gửi</Text>
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );
 };
-
-const styles = StyleSheet.create({
-    bubble: { padding: 10, borderRadius: 12, marginVertical: 6, maxWidth: "75%" },
-    myBubble: { backgroundColor: "#007AFF", alignSelf: "flex-end" },
-    otherBubble: { backgroundColor: "#e5e5ea", alignSelf: "flex-start" },
-    myText: { color: "#fff" },
-    otherText: { color: "#000" },
-    inputRow: { flexDirection: "row", padding: 8, borderTopWidth: 1, borderColor: "#ddd" },
-    input: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 20, paddingHorizontal: 12, height: 40 },
-    btn: { marginLeft: 8, backgroundColor: "#007AFF", borderRadius: 20, paddingHorizontal: 16, justifyContent: "center" }
-});
 
 export default ChatBox;

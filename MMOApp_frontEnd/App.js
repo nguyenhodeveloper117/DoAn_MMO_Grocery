@@ -43,6 +43,7 @@ import ChatBox from "./components/Chat/ChatBox";
 
 const HomeStack = createNativeStackNavigator();
 const HomeNavigator = () => {
+  const user = useContext(MyUserContext);
   return (
     <HomeStack.Navigator>
       <HomeStack.Screen name="home" component={Home} options={({ navigation }) => ({
@@ -51,14 +52,16 @@ const HomeNavigator = () => {
           ...MyStyles.header,
         },
         headerRight: () => (
-          <TouchableOpacity onPress={() => navigation.navigate("conversationList")}>
-            <IconButton icon="message" size={24} />
-          </TouchableOpacity>
+          user ? (
+            <TouchableOpacity onPress={() => navigation.navigate("conversationList")}>
+              <IconButton icon="message" size={24} />
+            </TouchableOpacity>
+          ) : null
         ),
       })} />
       <HomeStack.Screen
         name="conversationList" component={ConversationList} options={{
-          title: 'Danh sách cuộc trò chuyện',
+          title: 'Các cuộc trò chuyện',
           headerTitleStyle: {
             ...MyStyles.header,
           }
@@ -161,6 +164,13 @@ const ProfileNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <HomeStack.Screen
+      name="chatBox" component={ChatBox} options={{
+        title: 'Cuộc trò chuyện',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
   </ProfileStack.Navigator>
 );
 
@@ -275,6 +285,13 @@ const StoreNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <HomeStack.Screen
+      name="chatBox" component={ChatBox} options={{
+        title: 'Cuộc trò chuyện',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
   </StoreStack.Navigator>
 );
 
@@ -311,6 +328,13 @@ const UserOrderNavigator = () => (
         ...MyStyles.header,
       }
     }} />
+    <HomeStack.Screen
+      name="chatBox" component={ChatBox} options={{
+        title: 'Cuộc trò chuyện',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
   </OrderStack.Navigator>
 );
 
