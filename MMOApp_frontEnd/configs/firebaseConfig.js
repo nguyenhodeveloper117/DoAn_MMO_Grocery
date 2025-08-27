@@ -1,16 +1,25 @@
-// configs/firebaseConfig.js
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_DATABASE_URL,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID,
+} from "@env";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC6gO9kcU535gwAWFwQsIO6MyUn93sUqQA",
-  authDomain: "mmoapp-5e9a6.firebaseapp.com",
-  databaseURL: "https://mmoapp-5e9a6-default-rtdb.firebaseio.com",
-  projectId: "mmoapp-5e9a6",
-  storageBucket: "mmoapp-5e9a6.firebasestorage.app",
-  messagingSenderId: "593548698582",
-  appId: "1:593548698582:web:b357173332d6dcb4ac7a77",
-  measurementId: "G-SKDDLTVLBN"
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  databaseURL: FIREBASE_DATABASE_URL,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
