@@ -7,6 +7,7 @@ import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { useNavigation } from "@react-navigation/native";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./ChatStyle";
+import { showMessage } from "react-native-flash-message";
 
 const ChatBox = ({ route }) => {
     const navigation = useNavigation();
@@ -42,6 +43,16 @@ const ChatBox = ({ route }) => {
             const msg = snapshot.val();
             console.log("📩 New message from DB:", msg);
             setMessages(prev => [...prev, { id: snapshot.key, ...msg }]);
+
+            // Popup thông báo nếu không phải tin nhắn của mình
+            if (msg.senderId !== user.user_code) {
+                showMessage({
+                    message: "Tin nhắn mới",
+                    description: msg.text,
+                    type: "info",
+                    duration: 3000,
+                });
+            }
         });
 
         return () => {

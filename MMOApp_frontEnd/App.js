@@ -38,6 +38,8 @@ import OrderComplaint from "./components/Order/OrderComplaint";
 import HomeStoreProduct from "./components/Home/HomeStoreProduct";
 import ConversationList from "./components/Chat/ConversationList";
 import ChatBox from "./components/Chat/ChatBox";
+import FlashMessage from "react-native-flash-message";
+
 
 
 
@@ -370,6 +372,7 @@ const App = () => {
           <NavigationContainer>
             <TabNavigator />
           </NavigationContainer>
+          <FlashMessage position="top" />
         </PaperProvider>
       </MyDispatchContext.Provider>
     </MyUserContext.Provider>
