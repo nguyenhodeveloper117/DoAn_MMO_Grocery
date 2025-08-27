@@ -69,6 +69,11 @@ const styles = StyleSheet.create({
     },
     padding: {
         padding: 24
+    },
+    noChat: {
+        textAlign: "center",
+        marginTop: 20,
+        color: "#666"
     }
 });
 

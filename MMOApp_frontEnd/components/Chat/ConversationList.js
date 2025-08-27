@@ -78,10 +78,10 @@ const ConversationList = ({ route }) => {
                 keyExtractor={(item) => item.chatId}
                 renderItem={renderItem}
                 ListEmptyComponent={
-                <Text style={{ textAlign: "center", marginTop: 20, color: "#666" }}>
-                    Không có cuộc trò chuyện nào
-                </Text>
-            }
+                    <Text style={styles.noChat}>
+                        Không có cuộc trò chuyện nào
+                    </Text>
+                }
             />
         </View>
     );
