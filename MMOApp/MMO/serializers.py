@@ -451,7 +451,7 @@ class TransactionHistorySerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
-        model = models.Review
+        model = models.TransactionHistory
         fields = ('transaction_code', 'user', 'type', 'amount', 'note', 'created_date', 'updated_date')
         read_only_fields = ['transaction_code', 'user', 'created_date', 'updated_date']
 
