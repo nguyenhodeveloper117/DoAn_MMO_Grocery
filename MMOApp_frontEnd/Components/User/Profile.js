@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { Text, View, Image, StyleSheet, ScrollView } from "react-native";
+import { useCallback, useContext, useState } from "react";
+import { Text, View, Image, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
@@ -14,6 +14,31 @@ const Profile = () => {
     const user = useContext(MyUserContext);
     const dispatch = useContext(MyDispatchContext);
     const nav = useNavigation();
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Hàm load lại user từ API
+    const fetchUser = async () => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            let res = await authApis(token).get(endpoints["current-user"]);
+            if (res.status === 200) {
+                dispatch({
+                    type: "updateUser",
+                    payload: res.data
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // Khi kéo để refresh
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchUser();
+        setRefreshing(false);
+    }, []);
 
     const onBecomeSeller = async () => {
         if (!user.is_verified) {
@@ -84,7 +109,10 @@ const Profile = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={MyStyles.container}>
+        <ScrollView contentContainerStyle={MyStyles.container}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
             <View style={styles.avatarContainer}>
                 <Image source={{ uri: user?.avatar }} style={styles.avatar} />
                 <Text style={styles.name}>{user?.first_name} {user?.last_name}</Text>
@@ -94,7 +122,7 @@ const Profile = () => {
                 <Text style={styles.info}>👤 Username: {user?.username}</Text>
                 <Text style={styles.info}>📧 Email: {user?.email}</Text>
                 <Text style={styles.info}>📞 SĐT: {user?.phone}</Text>
-                <Text style={styles.info}>🛡️ Vai trò: {user?.role}</Text>                
+                <Text style={styles.info}>🛡️ Vai trò: {user?.role}</Text>
                 <Text style={styles.info}>✅ Verified: {user?.is_verified ? "Đã xác minh" : "Chưa xác minh"}</Text>
                 <Text style={styles.info}>☀️ Ngày tạo: {new Date(user?.date_joined).toLocaleDateString()}</Text>
                 <Text style={styles.info}>💰 Số dư: {user?.balance} VND</Text>

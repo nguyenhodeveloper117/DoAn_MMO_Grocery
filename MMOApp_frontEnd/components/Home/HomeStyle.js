@@ -155,6 +155,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 5,
+        marginLeft: 5
+    },
+    ViewStoreBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 5,
     },
     chatBtn: { 
         flexDirection: "row",

@@ -235,7 +235,7 @@ const HomeProductDetail = ({ route, navigation }) => {
 
             <View style={styles.flexStoreChat}>
                 <TouchableOpacity
-                    style={styles.favoriteBtn}
+                    style={styles.ViewStoreBtn}
                     onPress={() => nav.navigate("homeStoreProduct", { store: product.store })}
                 >
                     <Text style={styles.storeBtn}>Xem cửa hàng</Text>
@@ -254,14 +254,13 @@ const HomeProductDetail = ({ route, navigation }) => {
                         <Text style={styles.chatBtn1}>💬</Text>
                     </TouchableOpacity>
                 )}
-            </View>
 
-
-            <View style={styles.favoriteBtn}>
-                <TouchableOpacity onPress={handleAddFavorite} style={styles.favoriteBtn}>
-                    <AntDesign name={favorited ? "heart" : "hearto"} size={24} color={favorited ? "red" : "black"} />
-                    <Text style={styles.marginLeft}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
-                </TouchableOpacity>
+                <View style={styles.favoriteBtn}>
+                    <TouchableOpacity onPress={handleAddFavorite} style={styles.favoriteBtn}>
+                        <AntDesign name={favorited ? "heart" : "hearto"} size={24} color={favorited ? "red" : "black"} />
+                        <Text style={styles.marginLeft}>{favorited ? "Đã yêu thích" : "Yêu thích"}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <Text style={styles.subInfoProduct} >Loại: {product.type}</Text>

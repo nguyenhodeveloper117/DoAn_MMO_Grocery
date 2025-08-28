@@ -229,54 +229,68 @@ class AccOrderDetailSerializer(ModelSerializer):
                             'product', 'product_info', 'created_date', 'updated_date']
 
     def create(self, validated_data):
+        user = self.context['request'].user
         product = validated_data["product"]
         qty = validated_data["quantity"]
+        order = validated_data["order"]
 
         unit_price = product.price
         total = unit_price * qty
 
-        # Check voucher trong order
-        order = validated_data["order"]
+        # --- Check voucher ---
         if order.voucher:
             voucher = order.voucher
-
-            # Check store
             if voucher.store != product.store:
                 raise ValidationError("Voucher không thuộc cửa hàng này!")
-
             discount = int(total * voucher.discount_percent / 100)
             if voucher.max_discount and discount > voucher.max_discount:
                 discount = voucher.max_discount
             total -= discount
-            validated_data["discount_amount"] = discount  # Lưu số tiền giảm
+            validated_data["discount_amount"] = discount
         else:
             validated_data["discount_amount"] = 0
 
-        # Lấy stock chưa bán
+        # --- Check stock ---
         stocks = models.AccountStock.objects.filter(product=product, is_sold=False)[:qty]
         if len(stocks) < qty:
             raise ValidationError("Không đủ tài khoản trong kho!")
 
-        # Tính giá
         validated_data["unit_price"] = unit_price
         validated_data["total_amount"] = total
 
-        # Ghép content từ stock
-        contents = []
-        for stock in stocks:
-            contents.append(stock.content)
-            stock.is_sold = True
-            stock.sold_at = timezone.now()
-            stock.save(update_fields=["is_sold", "sold_at"])
+        # --- Check balance & trừ tiền ---
+        if user.balance < total:
+            raise ValidationError("Số dư không đủ để thanh toán đơn hàng này!")
 
-        validated_data["content_delivered"] = "\n".join(contents)
+        with transaction.atomic():
+            # Trừ tiền buyer
+            user.balance -= total
+            user.save(update_fields=["balance"])
 
-        detail = models.AccOrderDetail.objects.create(**validated_data)
+            # Lưu lịch sử giao dịch
+            models.TransactionHistory.objects.create(
+                user=user,
+                type="purchase",
+                amount=total,
+                note=f"Thanh toán đơn hàng {order.order_code}"
+            )
 
-        # Update order status
-        order = detail.order
-        order.status = "delivered"
-        order.save(update_fields=["status"])
+            # Lấy và đánh dấu stock
+            contents = []
+            for stock in stocks:
+                contents.append(stock.content)
+                stock.is_sold = True
+                stock.sold_at = timezone.now()
+                stock.save(update_fields=["is_sold", "sold_at"])
+
+            validated_data["content_delivered"] = "\n".join(contents)
+
+            detail = models.AccOrderDetail.objects.create(**validated_data)
+
+            # Update order
+            order.is_paid = True
+            order.status = "delivered"
+            order.save(update_fields=["is_paid", "status"])
 
         return detail
 
@@ -296,16 +310,15 @@ class ServiceOrderDetailSerializer(ModelSerializer):
     def create(self, validated_data):
         product = validated_data["product"]
         qty = validated_data["quantity"]
+        order = validated_data["order"]
+        buyer = order.buyer
 
+        # 1. Tính tổng tiền
         unit_price = product.price
         total = unit_price * qty
 
-        # Check voucher trong order
-        order = validated_data["order"]
         if order.voucher:
             voucher = order.voucher
-
-            # Check store
             if voucher.store != product.store:
                 raise ValidationError("Voucher không thuộc cửa hàng này!")
 
@@ -313,17 +326,32 @@ class ServiceOrderDetailSerializer(ModelSerializer):
             if voucher.max_discount and discount > voucher.max_discount:
                 discount = voucher.max_discount
             total -= discount
-            validated_data["discount_amount"] = discount # Lưu số tiền giảm
+            validated_data["discount_amount"] = discount
         else:
             validated_data["discount_amount"] = 0
 
         validated_data["unit_price"] = unit_price
         validated_data["total_amount"] = total
 
+        # 2. Kiểm tra số dư buyer
+        if buyer.balance < total:
+            raise ValidationError("Số dư không đủ để thanh toán dịch vụ này!")
+
+        # 3. Trừ số dư buyer và lưu transaction
+        buyer.balance -= total
+        buyer.save(update_fields=["balance"])
+
+        models.TransactionHistory.objects.create(
+            user=buyer,
+            type="purchase",
+            amount=total,
+            note=f"Thanh toán dịch vụ {product.name} trong đơn {order.order_code}"
+        )
+
+        # 4. Tạo service order detail
         detail = models.ServiceOrderDetail.objects.create(**validated_data)
 
-        # Cập nhật order status = processing
-        order = detail.order
+        # 5. Cập nhật trạng thái order = processing
         order.status = "processing"
         order.save(update_fields=["status"])
 

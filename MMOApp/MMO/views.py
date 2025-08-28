@@ -86,7 +86,7 @@ class VerificationViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Upd
 
 class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,
                      generics.DestroyAPIView):
-    queryset = models.Product.objects.filter(active=True, is_approved=True).order_by('-created_date')
+    # queryset = models.Product.objects.filter(active=True, is_approved=True).order_by('-created_date')
     serializer_class = serializers.ProductSerializer
     parser_classes = [parsers.MultiPartParser]
     pagination_class = paginators.ProductPaginator
@@ -106,6 +106,13 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
         if self.request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             return [perms.IsSellerProduct()]
         return [AllowAny()]
+
+    def get_queryset(self):
+        if self.request.method == "GET":
+            return models.Product.objects.filter(active=True, is_approved=True).order_by('-created_date')
+        elif self.request.method in ["PUT", "PATCH", "DELETE"]:
+            return models.Product.objects.filter(active=True)
+        return models.Product.objects.all()
 
     @action(detail=False, methods=['get'], url_path='my-products')
     def my_products(self, request):

@@ -319,7 +319,7 @@ class VerificationAdmin(admin.ModelAdmin):
 
 # Store
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ['store_code', 'name', 'seller', 'active', 'created_date', 'updated_date']
+    list_display = ['store_code', 'name', 'seller', 'description', 'active', 'created_date', 'updated_date']
     search_fields = ['name', 'seller__username']
     list_filter = ['created_date', 'active']
 

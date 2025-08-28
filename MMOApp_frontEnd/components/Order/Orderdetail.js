@@ -155,7 +155,7 @@ const OrderDetail = ({ route }) => {
                         {/* Nút chuyển hướng sang trang chi tiết sản phẩm */}
                         <TouchableOpacity
                             style={styles.detailButton}
-                            onPress={() => nav.navigate("productDetail", { product: detail.detail.product_info })}
+                            onPress={() => nav.navigate("homeProductDetail", { product: detail.detail.product_info })}
                         >
                             <Text style={styles.detailButtonText}><Text>Sản phẩm: {detail.detail.product_info?.name}</Text></Text>
                         </TouchableOpacity>
