@@ -750,3 +750,34 @@ class ComplaintViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Update
         complaints = models.Complaint.objects.filter(order=order, active=True)
         serializer = self.get_serializer(complaints, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TransactionHistoryViewSet(viewsets.ViewSet):
+    queryset = models.TransactionHistory.objects.filter(active=True)
+    serializer_class = serializers.TransactionHistorySerializer
+    pagination_class = paginators.TransactionHistoryPaginator
+
+    def get_permissions(self):
+        if self.action in ['my_transactions']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-transactions')
+    def my_transactions(self, request):
+        user = request.user
+        search = request.query_params.get("search")
+        tx_type = request.query_params.get("type")  # ví dụ: deposit | withdraw
+
+        histories = self.queryset.filter(user=user)
+
+        if search:
+            histories = histories.filter(transaction_code__icontains=search)
+
+        if tx_type:
+            histories = histories.filter(type__iexact=tx_type)
+
+        histories = histories.order_by('-created_date')
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(histories, request)
+        serializer = self.serializer_class(page, many=True)
+        return paginator.get_paginated_response(serializer.data)

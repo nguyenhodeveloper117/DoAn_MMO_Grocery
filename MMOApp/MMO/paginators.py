@@ -20,3 +20,6 @@ class ReviewPaginator(pagination.PageNumberPagination):
 
 class ComplaintPaginator(pagination.PageNumberPagination):
     page_size = 5
+
+class TransactionHistoryPaginator(pagination.PageNumberPagination):
+    page_size = 5

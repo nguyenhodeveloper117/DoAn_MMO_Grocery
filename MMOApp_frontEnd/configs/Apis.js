@@ -57,7 +57,7 @@ export const endpoints = {
     "status-favorite": (productId) => `/favorites/${productId}/favourite-status/`,
     "add-complaint": '/complaints/',
     "get-complaints": (orderId) => `/complaints/order/${orderId}/`,
-
+    "my-transactions": '/transaction-histories/my-transactions/',
 };
 
 export const authApis = (token) => {

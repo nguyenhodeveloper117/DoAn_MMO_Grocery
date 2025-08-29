@@ -20,6 +20,7 @@ router.register('service-orders-detail', views.ServiceOrderDetailViewSet, basena
 router.register('reviews', views.ReviewViewSet, basename='review')
 router.register('favorites', views.FavoriteProductViewSet, basename='favorite')
 router.register('complaints', views.ComplaintViewSet, basename='complaint')
+router.register('transaction-histories', views.TransactionHistoryViewSet, basename='transaction-history')
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),

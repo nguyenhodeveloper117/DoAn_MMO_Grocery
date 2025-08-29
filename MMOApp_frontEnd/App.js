@@ -39,6 +39,7 @@ import HomeStoreProduct from "./components/Home/HomeStoreProduct";
 import ConversationList from "./components/Chat/ConversationList";
 import ChatBox from "./components/Chat/ChatBox";
 import FlashMessage from "react-native-flash-message";
+import Transaction from "./components/User/Transaction";
 
 
 
@@ -169,6 +170,13 @@ const ProfileNavigator = () => (
     <HomeStack.Screen
       name="chatBox" component={ChatBox} options={{
         title: 'Cuộc trò chuyện',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
+    <HomeStack.Screen
+      name="transaction" component={Transaction} options={{
+        title: 'Giao dịch',
         headerTitleStyle: {
           ...MyStyles.header,
         }

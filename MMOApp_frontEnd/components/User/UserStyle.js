@@ -114,6 +114,11 @@ const styles = StyleSheet.create({
         width: '80%',
         borderRadius: 20,
     },
+    transactionButton: {
+        backgroundColor: '#4bccccff',
+        width: '80%',
+        borderRadius: 20,
+    },
     becomeSellerButton: {
         backgroundColor: '#78cb1fff',
         width: '80%',
@@ -180,6 +185,17 @@ const styles = StyleSheet.create({
     productDes: {
         color: "#555"
     },
+    marginBottom: {
+        marginBottom: 10
+    },
+    marginRight: {
+        marginRight: 10
+    },
+    noTransactionText: {
+        textAlign: "center",
+        color: "#999",
+        marginTop: 20
+    }
 });
 
 export default styles;

@@ -108,6 +108,10 @@ const Profile = () => {
         nav.navigate("favoriteProducts");
     }
 
+    const navigateToTransaction = () => {
+        nav.navigate("transaction");
+    }
+
     return (
         <ScrollView contentContainerStyle={MyStyles.container}
             refreshControl={
@@ -134,6 +138,9 @@ const Profile = () => {
                 </Button>
                 <Button onPress={navigateToFavoriteProducts} mode="contained" style={styles.favoriteButton}>
                     Sản phẩm đã thích
+                </Button>
+                <Button onPress={navigateToTransaction} mode="contained" style={styles.transactionButton}>
+                    Giao dịch
                 </Button>
                 <Button onPress={navigateToKYC} mode="contained" style={styles.kycButton}>
                     Xác minh KYC
