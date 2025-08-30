@@ -1,5 +1,5 @@
 import csv
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponse
 from .models import *
 from django.template.response import TemplateResponse
@@ -469,16 +469,82 @@ class FavoriteProductAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'product__name']
     list_filter = ['user__user_code', 'active']
 
+@admin.action(description="Xác nhận và cộng tiền cho user")
+def confirm_deposit(modeladmin, request, queryset):
+    count = 0
+    for deposit in queryset:
+        if deposit.status == 'pending':  # chỉ chấp nhận những yêu cầu chờ
+            # Cập nhật status
+            deposit.status = 'confirmed'
+            deposit.save()
+
+            # Cộng tiền cho user
+            user = deposit.user
+            user.balance += deposit.amount
+            user.save()
+
+            count += 1
+
+    messages.success(request, f"{count} yêu cầu deposit đã được xác nhận và cộng tiền thành công!")
+
+@admin.action(description="Từ chối yêu cầu deposit")
+def reject_deposit(modeladmin, request, queryset):
+    count = 0
+    for deposit in queryset:
+        if deposit.status == 'pending':  # chỉ từ chối những yêu cầu chờ
+            deposit.status = 'rejected'
+            deposit.save()
+            count += 1
+    messages.warning(request, f"{count} yêu cầu deposit đã được từ chối!")
+
 class DepositRequestAdmin(admin.ModelAdmin):
     list_display = ['deposit_code', 'user', 'amount', 'deposit_code', 'status', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username', 'deposit_code']
     list_filter = ['user__user_code', 'active', 'status']
+    actions = [confirm_deposit, reject_deposit]
 
+@admin.action(description="Xác nhận yêu cầu rút tiền")
+def confirm_withdraw(modeladmin, request, queryset):
+    count = 0
+    for withdraw in queryset:
+        if withdraw.status == 'pending':  # chỉ xử lý những request đang chờ
+            # Cập nhật status
+            withdraw.status = 'confirmed'
+            withdraw.save()
+            count += 1
+
+    messages.success(request, f"{count} yêu cầu rút tiền đã được xác nhận và trừ tiền thành công!")
+
+@admin.action(description="Từ chối yêu cầu rút tiền và hoàn trả số tiền")
+def reject_withdraw(modeladmin, request, queryset):
+    count = 0
+    for withdraw in queryset:
+        if withdraw.status == 'pending':  # chỉ xử lý những request chờ
+            user = withdraw.user
+            user.balance += withdraw.amount
+            user.save()
+
+            # Cập nhật status
+            withdraw.status = 'rejected'
+            withdraw.save()
+
+            # Tạo TransactionHistory cho việc hoàn trả
+            TransactionHistory.objects.create(
+                user=user,
+                type='refund',  # dùng refund để ghi nhận hoàn tiền
+                amount=withdraw.amount,
+                note=f"Hoàn trả rút tiền bị từ chối - {withdraw.withdraw_code}"
+            )
+
+            count += 1
+
+    messages.warning(request, f"{count} yêu cầu rút tiền đã bị từ chối và hoàn trả số tiền!")
 
 class WithdrawRequestAdmin(admin.ModelAdmin):
     list_display = ['withdraw_code', 'user', 'amount', 'withdraw_code', 'status', 'active', 'created_date', 'updated_date']
     search_fields = ['user__username', 'withdraw_code']
     list_filter = ['user__user_code', 'active', 'status']
+    actions = [confirm_withdraw, reject_withdraw]
 
 
 # Custom Admin site
