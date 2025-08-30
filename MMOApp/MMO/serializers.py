@@ -486,3 +486,63 @@ class TransactionHistorySerializer(ModelSerializer):
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user  # Gán user là user hiện tại
         return super().create(validated_data)
+
+
+class DepositRequestSerializer(ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.DepositRequest
+        fields = ('deposit_code', 'user', 'amount', 'transaction_code',  'status', 'created_date', 'updated_date')
+        read_only_fields = ['deposit_code', 'user', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['user'] = user
+
+        # Tạo DepositRequest
+        deposit = super().create(validated_data)
+
+        # Tạo TransactionHistory
+        models.TransactionHistory.objects.create(
+            user=user,
+            type='deposit',
+            amount=deposit.amount,
+            note=f"Nạp tiền qua VietQR - {deposit.transaction_code}"
+        )
+
+        return deposit
+
+class WithdrawRequestSerializer(ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = models.WithdrawRequest
+        fields = ('withdraw_code', 'user', 'amount', 'status', 'created_date', 'updated_date')
+        read_only_fields = ['withdraw_code', 'user', 'created_date', 'updated_date']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        amount = validated_data['amount']
+
+        # Kiểm tra số dư
+        if user.balance < amount:
+            raise serializers.ValidationError("Số dư không đủ để rút tiền!")
+
+        # Trừ tiền
+        user.balance -= amount
+        user.save()
+
+        # Tạo WithdrawRequest
+        validated_data['user'] = user
+        withdraw = super().create(validated_data)
+
+        # Tạo TransactionHistory cho rút tiền
+        models.TransactionHistory.objects.create(
+            user=user,
+            type='withdraw',
+            amount=amount,
+            note=f"Yêu cầu rút tiền - {withdraw.withdraw_code}"
+        )
+
+        return withdraw

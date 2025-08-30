@@ -112,6 +112,14 @@ const Profile = () => {
         nav.navigate("transaction");
     }
 
+    const navigateToDeposit = () => {
+        nav.navigate("deposit");
+    }
+
+    const navigateToWithdraw = () => {
+        nav.navigate("withdraw");
+    }
+
     return (
         <ScrollView contentContainerStyle={MyStyles.container}
             refreshControl={
@@ -139,8 +147,14 @@ const Profile = () => {
                 <Button onPress={navigateToFavoriteProducts} mode="contained" style={styles.favoriteButton}>
                     Sản phẩm đã thích
                 </Button>
+                <Button onPress={navigateToDeposit} mode="contained" style={styles.depositButton}>
+                    Nạp tiền
+                </Button>
+                <Button onPress={navigateToWithdraw} mode="contained" style={styles.withdrawButton}>
+                    Rút tiền
+                </Button>
                 <Button onPress={navigateToTransaction} mode="contained" style={styles.transactionButton}>
-                    Giao dịch
+                    Lịch sử giao dịch
                 </Button>
                 <Button onPress={navigateToKYC} mode="contained" style={styles.kycButton}>
                     Xác minh KYC

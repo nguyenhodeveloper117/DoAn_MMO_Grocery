@@ -2,8 +2,8 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
     registerView: {
-        flexDirection: 'row', 
-        justifyContent: 'center', 
+        flexDirection: 'row',
+        justifyContent: 'center',
         marginTop: 20
     },
     avatar: {
@@ -61,6 +61,10 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginTop: 8,
     },
+    label2: {
+        fontSize: 16,
+        marginBottom: 10,
+    },
     input: {
         marginBottom: 16,
     },
@@ -95,7 +99,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     googleButton: {
-        borderColor: "#1976d2", 
+        borderColor: "#1976d2",
         borderWidth: 1,
         marginTop: 16,
     },
@@ -111,6 +115,16 @@ const styles = StyleSheet.create({
     },
     favoriteButton: {
         backgroundColor: '#0c388aff',
+        width: '80%',
+        borderRadius: 20,
+    },
+    depositButton: {
+        backgroundColor: '#5c9724ff',
+        width: '80%',
+        borderRadius: 20,
+    },
+    withdrawButton: {
+        backgroundColor: '#d82c2fff',
         width: '80%',
         borderRadius: 20,
     },
@@ -195,6 +209,35 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: "#999",
         marginTop: 20
+    },
+    qrBox: {
+        alignItems: "center",
+        marginTop: 20
+    },
+    qrImage: {
+        width: 250,
+        height: 250,
+        marginTop: 10
+    },
+    inputMoney: {
+        borderWidth: 1,
+        borderColor: "#ccc", 
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 20
+    },
+    marginBottom20: {
+        marginBottom: 20
+    },
+    listDeposit: {
+        fontSize: 16,
+        marginTop: 20,
+        marginBottom: 10
+    },
+    itemDeposit: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderColor: "#ccc"
     }
 });
 

@@ -12,6 +12,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
 from .models import Order
+import urllib.parse
+import uuid
+from django.http import JsonResponse
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
@@ -781,3 +784,68 @@ class TransactionHistoryViewSet(viewsets.ViewSet):
         page = paginator.paginate_queryset(histories, request)
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+
+def generate_vietqr_link(bank_code: str, account_number: str, account_name: str, amount: int, add_info: str = ""):
+    base_url = f"https://img.vietqr.io/image/{bank_code}-{account_number}-qr_only.png"
+    params = {
+        "amount": amount,
+        "addInfo": add_info,
+        "accountName": account_name
+    }
+    return f"{base_url}?{urllib.parse.urlencode(params)}"
+
+
+def get_vietqr(request):
+    amount = int(request.GET.get("amount", 0))
+    if amount <= 0:
+        return JsonResponse({"error": "Số tiền không hợp lệ"}, status=400)
+
+    transaction_code = f"NAP{uuid.uuid4().hex[:8].upper()}"
+
+    link = generate_vietqr_link(
+        bank_code="NAB",
+        account_number="0332636829",
+        account_name="HO CHI NGUYEN",
+        amount=amount,
+        add_info=transaction_code
+    )
+
+    return JsonResponse({
+        "transaction_code": transaction_code,
+        "qr_link": link
+    })
+
+class DepositRequestViewSet(viewsets.ViewSet, generics.CreateAPIView):
+    queryset = models.DepositRequest.objects.filter(active=True)
+    serializer_class = serializers.DepositRequestSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.action in ['list_by_user']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-deposits')
+    def list_by_user(self, request):
+        deposits = models.DepositRequest.objects.filter(user=request.user, active = True).order_by('-created_date')
+        serializer = self.get_serializer(deposits, many=True)
+        return Response(serializer.data)
+
+class WithdrawRequestViewSet(viewsets.ModelViewSet, generics.CreateAPIView):
+    queryset = models.WithdrawRequest.objects.filter(active=True)
+    serializer_class = serializers.WithdrawRequestSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['POST']:
+            return [IsAuthenticated()]
+        if self.action in ['list_by_user']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=['get'], url_path='my-withdraws')
+    def list_by_user(self, request):
+        withdraws = models.WithdrawRequest.objects.filter(user=request.user, active = True).order_by('-created_date')
+        serializer = self.get_serializer(withdraws, many=True)
+        return Response(serializer.data)

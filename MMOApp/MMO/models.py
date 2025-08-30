@@ -356,9 +356,50 @@ class FavoriteProduct(BaseModel):
             self.favorite_code = generate_code(FavoriteProduct, 'favorite_code', 'FV')
         super().save(*args, **kwargs)
 
+class DepositRequest(BaseModel):
+    deposit_code = models.CharField(primary_key=True, max_length=20, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='deposit_requests')
+    amount = models.DecimalField(max_digits=12, decimal_places=0, null=False, blank=False)
+    transaction_code = models.CharField(max_length=50, unique=True)  # ví dụ: NAP6EF4874D
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Chờ thanh toán'),
+            ('confirmed', 'Đã xác nhận'),
+            ('rejected', 'Bị từ chối')
+        ],
+        default='pending'
+    )
 
+    def __str__(self):
+        return f"{self.deposit_code} - {self.user.username} - {self.amount} ({self.status})"
 
+    def save(self, *args, **kwargs):
+        if not self.deposit_code:
+            self.deposit_code = generate_code(DepositRequest, 'deposit_code', 'DP')
+        super().save(*args, **kwargs)
 
+class WithdrawRequest(BaseModel):
+    withdraw_code = models.CharField(primary_key=True, max_length=20, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='withdraw_requests')
+    amount = models.DecimalField(max_digits=12, decimal_places=0, null=False, blank=False)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Chờ xử lý'),
+            ('confirmed', 'Đã xử lý'),
+            ('rejected', 'Bị từ chối')
+        ],
+        default='pending'
+    )
+
+    def __str__(self):
+        return f"{self.withdraw_code} - {self.user.username} - {self.amount} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        if not self.withdraw_code:
+            self.withdraw_code = generate_code(WithdrawRequest, 'withdraw_code', 'WC')
+        super().save(*args, **kwargs)
 
 
 

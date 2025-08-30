@@ -40,6 +40,8 @@ import ConversationList from "./components/Chat/ConversationList";
 import ChatBox from "./components/Chat/ChatBox";
 import FlashMessage from "react-native-flash-message";
 import Transaction from "./components/User/Transaction";
+import Deposit from "./components/User/Deposit";
+import WithdrawRequest from "./components/User/WithdrawRequest";
 
 
 
@@ -177,6 +179,20 @@ const ProfileNavigator = () => (
     <HomeStack.Screen
       name="transaction" component={Transaction} options={{
         title: 'Giao dịch',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
+      <HomeStack.Screen
+      name="deposit" component={Deposit} options={{
+        title: 'Nạp tiền',
+        headerTitleStyle: {
+          ...MyStyles.header,
+        }
+      }} />
+      <HomeStack.Screen
+      name="withdraw" component={WithdrawRequest} options={{
+        title: 'Rút tiền',
         headerTitleStyle: {
           ...MyStyles.header,
         }

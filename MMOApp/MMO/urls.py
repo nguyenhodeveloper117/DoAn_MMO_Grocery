@@ -21,9 +21,12 @@ router.register('reviews', views.ReviewViewSet, basename='review')
 router.register('favorites', views.FavoriteProductViewSet, basename='favorite')
 router.register('complaints', views.ComplaintViewSet, basename='complaint')
 router.register('transaction-histories', views.TransactionHistoryViewSet, basename='transaction-history')
+router.register('deposit-requests', views.DepositRequestViewSet, basename='deposit-request')
+router.register('withdraw-requests', views.WithdrawRequestViewSet, basename='withdraw-request')
 
 urlpatterns = [
     path('upload-image/', upload_image_cloudinary, name='upload-image-cloudinary'),
     path("order-stats/", OrderStatsAPIView.as_view(), name="order-stats"),
+    path("get_vietqr/", views.get_vietqr, name="get_vietqr"),
     path('', include(router.urls)),
 ]

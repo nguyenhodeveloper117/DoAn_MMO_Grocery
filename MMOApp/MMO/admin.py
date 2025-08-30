@@ -469,6 +469,17 @@ class FavoriteProductAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'product__name']
     list_filter = ['user__user_code', 'active']
 
+class DepositRequestAdmin(admin.ModelAdmin):
+    list_display = ['deposit_code', 'user', 'amount', 'deposit_code', 'status', 'active', 'created_date', 'updated_date']
+    search_fields = ['user__username', 'deposit_code']
+    list_filter = ['user__user_code', 'active', 'status']
+
+
+class WithdrawRequestAdmin(admin.ModelAdmin):
+    list_display = ['withdraw_code', 'user', 'amount', 'withdraw_code', 'status', 'active', 'created_date', 'updated_date']
+    search_fields = ['user__username', 'withdraw_code']
+    list_filter = ['user__user_code', 'active', 'status']
+
 
 # Custom Admin site
 admin_site = MyAdminSite(name='admin')
@@ -490,6 +501,8 @@ admin_site.register(BlogLike, BlogLikeAdmin)
 admin_site.register(BlogComment, BlogCommentAdmin)
 admin_site.register(TransactionHistory, TransactionHistoryAdmin)
 admin_site.register(FavoriteProduct, FavoriteProductAdmin)
+admin_site.register(DepositRequest, DepositRequestAdmin)
+admin_site.register(WithdrawRequest, WithdrawRequestAdmin)
 
 # OAuth2
 admin_site.register(AccessToken)
