@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext} from "react";
 import { View, Text, TextInput, FlatList, Alert } from "react-native";
 import { Button } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 import { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import styles from "./UserStyle";
@@ -9,6 +10,8 @@ import styles from "./UserStyle";
 const WithdrawRequest = () => {
     const [amount, setAmount] = useState("");
     const [withdraws, setWithdraws] = useState([]);
+    const user = useContext(MyUserContext);
+    const dispatch = useContext(MyDispatchContext);
 
     // Lấy danh sách yêu cầu rút tiền của user
     const getMyWithdraws = async () => {
@@ -58,6 +61,7 @@ const WithdrawRequest = () => {
 
     return (
         <View style={MyStyles.container}>
+            <Text style={styles.title2}>Số dư hiện tại: {user?.balance || 0} VND</Text>
             <Text style={styles.label2}>Nhập số tiền muốn rút:</Text>
             <TextInput
                 style={styles.inputMoney}

@@ -275,6 +275,18 @@ class AccOrderDetailSerializer(ModelSerializer):
                 note=f"Thanh toán đơn hàng {order.order_code}"
             )
 
+            # Cộng tiền ngay cho seller
+            seller = product.store.seller  # hoặc user của store
+            seller.balance += total
+            seller.save(update_fields=["balance"])
+
+            models.TransactionHistory.objects.create(
+                user=seller,
+                type="receive",
+                amount=total,
+                note=f"Nhận tiền từ đơn bán tài khoản {product.name} - {order.order_code}"
+            )
+
             # Lấy và đánh dấu stock
             contents = []
             for stock in stocks:
@@ -346,6 +358,18 @@ class ServiceOrderDetailSerializer(ModelSerializer):
             type="purchase",
             amount=total,
             note=f"Thanh toán dịch vụ {product.name} trong đơn {order.order_code}"
+        )
+
+        # Cộng tiền ngay cho seller
+        seller = product.store.seller
+        seller.balance += total
+        seller.save(update_fields=["balance"])
+
+        models.TransactionHistory.objects.create(
+            user=seller,
+            type="receive",
+            amount=total,
+            note=f"Nhận tiền từ đơn dịch vụ {product.name} - {order.order_code}"
         )
 
         # 4. Tạo service order detail

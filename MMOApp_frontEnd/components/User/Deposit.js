@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext} from "react";
 import { View, Text, TextInput, Image, StyleSheet, Alert, FlatList } from "react-native";
 import { Button } from "react-native-paper";
 import Apis, { authApis, endpoints } from "../../configs/Apis";
 import MyStyles from "../../styles/MyStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./UserStyle";
+import { MyDispatchContext, MyUserContext } from "../../configs/Contexts";
 
 
 
@@ -13,6 +14,8 @@ const Deposit = () => {
     const [qr, setQr] = useState(null);
     const [transactionCode, setTransactionCode] = useState("");
     const [deposits, setDeposits] = useState([]);
+    const user = useContext(MyUserContext);
+    const dispatch = useContext(MyDispatchContext);
 
     const createQR = async () => {
         if (!amount || isNaN(amount) || parseInt(amount) <= 0) {
@@ -67,6 +70,7 @@ const Deposit = () => {
 
     return (
         <View style={MyStyles.container}>
+            <Text style={styles.title2}>Số dư hiện tại: {user?.balance || 0} VND</Text>
             <Text style={styles.label2}>Nhập số tiền muốn nạp:</Text>
             <TextInput
                 style={styles.inputMoney}

@@ -149,6 +149,7 @@ const Transaction = () => {
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.5}
+                    ListFooterComponent={<View style={{ height: 80 }} />} // thêm khoảng trống cuối list
                 />
             )}
         </View>

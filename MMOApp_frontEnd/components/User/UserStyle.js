@@ -80,6 +80,11 @@ const styles = StyleSheet.create({
         marginTop: 12,
         marginBottom: 4,
     },
+    title2: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
     subTitle: {
         fontWeight: '600',
         marginTop: 4,
