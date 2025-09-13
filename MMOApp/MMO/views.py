@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from rest_framework.decorators import action, api_view, parser_classes
+from rest_framework.decorators import action, api_view, parser_classes, permission_classes
 import cloudinary.uploader
 from . import perms, paginators, serializers
 from . import models
@@ -15,6 +15,9 @@ from .models import Order
 import urllib.parse
 import uuid
 from django.http import JsonResponse
+
+from .recommender import recommend_products
+from .serializers import ProductSerializer
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.UpdateAPIView):
@@ -849,3 +852,11 @@ class WithdrawRequestViewSet(viewsets.ModelViewSet, generics.CreateAPIView):
         withdraws = models.WithdrawRequest.objects.filter(user=request.user, active = True).order_by('-created_date')
         serializer = self.get_serializer(withdraws, many=True)
         return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def recommend_view(request):
+    user = request.user
+    products = recommend_products(user)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)

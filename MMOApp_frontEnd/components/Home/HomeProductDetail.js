@@ -29,6 +29,7 @@ const HomeProductDetail = ({ route, navigation }) => {
     const [loadingMore, setLoadingMore] = useState(false);
 
     const [favorited, setFavorited] = useState(false);
+    const [suggestedProducts, setSuggestedProducts] = useState([]);
 
 
     const nav = useNavigation();
@@ -223,6 +224,20 @@ const HomeProductDetail = ({ route, navigation }) => {
         );
     };
 
+    const loadSuggestions = async () => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await authApis(token).get(endpoints["recommended-products"]);
+            setSuggestedProducts(res.data);
+        } catch (err) {
+            console.error("Lỗi load gợi ý:", err.response?.data || err);
+        }
+    };
+
+    useEffect(() => {
+        loadSuggestions();
+    }, [product.product_code]);
+
 
     return (
         <ScrollView contentContainerStyle={MyStyles.container}>
@@ -366,6 +381,41 @@ const HomeProductDetail = ({ route, navigation }) => {
                     </Text>
                 </TouchableOpacity>
             )}
+
+            <Text style={styles.label}>Sản phẩm gợi ý:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 10 }}>
+                {suggestedProducts.length === 0 ? (
+                    <Text>Không có sản phẩm gợi ý</Text>
+                ) : (
+                    suggestedProducts.map((sp, idx) => (
+                        <TouchableOpacity
+                            key={idx}
+                            style={{
+                                width: 150,
+                                marginRight: 10,
+                                backgroundColor: "#fff",
+                                borderRadius: 10,
+                                padding: 8,
+                                shadowColor: "#000",
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                            }}
+                            onPress={() => navigation.push("homeProductDetail", { product: sp })}
+                        >
+                            <Image
+                                source={{ uri: sp.image }}
+                                style={{ width: "100%", height: 100, borderRadius: 8 }}
+                            />
+                            <Text numberOfLines={1} style={{ fontWeight: "bold", marginTop: 5 }}>
+                                {sp.name}
+                            </Text>
+                            <Text style={{ color: "red" }}>
+                                {sp.price.toLocaleString()} đ
+                            </Text>
+                        </TouchableOpacity>
+                    ))
+                )}
+            </ScrollView>
 
         </ScrollView>
     );

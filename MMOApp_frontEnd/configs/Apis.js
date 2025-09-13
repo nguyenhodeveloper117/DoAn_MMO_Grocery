@@ -62,8 +62,8 @@ export const endpoints = {
     "add-deposit": '/deposit-requests/',
     "my-deposits": '/deposit-requests/my-deposits/',
     "add-withdraw": '/withdraw-requests/',
-    "my-withdraws": '/withdraw-requests/my-withdraws/'
-
+    "my-withdraws": '/withdraw-requests/my-withdraws/',
+    "recommended-products": '/recommend/',
 };
 
 export const authApis = (token) => {
