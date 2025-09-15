@@ -104,6 +104,10 @@ const MMOForum = () => {
     nav.navigate("myBlogs");
   };
 
+  const navigateAI = () => {
+    nav.navigate("AI");
+  };
+
   const navigateToCreate = () => {
     nav.navigate("blogCreate");
   };
@@ -222,6 +226,9 @@ const MMOForum = () => {
           </Button>
           <Button mode="contained" onPress={navigateMyBlogs} style={styles.buttonMyBlog}>
             Bài viết của tôi
+          </Button>
+          <Button mode="contained" onPress={navigateAI} style={styles.buttonAI}>
+            Hỏi AI
           </Button>
         </View>
       )}

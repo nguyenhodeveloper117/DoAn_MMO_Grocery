@@ -77,6 +77,9 @@ const styles = StyleSheet.create({
     buttonMyBlog: {
         backgroundColor: "#0b5bf1ff",
     },
+    buttonAI: {
+        backgroundColor: "#29966cff",
+    },
     colorRed: {
         backgroundColor: "#d71c1cff"
     },

@@ -64,6 +64,8 @@ export const endpoints = {
     "add-withdraw": '/withdraw-requests/',
     "my-withdraws": '/withdraw-requests/my-withdraws/',
     "recommended-products": '/recommend/',
+    "ai-suggest": '/blog/suggest/',
+    "chatbot": '/chatbot/',
 };
 
 export const authApis = (token) => {

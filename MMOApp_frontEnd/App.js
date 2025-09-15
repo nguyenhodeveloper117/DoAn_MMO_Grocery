@@ -42,6 +42,7 @@ import FlashMessage from "react-native-flash-message";
 import Transaction from "./components/User/Transaction";
 import Deposit from "./components/User/Deposit";
 import WithdrawRequest from "./components/User/WithdrawRequest";
+import ChatBot from "./components/Forum/ChatBot";
 
 
 
@@ -229,6 +230,12 @@ const MMOForumNavigator = () => (
     }} />
     <ForumStack.Screen name="blogDetail" component={ForumDetail} options={{
       title: 'Chi tiết bài viết',
+      headerTitleStyle: {
+        ...MyStyles.header,
+      }
+    }} />
+    <ForumStack.Screen name="AI" component={ChatBot} options={{
+      title: 'Hỏi AI',
       headerTitleStyle: {
         ...MyStyles.header,
       }

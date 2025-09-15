@@ -183,6 +183,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_SEND")
 
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # lưu trong biến môi trường
 # POSTMAN - cach lay token
 # http://127.0.0.1:8000/o/token/
 # {

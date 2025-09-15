@@ -95,6 +95,7 @@ const Deposit = () => {
             <FlatList
                 data={deposits}
                 keyExtractor={(item) => item.deposit_code}
+                contentContainerStyle={{ paddingBottom: 200 }}  // tránh bị che
                 renderItem={({ item }) => (
                     <View style={styles.itemDeposit}>
                         <Text>Mã: {item.deposit_code}</Text>

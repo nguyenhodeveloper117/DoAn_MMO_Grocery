@@ -62,6 +62,35 @@ const AddForum = () => {
         }
     };
 
+    const generateWithAI = async () => {
+        if (!title.trim()) {
+            Alert.alert("Lỗi", "Vui lòng nhập tiêu đề trước khi gợi ý AI!");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const token = await AsyncStorage.getItem("token");
+            const res = await authApis(token).post(endpoints["ai-suggest"], {
+                title,
+                category,   // bạn có thể gửi thêm nếu muốn
+                keywords: product, // hoặc bỏ nếu không dùng
+            });
+
+            const aiContent = res.data.suggested_content;
+
+            // Chèn thẳng vào RichEditor
+            richText.current?.setContentHTML(aiContent);
+            setContent(aiContent);
+
+        } catch (err) {
+            console.error("Lỗi AI:", err?.response?.data || err);
+            Alert.alert("Lỗi", "Không thể tạo nội dung với AI!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim() || !category) {
             Alert.alert("Lỗi", "Vui lòng nhập tiêu đề, nội dung và chọn danh mục.");
@@ -138,6 +167,16 @@ const AddForum = () => {
                 ]}
                 onPressAddImage={pickImage}
             />
+
+            <Button
+                mode="outlined"
+                onPress={generateWithAI}
+                loading={loading}
+                disabled={loading}
+                style={styles.marginTop}
+            >
+                AI gợi ý nội dung
+            </Button>
 
             {/* Ô nhập nội dung rich text */}
             <RichEditor

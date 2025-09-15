@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import upload_image_cloudinary, recommend_view
+from .views import upload_image_cloudinary, recommend_view, BlogSuggestView, ChatBotView
 from .views import OrderStatsAPIView
 
 router = DefaultRouter()
@@ -29,5 +29,7 @@ urlpatterns = [
     path("order-stats/", OrderStatsAPIView.as_view(), name="order-stats"),
     path("get_vietqr/", views.get_vietqr, name="get_vietqr"),
     path('recommend/', recommend_view, name='recommend-products'),
+    path("blog/suggest/", BlogSuggestView.as_view(), name="blog-suggest"),
+    path("chatbot/", ChatBotView.as_view(), name="chatbot"),
     path('', include(router.urls)),
 ]

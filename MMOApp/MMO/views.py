@@ -1,4 +1,7 @@
+import os
+
 from django.db.models import Q
+from openai import OpenAI
 from rest_framework import viewsets, generics, parsers, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -149,7 +152,8 @@ class ProductViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIV
         # Lấy tất cả sản phẩm của một store dựa vào store_code
         try:
             store = models.Store.objects.get(store_code=pk, active=True)
-            queryset = models.Product.objects.filter(store=store, active = True, is_approved=True).order_by('-created_date')
+            queryset = models.Product.objects.filter(store=store, active=True, is_approved=True).order_by(
+                '-created_date')
 
             for backend in [DjangoFilterBackend, filters.SearchFilter]:
                 queryset = backend().filter_queryset(request, queryset, self)
@@ -578,6 +582,7 @@ class AccOrderDetailViewSet(viewsets.ViewSet, generics.CreateAPIView):
             return [perms.CanPostOrderDetail()]
         return [AllowAny()]
 
+
 class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.CreateAPIView):
     queryset = models.ServiceOrderDetail.objects.filter(active=True)
     serializer_class = serializers.ServiceOrderDetailSerializer
@@ -588,6 +593,7 @@ class ServiceOrderDetailViewSet(viewsets.ViewSet, generics.UpdateAPIView, generi
         if self.request.method in ['POST']:
             return [perms.CanPostOrderDetail()]
         return [AllowAny()]
+
 
 class OrderStatsAPIView(APIView):
     permission_classes = [perms.IsSeller]
@@ -644,6 +650,7 @@ class OrderStatsAPIView(APIView):
 
         return Response(stats)
 
+
 class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = models.Review.objects.filter(active=True)
     serializer_class = serializers.ReviewSerializer
@@ -668,6 +675,7 @@ class ReviewViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
         serializer = self.serializer_class(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class FavoriteProductViewSet(viewsets.ViewSet):
     queryset = models.FavoriteProduct.objects.filter(active=True)
@@ -727,7 +735,7 @@ class FavoriteProductViewSet(viewsets.ViewSet):
         except models.Product.DoesNotExist:
             return Response({"detail": "Product không tồn tại"}, status=404)
 
-        favourited= False
+        favourited = False
         if request.user.is_authenticated:
             favourited = product.favorited_by.filter(user=request.user, active=True).exists()
 
@@ -756,6 +764,7 @@ class ComplaintViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.Update
         complaints = models.Complaint.objects.filter(order=order, active=True)
         serializer = self.get_serializer(complaints, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class TransactionHistoryViewSet(viewsets.ViewSet):
     queryset = models.TransactionHistory.objects.filter(active=True)
@@ -819,6 +828,7 @@ def get_vietqr(request):
         "qr_link": link
     })
 
+
 class DepositRequestViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = models.DepositRequest.objects.filter(active=True)
     serializer_class = serializers.DepositRequestSerializer
@@ -832,9 +842,10 @@ class DepositRequestViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
     @action(detail=False, methods=['get'], url_path='my-deposits')
     def list_by_user(self, request):
-        deposits = models.DepositRequest.objects.filter(user=request.user, active = True).order_by('-created_date')
+        deposits = models.DepositRequest.objects.filter(user=request.user, active=True).order_by('-created_date')
         serializer = self.get_serializer(deposits, many=True)
         return Response(serializer.data)
+
 
 class WithdrawRequestViewSet(viewsets.ModelViewSet, generics.CreateAPIView):
     queryset = models.WithdrawRequest.objects.filter(active=True)
@@ -849,9 +860,10 @@ class WithdrawRequestViewSet(viewsets.ModelViewSet, generics.CreateAPIView):
 
     @action(detail=False, methods=['get'], url_path='my-withdraws')
     def list_by_user(self, request):
-        withdraws = models.WithdrawRequest.objects.filter(user=request.user, active = True).order_by('-created_date')
+        withdraws = models.WithdrawRequest.objects.filter(user=request.user, active=True).order_by('-created_date')
         serializer = self.get_serializer(withdraws, many=True)
         return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -860,3 +872,63 @@ def recommend_view(request):
     products = recommend_products(user)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+
+class BlogSuggestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        title = request.data.get("title", "")
+        keywords = request.data.get("keywords", "")
+        category = request.data.get("category", "other")
+
+        if not title and not keywords:
+            return Response({"error": "Cần nhập ít nhất tiêu đề hoặc keywords"}, status=400)
+
+        # Kết nối OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        prompt = f"""
+        Viết một bài blog khoảng 300-500 từ bằng tiếng Việt.
+        Chủ đề: {title}
+        Thể loại: {category}
+        Từ khóa: {keywords}
+        Viết nội dung rõ ràng, hấp dẫn. 
+        Dễ đọc, xuống dòng rõ ràng.
+        Không trả về Markdown (#, ##, ###).
+        """
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            content = response.choices[0].message.content
+            return Response({"suggested_content": content})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
+class ChatBotView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        question = request.data.get("question", "")
+        if not question:
+            return Response({"error": "Bạn cần nhập câu hỏi"}, status=400)
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Bạn là một trợ lý thân thiện, trả lời ngắn gọn, dễ hiểu."},
+                    {"role": "user", "content": question}
+                ]
+            )
+            answer = response.choices[0].message.content
+            return Response({"answer": answer})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
